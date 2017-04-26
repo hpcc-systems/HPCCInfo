@@ -1,0 +1,93 @@
+<link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+
+<dom-module id="common-input-view">
+  <template>
+    <div>
+      <vaadin-grid class="projectworksheet" name="worksheet"></vaadin-grid>
+    </div>
+    <iron-ajax
+        id="ajaxwuWUCreateAndUpdate"
+        method = "POST"
+        handle-as="json" 
+        on-response="WUCreateAndUpdateResponse">
+    </iron-ajax> 
+  
+    <iron-ajax
+        id="ajaxwuSubmit"
+        method = "POST"
+        handle-as="json" 
+        on-response="WUSubmitResponse">
+    </iron-ajax>
+
+    <iron-ajax
+        id="ajaxwuStatus"
+        method = "POST"
+        handle-as="json" 
+        on-response="WUInfoResponse">
+    </iron-ajax>
+     
+    <iron-ajax
+        id="ajaxwuResult"
+        method = "POST"
+        handle-as="json"
+        on-response="WUResultResponse">
+    </iron-ajax>
+     
+    <iron-ajax
+        id="ajaxdfuFileInfo"
+        method = "POST"
+        handle-as="json" 
+        on-response="DFUFileResponse">
+    </iron-ajax>
+
+    <iron-ajax
+        id="ajaxdfuFilesListInfo"
+        method = "POST"
+        handle-as="json" 
+        on-response="DFUFilesListResponse">
+    </iron-ajax>
+  </template>
+
+  <script>
+    Polymer({
+        is: 'common-input-view',
+
+        properties: {
+            pluginId : String,
+            label : String,
+            id : String,
+            editor : Object,
+            tab : Object,
+            outputdsname : String,
+            eclcode : String,
+            fields : String
+        },
+
+        ready : function(e) {
+            var grid = this.querySelector(".projectworksheet");
+            grid.items = [];
+            grid.addColumn({name: "<b>Please use this Edit button to select an Input file!</b>"});
+        },
+
+        setGeneralProperties: function (properties) {
+
+        },
+
+        setViewProperties: function(properties) {
+
+        },
+
+        getViewProperties: function() {
+
+        },
+
+        refresh: function() {
+
+        }
+    });
+  </script>
+
+</dom-module>

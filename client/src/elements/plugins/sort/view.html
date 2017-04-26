@@ -1,0 +1,62 @@
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+
+<dom-module id="common-sort-view">
+    <template>
+        <div>
+            <vaadin-grid class="projectworksheet" name="worksheet">
+                </</div>
+    </template>
+    <script>
+    Polymer({
+        is: 'common-sort-view',
+
+        properties: {
+
+            pluginId: {
+                type: String
+            },
+
+            label: {
+                type: String
+            },
+
+            id: {
+                type: String
+            },
+
+            editor: {
+                type: Object
+            },
+
+            tab: {
+                type: Object
+            }
+
+        },
+        ready: function(e) {
+            var grid = this.querySelector(".projectworksheet");
+
+            grid.items = [];
+
+            grid.addColumn({
+                name: "<b>Please use this Edit button to sort the Data </b>"
+            });
+
+        },
+
+        setGeneralProperties: function(properties) {
+
+        },
+
+        setViewProperties: function(properties) {
+
+        },
+
+        getViewProperties: function() {
+
+        },
+
+
+    });
+    </script>
+</dom-module>

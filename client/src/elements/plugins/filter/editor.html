@@ -1,0 +1,332 @@
+<link rel="import" href="../../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="common-filter-editor">
+    <template>
+        <iron-ajax id="ajaxwuWUCreateAndUpdate" method="POST" handle-as="json" on-response="WUCreateAndUpdateResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxwuSubmit" method="POST" handle-as="json" on-response="WUSubmitResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxwuStatus" method="POST" handle-as="json" on-response="WUInfoResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxwuResult" method="POST" handle-as="json" on-response="WUResultResponse">
+        </iron-ajax>
+        <style>
+        paper-button.green {
+            background-color: var(--paper-green-500);
+            color: white;
+        }
+        
+        paper-button.indigo {
+            background-color: var(--paper-indigo-500);
+            color: white;
+            --paper-button-raised-keyboard-focus: {
+                background-color: var(--paper-pink-a200) !important;
+                color: white !important;
+            }
+            ;
+        }
+        
+        paper-button.indigo:hover {
+            background-color: var(--paper-indigo-400);
+        }
+        
+        paper-dialog {
+            width: 500px;
+        }
+        </style>
+        <paper-dialog id="dialog" modal>
+            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
+            <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+            <vaadin-combo-box id='filterInputTab' on-change='changeInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='field' required label="Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='operation' required label="Operation" items='["=", ">", "<",">=","<=","IN","BETWEEN"]'></vaadin-combo-box>
+            <paper-input id='formulavalue' label="Value"></paper-input>
+            <paper-button on-tap="andFunction">AND</paper-button>
+            <paper-button on-tap="orFunction">OR</paper-button>
+            <paper-input id='filterformulas' label="Value"></paper-input>
+            <div class="buttons">
+                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+    Polymer({
+        is: 'common-filter-editor',
+
+        properties: {
+            eclcode: String,
+            outputdsname: String,
+            inputdsname: String,
+            eclIP: String,
+            hpccuser: String,
+            editortitle: {
+                type: String,
+                value: "Editor Title"
+            }
+        },
+
+        ready: function() {
+            var selpage = document.querySelector("#pages").querySelector("#common-input");
+            this.properties.eclcode = selpage.properties.eclcode;
+            this.properties.inputdsname = selpage.properties.outputdsname;
+            this.$.field.items = selpage.properties.fields.split(",");
+
+            var infoBox = document.querySelector("#infobox");
+            var username = infoBox.properties.username;
+            var password = infoBox.properties.password;
+            var credentials = username === null || username === "" ? "" : (
+                password === null || password === "" ? (username + '@') :
+                (username + ':' + password + '@')
+            );
+            var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + infoBox.properties.cluster_address +
+                ":" + infoBox.properties.port;
+            this.properties.eclIP = eclIP;
+            this.properties.hpccuser = username;
+
+        },
+
+        open: function() {
+
+            Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
+
+            var pages = document.querySelector("#tabs");
+
+            var tabnames = "";
+
+            for (var cnt = 0; cnt < document.getElementsByTagName("paper-tab").length; cnt++) {
+                if (pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id) {
+                    break;
+                }
+                tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+            }
+            this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
+
+
+
+            this.$.dialog.open();
+        },
+
+        _okHandler: function(e) {
+            document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+            var currentPage = document.querySelector("#pages").selectedItem;
+
+            currentPage.properties.outputdsname = 'filterdsName' + '_' + Math.random().toString(36).substr(2, 4);
+
+            var QueryStr1 = this.properties.eclcode + "\n" + currentPage.properties.outputdsname + " := " +
+                this.properties.inputdsname + "(" +
+
+                this.$.filterformulas.value +
+
+                ");";
+
+            var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
+
+            //    "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + "inputds := DATASET(\'~" + sessionStorage.getItem("selecteFile") + "\'," +  "recLayout, THOR);\n" + 
+            //     "Output(inputds" +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
+            currentPage.properties.eclcode = QueryStr1;
+
+            this.$.ajaxwuWUCreateAndUpdate.url = this.properties.eclIP + "/WsWorkunits/WUCreateAndUpdate.json";
+
+            this.$.ajaxwuWUCreateAndUpdate.params = {
+                QueryText: QueryStr,
+                ResultLimit: 10000,
+                Jobname: "HPCCInfoRequest",
+                Owner: sessionStorage.getItem("user")
+            };
+            this.$.ajaxwuWUCreateAndUpdate.generateRequest();
+            console.log("Workunit is Executed");
+            this.fire('complete');
+            return;
+
+        },
+        changeInput: function(e) {
+
+            // this.$.tabs.selectedItem.id
+
+            console.log(event.currentTarget.value);
+
+            var tabid = "";
+
+            for (var cnt = 0; cnt < document.getElementsByTagName("paper-tab").length; cnt++) {
+                if (event.currentTarget.value === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()) {
+                    tabid = document.getElementsByTagName("paper-tab")[cnt].id;
+                    break;
+                }
+            }
+
+            var selpage = document.querySelector("#pages").querySelector("#" + tabid);
+
+            this.properties.eclcode = selpage.properties.eclcode;
+
+            this.properties.inputdsname = selpage.properties.outputdsname;
+
+            this.$.field.items = selpage.properties.fields.split(",");
+
+            return;
+
+
+        },
+        andFunction: function(e) {
+            this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + this.$.formulavalue.value;
+        },
+        orFunction: function(e) {
+            this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " OR " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + this.$.formulavalue.value;
+        },
+        _cancelHandler: function(e) {
+            this.fire('cancel');
+        },
+
+        setGeneralProperties: function(properties) {
+
+        },
+
+        setViewProperties: function(properties) {
+
+        },
+
+        getViewProperties: function() {
+
+        },
+        WUCreateAndUpdateResponse: function(request) {
+            console.log(this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid + 'CreateAndUpdate');
+            console.log(request.detail.response);
+            this.$.ajaxwuSubmit.url = this.properties.eclIP + "/WsWorkunits/WUSubmit.json";
+            this.$.ajaxwuSubmit.params = {
+                Wuid: this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid,
+                Cluster: "thor"
+            };
+            this.$.ajaxwuStatus.params = {
+                Wuid: request.detail.response.WUUpdateResponse.Workunit.Wuid,
+                Cluster: "thor"
+            };
+            this.$.ajaxwuSubmit.generateRequest();
+            return;
+        },
+        WUSubmitResponse: function(request) {
+            console.log(this.$.ajaxwuSubmit.lastResponse);
+            this.$.ajaxwuStatus.url = this.properties.eclIP + "/WsWorkunits/WUInfo.json";
+            this.$.ajaxwuStatus.generateRequest();
+            return;
+        },
+        WUInfoResponse: function(request) {
+
+            var wuState = request.detail.response.WUInfoResponse.Workunit.State;
+
+            if (wuState === "submitted" || wuState === 'compiling' || wuState === 'running' || wuState === 'compiled' || wuState === 'blocked') {
+                this.$.ajaxwuStatus.generateRequest();
+            } else if (wuState === 'completed') {
+                this.$.ajaxwuResult.url = this.properties.eclIP + "/WsWorkunits/WUResult.json";
+                this.$.ajaxwuResult.params = {
+                    Wuid: request.detail.response.WUInfoResponse.Workunit.Wuid,
+                    "BypassCachedResult": 1,
+                    "Count": this.$.filteroutputlimit.value
+                };
+                this.$.ajaxwuResult.generateRequest();
+            } else {
+                console.log(wuState);
+                console.log('Something went wrong while fetching the data, Please try again or check you filter query again!');
+                var grid = document.querySelector("#worksheet");
+
+                var currentPage = document.querySelector("#pages").selectedItem;
+
+                grid = currentPage.querySelector(".projectworksheet");
+
+
+                if (grid !== null) {
+                    var cols = grid.columns;
+                    for (; cols.length > 0;) {
+                        console.log(cols[0].name);
+                        grid.removeColumn(cols[0].name);
+                    }
+                }
+                grid.items = [];
+                grid.addColumn({
+                    name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"
+                });
+                alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
+            }
+            return;
+
+        },
+
+        WUResultResponse: function(request) {
+
+            if (this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS") {
+                var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
+                this.$.ajaxdfuFileInfo.url = this.properties.eclIP + "/WsDfu/DFUInfo.json";
+                this.$.ajaxdfuFileInfo.params = {
+                    Name: subfilename
+                };
+                return this.$.ajaxdfuFileInfo.generateRequest();
+            }
+
+            var currentPage = document.querySelector("#pages").selectedItem;
+
+            var grid = currentPage.querySelector(".projectworksheet");
+
+            var cols = grid.columns;
+            var colArray = [];
+            for (; cols.length > 0;) {
+                console.log(cols[0].name);
+                grid.removeColumn(cols[0].name);
+            }
+            if (this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0) {
+                grid.items = [];
+                grid.addColumn({
+                    name: "<b>There are no records for your Filter Query</b>"
+                });
+                return;
+            }
+            var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
+            var cnt = 0;
+
+            var fieldnames = "";
+            Object.keys(obj).forEach(function(key) {
+                grid.addColumn({
+                    name: key,
+                    resizable: true
+                });
+                if (fieldnames === "") {
+                    fieldnames += key;
+                } else {
+                    fieldnames += "," + key;
+                }
+                colArray[cnt] = key;
+                cnt++;
+            });
+
+            currentPage.properties.fields = fieldnames;
+
+            sessionStorage.setItem('gridColumns', colArray);
+            // Add some example data as an array.
+            grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
+
+
+            return; // Polish.resovle();
+            // this.createGrid(this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row);
+        }
+
+
+
+    });
+
+    document.addEventListener("WebComponentsReady", function() {
+
+        // Reference to the grid element.
+        // var grid = document.querySelector("#worksheet-list");
+
+        console.log("common-filter-editor ... WebComponentsReady");
+        var currentPage = document.querySelector("#pages").selectedItem;
+
+        // Add some example data as an array.
+
+    });
+    </script>
+</dom-module>

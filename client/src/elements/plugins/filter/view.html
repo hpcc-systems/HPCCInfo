@@ -1,0 +1,38 @@
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+
+<dom-module id="common-filter-view">
+    <template>
+        <div><vaadin-grid class="projectworksheet" name="worksheet" ></</div>
+    </template>
+    <script>
+        Polymer({
+            is: 'common-filter-view',
+            properties: {
+                pluginId: String,               
+                label: String,
+                id: String,
+                editor: Object,
+                tab: Object
+            },
+
+            ready : function(e){
+                var grid =   this.querySelector(".projectworksheet");
+                grid.items = [];
+                grid.addColumn({name: "<b>Please use this Edit button to filter on the Data </b>"});
+            },
+
+            setGeneralProperties: function (properties) {
+
+            },
+
+            setViewProperties: function(properties) {
+
+            },
+
+            getViewProperties: function() {
+
+            },
+        });
+    </script>
+
+</dom-module>

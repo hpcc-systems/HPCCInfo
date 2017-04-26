@@ -28,7 +28,7 @@ function editProjectTitleHandler() {
 	  
 	  	document.onclick = myClickHandler;
 		function myClickHandler() {
-		  	if(document.getElementById('thVal') != null) {
+		  	if(document.getElementById('thVal') !== null) {
 		  		var newEle = document.getElementById('thVal').value;
 		  		currentElement.innerHTML = newEle;
 		  	}

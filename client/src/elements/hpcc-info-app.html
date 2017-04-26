@@ -19,13 +19,15 @@
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html" />
+<link rel="import" href="../../bower_components/iron-label/iron-label.html" />
 
 <link rel="import" href="info-box.html">
-<link rel="import" href="info-plugin-dialog.html">
-<link rel="import" href="filter-dialog.html">
+<!-- <link rel="import" href="info-plugin-dialog.html">
+<link rel="import" href="filter-dialog.html"> -->
 <link rel="import" href="new-worksheet-dialog.html">
 <link rel="import" href="open-worksheet-dialog.html">
-<link rel="import" href="dialog-button.html"> 
+<link rel="import" href="dialog-button.html">
 
 <dom-module id="hpcc-info-app">
 
@@ -46,11 +48,8 @@
             }
 
             app-drawer {
-                --app-drawer-scrim-background: rgba(0, 0, 100, 0.8);
-                --app-drawer-content-container: {
-                    background-color: #B0BEC5;
-                }
-                width: 100%;
+                --app-drawer-scrim-background: rgba(100, 100, 100, 0.8);
+                --app-drawer-width: 300px;
             }
 
             paper-icon-button {
@@ -59,6 +58,80 @@
                     height: 36px;
                 }
             }
+
+            .main {
+                position: relative;
+            }
+
+            h2 {
+                font-size: 16px;
+                font-family: Helvetica, sans-serif;
+                position: relative;
+                padding: 0 0 0 10px;
+                margin: 1em 0 .6em 0;
+            }
+           
+            p {
+                margin-left: 30px;
+            }
+
+            .headerLabels{
+                color: gray;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .paperInputs {
+                padding-left: 30px;
+                padding-right: 20px;
+            }
+
+            paper-input.paperInputs {
+                --paper-input-container-input-color: gray;
+            }
+
+            .btnSaveClusterDetails {
+                background-color: #4caf50;
+                color: white;
+                text-transform: none;
+                font-size: 15px;
+                margin-left: 30px;
+            }
+
+            .toggleBtn {
+                padding-left: 30px;
+                padding-right: 20px;
+                color: gray;
+            }
+
+            paper-toggle-button.toggleBtn {
+                --paper-toggle-button-checked-bar-color:  var(--paper-indigo-500);
+                --paper-toggle-button-checked-button-color:  var(--paper-indigo-500);
+                --paper-toggle-button-checked-ink-color: var(--paper-indigo-500);
+                --paper-toggle-button-unchecked-bar-color:  gray;
+                --paper-toggle-button-unchecked-button-color:  gray;
+                --paper-toggle-button-unchecked-ink-color: gray;
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+                text-transform: none;
+                font-size: 15px;
+            }
+
+
+            paper-button.btnSaveClusterDetails {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    background-color: var(--paper-pink-a200) !important;
+                    color: white !important;
+                }
+                ;
+            }
+
+
         </style>
 
         <!-- ----------------------- App Drawer Left Position ---------------------------->
@@ -69,18 +142,34 @@
         <new-worksheet-dialog></new-worksheet-dialog>
         <open-worksheet-dialog></open-worksheet-dialog>
         <info-box id="infobox"></info-box>
-         <app-drawer id="drawer">
-            <div role="listbox">
-                <dialog-button id="new-worksheet-dialog" icon="create" title="New Worksheet"></dialog-button>
-                <dialog-button id="open-worksheet-dialog" icon="mail" title="Open Worksheet"></dialog-button>
-                <paper-input style="padding-left: 5px"  id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
-                <paper-input style="padding-left: 5px"  id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
-                <paper-input style="padding-left: 5px"  id='port' label="Port" value="[[port]]"></paper-input>
-                <paper-input style="padding-left: 5px"  id='username' label="Username" value="[[username]]"></paper-input>
-                <paper-input style="padding-left: 5px"  id='password' label="Password" value="[[password]]"></paper-input>
-                <paper-toggle-button  id="httpSecured" >HTTP Secured</paper-toggle-button></br>
-                <paper-button style="background-color: #4caf50;;color: white;text-transform: none;"  on-tap="addAllToSession">Save Cluster Details</paper-button>
-                </div></app-drawer>
+        <app-drawer id="drawer">
+            <div class="listbx_div" role="listbox">
+                <section class="main">
+                    <h2><iron-label>Actions</iron-label></h2><hr>
+                    <p><dialog-button id="new-worksheet-dialog" icon="create"></dialog-button>
+                        <iron-label class="headerLabels">New Worksheet</iron-label>
+                    </p>
+                    <paper-tooltip for="new-worksheet-dialog" offset="10">New Worksheet</paper-tooltip>
+                    <p><dialog-button id="open-worksheet-dialog" icon="mail"></dialog-button>
+                        <iron-label class="headerLabels">Open Worksheet</iron-label>
+                    </p>
+                    <paper-tooltip for="open-worksheet-dialog" offset="10">Open Worksheet</paper-tooltip>
+
+                    <h2><iron-label>Cluster Details</iron-label></h2><hr>
+                    <paper-input class="paperInputs" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
+                    <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
+                    <paper-input class="paperInputs" id='port' label="Port" value="[[port]]"></paper-input>
+                    <paper-input class="paperInputs" id='username' label="Username" value="[[username]]"></paper-input>
+                    <paper-input class="paperInputs" id='password' label="Password" value="[[password]]"></paper-input>
+                    </br>
+                    <paper-toggle-button class="toggleBtn" id="httpSecured">
+                        <iron-label class="headerLabels">HTTP Secured</iron-label>
+                    </paper-toggle-button></br></br>
+                    <paper-button class="btnSaveClusterDetails" on-tap="addAllToSession">Save Cluster Details</paper-button>
+                    <paper-button raised class="green" onclick="drawer.toggle()">Cancel</paper-button>
+                </section>
+            </div>
+        </app-drawer>
     </template>
     
     <script>

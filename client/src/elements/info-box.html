@@ -1,20 +1,26 @@
-                this.listen(this.$.dialog, 'complete', infobox._pluginNewTabHandler(e));
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
-
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
-
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
 <link rel="import" href="info-plugin-dialog.html">
-<link rel="import" href="info-plugins.html">
 
-
+<!-- Import Custom Plugins here -->
+<link rel="import" href="plugins/input/editor.html">
+<link rel="import" href="plugins/input/view.html">
+<link rel="import" href="plugins/filter/editor.html">
+<link rel="import" href="plugins/filter/view.html">
+<link rel="import" href="plugins/sort/editor.html">
+<link rel="import" href="plugins/sort/view.html">
+<link rel="import" href="plugins/aggregate/editor.html">
+<link rel="import" href="plugins/aggregate/view.html">
 
 <dom-module id="info-box">
     <template>
@@ -57,11 +63,13 @@
     </style>
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
-            <paper-icon-button icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+            <paper-icon-button id="btnEditPlugin" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+            <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
             <paper-menu-button horizontal-align="right" disabled id="pluginMenu">
-                <paper-icon-button icon="add" class="dropdown-trigger"></paper-icon-button>
+                <paper-icon-button id="btnAddPlugin" icon="add" class="dropdown-trigger"></paper-icon-button>
                 <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
             </paper-menu-button>
+            <paper-tooltip for="btnAddPlugin" offset="0">Plugin List</paper-tooltip>
         </app-toolbar>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
         <info-plugin-dialog id="plugininfo"></info-plugin-dialog>
@@ -99,11 +107,16 @@
                 this.addPlugin("common-sample", "Sample", "common");
             },
 
+            attached : function() {
+                this.listen(this.$.plugininfo, 'complete', '_pluginNewTabHandler');
+            },
+
             addPlugin: function (id, label, category) {
                 var item = document.createElement("paper-item");
                 item.id = "item_" + id;
                 item.textContent = label;
                 Polymer.dom(this.$.pluginmenu).appendChild(item);
+
                 this.listen(item, 'tap', '_pluginMenuTapHandler');
                 if (this.pluginList == null) {
                     this.pluginList = [];
@@ -111,7 +124,8 @@
                 var plugin = new Plugin(id, label, category);
                 this.pluginList.push(plugin);
             },
-           addTab: function (id, label, pluginId) {
+
+            addTab: function (id, label, pluginId) {
 
                if(pluginId === "common-input"){
                    var tabitems = Polymer.dom(this.$.tabs);
@@ -139,7 +153,9 @@
                 Polymer.dom(this.$.tabs).appendChild(tab);
                 Polymer.dom(this.$.pages).appendChild(view);
                 Polymer.dom(this.$.tabs).appendChild(editor);
+
                 this.listen(editor, 'complete', '_pluginEditCompleteHandler');
+
                 if (this.viewList == null) {
                     this.viewList = [];
                 };
@@ -199,28 +215,31 @@
 
             },
 
- 
-               _pluginMenuTapHandler: function (e) {
+            _pluginMenuTapHandler: function (e) {
                 var pluginId = e.target.id.substring(5);
                 this.$.plugininfo.pluginId = pluginId;
                 this.$.plugininfo.plugintitle = pluginId.substring(7);
                 //Create a dialog to accept just the id and label
                 this.$.plugininfo.open();
-                
-                //TODO: I really do not like to add a handler within an event
-                this.listen(this.$.plugininfo, 'complete', '_pluginNewTabHandler');
             },
+            
+            // This handler is called when the user adds a new plugin.
+            // Called on 'OK' button of the dialog
             _pluginNewTabHandler: function (e) {
                 var pluginId = e.target.pluginId;
                 var label = e.target.getLabel();
                 //Add a new tab
                 this.addTab((pluginId + '_' + Math.random().toString(36).substr(2, 9)), label, pluginId); //TODO: Need to generate an unique id for the tab
             },
+
+            // This handler is called when the user clicks on any plugins 'Edit' button.
             _pluginEditOpenHandler: function (e) {
                 view = this.getActiveView();
                 view.editor.open();
             },
 
+            // This handler is called when the user clicks on any editors 'OK' button.
+            // Fired from editors _okHandler method.
             _pluginEditCompleteHandler: function (e) {
                 view = this.getActiveView();
                 // view.setViewProperties(tab.editor.getViewProperties());

@@ -7,6 +7,19 @@
 <!--- ---------------------------------------------dialog button element------------------------------------------------>
 
 <dom-module id="dialog-button">
+    <style is="custom-style">
+      paper-icon-button {
+        width: 35px;
+        height: 35px;
+        color: var(--paper-indigo-500);
+        border-radius: 50%;
+      }
+
+      paper-icon-button:hover {
+        background-color: var(--paper-indigo-500);
+        color: white;
+      }
+    </style>
     <template>
         <paper-icon-button id=[[id]] icon="[[icon]]" title=[[title]] on-tap="clickHandler"></paper-icon-button>
     </template>
