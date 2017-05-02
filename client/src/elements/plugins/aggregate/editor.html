@@ -41,15 +41,15 @@
         }
         </style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
+            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
             <paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='aggregateInputtab' on-change='changeAggregateInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
             <paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
-            <vaadin-combo-box id='crosstabfield' required label="GroupBy Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='crosstabfield' required label="GroupBy Field"></vaadin-combo-box>
             <paper-button id='addMeasureKey' on-tap="tableKeyAddFunction">ADD</paper-button>
             <paper-input id='aggregateformulas' required label="Group Fields" label="Value"></paper-input>
             <vaadin-combo-box id='aggregategroupfunc' required label="Aggregate Function" items='["SUM", "COUNT", "MAX", "MIN", "AVE"]'></vaadin-combo-box>
-            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
             <paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction">ADD</paper-button>
             <paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
             <div class="buttons">
@@ -168,7 +168,13 @@
         },
 
         _okHandler: function(e) {
-            document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+            // If the Title field is empty assign the placeholder value to it.
+            var tabTitle = this.$.TabTitle.value;
+            if (tabTitle.trim() === ""){
+              tabTitle = this.$.TabTitle.label;
+            }
+
+            document.querySelector("#tabs").selectedItem.textContent = tabTitle;
             var currentPage = document.querySelector("#pages").selectedItem;
 
             currentPage.properties.outputdsname = 'aggregatedsName' + '_' + Math.random().toString(36).substr(2, 4);
@@ -216,11 +222,6 @@
 
         },
         changeAggregateInput: function(e) {
-
-            // this.$.tabs.selectedItem.id
-
-            console.log(event.currentTarget.value);
-
             var tabid = "";
 
             for (var cnt = 0; cnt < document.getElementsByTagName("paper-tab").length; cnt++) {
@@ -230,20 +231,15 @@
                 }
             }
 
-            var selpage = document.querySelector("#pages").querySelector("#" + tabid);
-
-            this.properties.eclcode = selpage.properties.eclcode;
-
-            this.properties.inputdsname = selpage.properties.outputdsname;
-
-            this.$.aggregatefield.items = selpage.properties.fields.split(",");
-
-            this.$.crosstabfield.items = selpage.properties.fields.split(",");
-
-
+            if(tabid !== "") {
+                var selpage = document.querySelector("#pages").querySelector("#" + tabid);
+                this.properties.eclcode = selpage.properties.eclcode;
+                this.properties.inputdsname = selpage.properties.outputdsname;
+                this.$.aggregatefield.items = selpage.properties.fields.split(",");
+                this.$.crosstabfield.items = selpage.properties.fields.split(",");
+            }
 
             return;
-
 
         },
 

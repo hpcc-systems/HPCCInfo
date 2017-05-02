@@ -41,10 +41,13 @@
         }
         </style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
+            <!-- User cannot enter title value beginning with a number -->
+            <paper-input id='TabTitle' label="[[editortitle]]" 
+                         required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+                         error-message="Title is Required"></paper-input>
             <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='filterInputTab' on-change='changeInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
-            <vaadin-combo-box id='field' required label="Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='filterInputTab' on-value-changed='changeInput' required label="Input Dataset"></vaadin-combo-box>
+            <vaadin-combo-box id='field' required label="Field"></vaadin-combo-box>
             <vaadin-combo-box id='operation' required label="Operation" items='["=", ">", "<",">=","<=","IN","BETWEEN"]'></vaadin-combo-box>
             <paper-input id='formulavalue' label="Value"></paper-input>
             <paper-button on-tap="andFunction">AND</paper-button>
@@ -73,6 +76,7 @@
         },
 
         ready: function() {
+            console.log("FILTER READY");
             var selpage = document.querySelector("#pages").querySelector("#common-input");
             this.properties.eclcode = selpage.properties.eclcode;
             this.properties.inputdsname = selpage.properties.outputdsname;
@@ -114,7 +118,14 @@
         },
 
         _okHandler: function(e) {
-            document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+            console.log("FILTER _okHandler");
+            // If the Title field is empty assign the placeholder value to it.
+            var tabTitle = this.$.TabTitle.value;
+            if (tabTitle.trim() === ""){
+              tabTitle = this.$.TabTitle.label;
+            }
+
+            document.querySelector("#tabs").selectedItem.textContent = tabTitle;
             var currentPage = document.querySelector("#pages").selectedItem;
 
             currentPage.properties.outputdsname = 'filterdsName' + '_' + Math.random().toString(36).substr(2, 4);
@@ -146,12 +157,9 @@
             return;
 
         },
+
         changeInput: function(e) {
-
-            // this.$.tabs.selectedItem.id
-
-            console.log(event.currentTarget.value);
-
+            //console.log(event.currentTarget.value);
             var tabid = "";
 
             for (var cnt = 0; cnt < document.getElementsByTagName("paper-tab").length; cnt++) {
@@ -161,16 +169,14 @@
                 }
             }
 
-            var selpage = document.querySelector("#pages").querySelector("#" + tabid);
-
-            this.properties.eclcode = selpage.properties.eclcode;
-
-            this.properties.inputdsname = selpage.properties.outputdsname;
-
-            this.$.field.items = selpage.properties.fields.split(",");
-
+            if(tabid !== "") {
+                var selpage = document.querySelector("#pages").querySelector("#" + tabid);
+                this.properties.eclcode = selpage.properties.eclcode;
+                this.properties.inputdsname = selpage.properties.outputdsname;
+                this.$.field.items = selpage.properties.fields.split(",");
+            }
+            
             return;
-
 
         },
         andFunction: function(e) {

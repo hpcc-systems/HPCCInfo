@@ -41,10 +41,10 @@
         }
         </style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
+            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
             <paper-input id='sortoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='sortInputtab' on-change='changeSortInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
-            <vaadin-combo-box id='sortfield' required label="Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
+            <vaadin-combo-box id='sortInputtab' on-value-changed='changeSortInput' required label="Input Dataset"></vaadin-combo-box>
+            <vaadin-combo-box id='sortfield' required label="Field"></vaadin-combo-box>
             <vaadin-combo-box id='fieldOrder' required label="Field Order" items='["ASC", "DSC"]'></vaadin-combo-box>
             <paper-button on-tap="ADDFunction">ADD</paper-button>
             <paper-input id='sortformulas' label="Value"></paper-input>
@@ -73,6 +73,7 @@
         },
 
         ready: function() {
+            console.log("SORT READY");
             var selpage = document.querySelector("#pages").querySelector("#common-input");
 
             this.properties.eclcode = selpage.properties.eclcode;
@@ -116,7 +117,13 @@
 
         _okHandler: function(e) {
 
-            document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+            // If the Title field is empty assign the placeholder value to it.
+            var tabTitle = this.$.TabTitle.value;
+            if (tabTitle.trim() === ""){
+              tabTitle = this.$.TabTitle.label;
+            }
+
+            document.querySelector("#tabs").selectedItem.textContent = tabTitle;
             var currentPage = document.querySelector("#pages").selectedItem;
 
             currentPage.properties.outputdsname = 'sortdsName' + '_' + Math.random().toString(36).substr(2, 4);
@@ -151,11 +158,10 @@
             return;
 
         },
+
         changeSortInput: function(e) {
 
-            // this.$.tabs.selectedItem.id
-
-            console.log(event.currentTarget.value);
+            console.log("SORT changeSortInput");
 
             var tabid = "";
 
@@ -166,13 +172,12 @@
                 }
             }
 
-            var selpage = document.querySelector("#pages").querySelector("#" + tabid);
-
-            this.properties.eclcode = selpage.properties.eclcode;
-
-            this.properties.inputdsname = selpage.properties.outputdsname;
-
-            this.$.sortfield.items = selpage.properties.fields.split(",");
+            if(tabid !== "") {
+                var selpage = document.querySelector("#pages").querySelector("#" + tabid);
+                this.properties.eclcode = selpage.properties.eclcode;
+                this.properties.inputdsname = selpage.properties.outputdsname;
+                this.$.sortfield.items = selpage.properties.fields.split(",");
+            }
 
             return;
 

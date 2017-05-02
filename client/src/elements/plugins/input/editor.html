@@ -27,7 +27,10 @@
     </style>
 
     <paper-dialog id="dialog" modal>
-      <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
+      <!-- User cannot enter title value beginning with a number -->
+      <paper-input id='TabTitle' label="[[editortitle]]" 
+                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+                   error-message="Title is Required"></paper-input>
       <paper-input id='scope' label="File Scope" ></paper-input>
       <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
       <div class="buttons">
@@ -116,7 +119,14 @@
       },
 
       _okHandler : function (e) {
-        document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+
+        // If the Title field is empty assign the placeholder value to it.
+        var tabTitle = this.$.TabTitle.value;
+        if (tabTitle.trim() === ""){
+          tabTitle = this.$.TabTitle.label;
+        }
+
+        document.querySelector("#tabs").selectedItem.textContent = tabTitle;
         var selectedFile = this.$.subfilesgrid.value;
         sessionStorage.setItem('FilterCriteria', '');
         sessionStorage.setItem('selecteFile', selectedFile);
