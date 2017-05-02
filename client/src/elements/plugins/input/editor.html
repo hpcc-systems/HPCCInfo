@@ -153,6 +153,12 @@
       getViewProperties : function() {
       },
 
+      // Order of execution of AJAX Calls
+      //1 - WUCreateAndUpdateResponse
+      //2 - WUSubmitResponse
+      //3 - WUInfoResponse
+      //4 - WUResultResponse
+      // TODO: Write a single method to chain all the AJAX calls into one common method.
       WUCreateAndUpdateResponse: function(request) {
         this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
         this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};

@@ -41,7 +41,10 @@
         }
         </style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" disabled="true"></paper-input>
+            <!-- User cannot enter title value beginning with a number -->
+            <paper-input id='TabTitle' label="[[editortitle]]" 
+                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+                   error-message="Title is Required"></paper-input>
             <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
             <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" items='[]'></vaadin-combo-box>
             <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
