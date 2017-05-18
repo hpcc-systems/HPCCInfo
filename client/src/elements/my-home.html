@@ -1,0 +1,110 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans: 300, 600" rel="stylesheet">
+
+<dom-module id="my-home">
+	<template>
+		<style type="text/css">
+
+			.header1 {
+		      font-family: 'Open Sans', sans-serif;
+		      margin: 20px;
+		      font-size: 30px;
+		      color: #767676;
+		      font-weight: 300;
+		    }
+
+		    .header1 span {
+		      color: #FF5722;
+		    }
+
+		    .flex-container {
+		      display: flex;
+		    }
+
+		    .left-spacer {
+		      width: 33%;
+		      margin-left: 0px;
+		    }
+
+		    .right-spacer {
+		      width: 33%;
+		    }
+
+		    .main-content {
+		      width: 33%;
+		      height: 630px;
+		    }
+
+		    .main-text {
+		      text-align: center;
+		      font-family: 'Open Sans', sans-serif;
+		      margin-top: 170px;
+		      font-size: 75px;
+		      color: #767676;
+		      font-weight: 600;
+		    }
+
+		    .main-text span {
+		      color: #FF5722;
+		    }
+
+		    .main-desc {
+		      font-family: 'Open Sans', sans-serif;
+		      margin-top: 20px;
+		      font-size: 20px;
+		      color: #767676;
+		      font-weight: 300;
+		    }
+
+		    .footer {
+		      margin-top: 10px;
+		      font-size: 16px;
+		      display: flex;
+		      font-family: 'Open Sans', sans-serif;
+		    }
+
+		    .siginBtn {
+		      background-color: #FF5722;
+		      color: white;
+		      width: 130px;
+		    }
+
+		    .signBtnDiv {
+		      margin-top: 60px;
+		      text-align: center;
+		    }
+		</style>
+
+		<app-location route="{{route}}"></app-location>
+
+		<div class="header1"> HPCC <span>Info</span> </div><hr>
+		  <div class="flex-container">
+		      <div class="left-spacer"></div>
+		      <div class="main-content">
+		          <div class="main-text">
+		            HPCC <span>Info</span>
+		          </div>
+		          <div class="main-desc">
+		            An Info Worksheet (like a spreadsheet) to view HPCC data files and apply simple data manipulation
+		          </div>
+		          <div class="signBtnDiv">
+		            <paper-button raised class="siginBtn" on-tap="signIn">Sign In</paper-button>
+		          </div>
+		          
+		      </div>
+		      <div class="right-spacer"></div>
+		  </div>
+		<div class="footer">Powered By HPCCSystems</div>
+
+	</template>
+	<script type="text/javascript">
+		Polymer({
+			is: "my-home",
+			signIn: function() {
+        		this.fire('sign-in', null, { bubbles: false });
+      		}
+		});
+	</script>
+</dom-module>

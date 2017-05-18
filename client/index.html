@@ -4,23 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <title>HPCCInfo</title>
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="src/scripts/info-objects.js"></script>
-  <link rel="import" href="bower_components/polymer/polymer.html">  
-  <link rel="import" href="src/elements/hpcc-info-app.html">
-
-  <style>
+  <script src="/src/scripts/info-objects.js"></script>
+  <link rel="import" href="/src/elements/my-app.html">
+  <link rel="import" href="bower_components/polymerfire/firebase-app.html">
+  
+  <style>    
     body {
-      margin: 0;
       font-family: sans-serif;
-      background-color: #f1f1f1; 
+      background-color: #FFFFFF;
     }
   </style>
-
-
 </head>
 <body class="fullbleed vertical layout">
-  <hpcc-info-app id="hpcc-info-app"></hpcc-info-app>
 
+  <firebase-app
+              auth-domain="poly-fire-c5723.firebaseapp.com"
+              database-url="https://poly-fire-c5723.firebaseio.com/"
+              api-key="AIzaSyAWspz6ssYlO5PcDRvM_2HhXG2mtHbnVqk">
+  </firebase-app>
+
+  <my-app></my-app>
 </body>
 </html>

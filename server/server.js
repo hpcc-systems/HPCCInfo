@@ -11,6 +11,14 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
+// Set static path
+app.use(express.static(path.join(__dirname, '../client')));
+
+// Render index.html on the main page
+app.get('*', function(req, res) {
+	res.sendFile("index.html", {root: '../client'});
+});
+
 var clusterDetailsRouter = require('./routes/ClusterDetailsRouter');
 
 var projectDetailsRouter = require('./routes/ProjectDetailsRouter');
@@ -18,10 +26,6 @@ var projectDetailsRouter = require('./routes/ProjectDetailsRouter');
 app.use('/clusterDetails', clusterDetailsRouter);
 
 app.use('/projectDetails', projectDetailsRouter);
-
-
-// Set static path
-app.use(express.static(path.join(__dirname, '../client')));
 
 //Start Server
 app.listen(3000, function() {

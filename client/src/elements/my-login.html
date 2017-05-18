@@ -1,64 +1,68 @@
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html" >
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
 
 <dom-module id="my-login">
+	<style>
+		.loginBtnDiv {
+			display: inline-flex;
+		}
+
+		.signoutBtn {
+			background-color: #4caf50; 
+			color: white; 
+			text-transform: none;
+			height: 25px;
+    		font-size: 13px;
+    		margin-top: 30px;
+		}
+
+		.SignInText {
+			margin-top: 30px;
+			padding: 5px;
+		}
+
+	</style>
 	<template>
-		<firebase-auth id="auth" 
-					   user="{{user}}" 
-					   provider="google" 
-					   on-error="handleError"
-					   on-signed-in-changed ="handlesignon">
-		</firebase-auth>
+		<app-location route="{{route}}"></app-location>
 
-		<div>
-			
-
-		<paper-button raised on-tap="login" hidden$="[[user]]" style="background-color: #4caf50;;color: white;text-transform: none;">Sign In</paper-button>
-		<p><h4 style="background-color: #4caf50;;color: white;">[[user.displayName]]</h4><paper-button raised on-tap="logout" hidden$="[[!user]]" style="background-color: #4caf50;;color: white;text-transform: none;float: right;">Sign Out</paper-button></p>
-		</div>
+		<template is="dom-if" if="[[signedIn]]">
+            <div class="loginBtnDiv">
+                <h6 class="SignInText">Welcome [[user.displayName]]</h6>
+                <paper-button raised class="signoutBtn" on-tap="logout">Sign-Out</paper-button>
+            </div>
+        </template>
+        <template is="dom-if" if="[[!signedIn]]">
+            <div class="loginBtnDiv">
+                <h6 class="SignInText">Welcome</h6>
+                <paper-button raised class="signoutBtn" on-tap="logout">Sign-In</paper-button>
+            </div>
+        </template>
 	</template>
 	<script type="text/javascript">
 		Polymer({
 			is: "my-login",
 			properties: {
-				user: Object
-			},
-			login: function() {
-				if(this.$.auth.signedIn === true){
-					// var x = event.currentTarget;
-					this.$.auth.signOut().then( 
-						function() { document.querySelector('#hpcc-info-app').querySelector('#signinout').textContent = 'Sign-In';
-						}).then( function() {
-						});
-				
-				}else{
-					return this.$.auth.signInWithPopup()
-						.then(function(response) {
-							document.querySelector('#hpcc-info-app').querySelector('#signinout').textContent = 'Sign-Out';
-							var infoBox = document.querySelector('#infobox');
-							infoBox.properties.updatedby = response.user.email;
+				user: {
+                    type: Object,
+                    notify: true
+                },
 
-						})// optionally handle a successful login
-						.catch(function(error) {// unsuccessful authentication response here
-							console.log(error);
-						});
+                signedIn: {
+                  type: Boolean,
+                  notify: true,
+                  value: false
+                }
+			},
+
+			logout: function(e) {
+				if(e.target.innerText === 'Sign-Out') {
+					this.fire('sign-out');
 				}
-			},
-
-			logout: function() {
-				return this.$.auth.signOut();
-			},
-
-			handleError: function(e) {
-				console.log(e);
-			},
-            handlesignon : function(e){
-		       var infoBox = document.querySelector('#infobox');
-			   if(this.$.auth.signedIn === true){
-			   infoBox.properties.updatedby = this.$.auth.user.email;
-			}
-			}
+				
+                this.set('route.path', '/');
+            }
 		});
 	</script>
 </dom-module>
