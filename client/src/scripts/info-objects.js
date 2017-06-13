@@ -99,7 +99,7 @@ function loadGridwithEcl(QueryStr) {
 	var infoBox = document.querySelector('#infobox');
 
 	var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +
-		(infoBox.properties.hpccuser != '' ? infoBox.properties.hpccuser + ':' + infoBox.properties.password + '@' : '') +
+		(infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '') +
 		infoBox.properties.cluster_address +
 		":" + infoBox.properties.port;
 
