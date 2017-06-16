@@ -1,11 +1,21 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans: 300, 600" rel="stylesheet">
 
 <dom-module id="my-home">
 	<template>
-		<style type="text/css">
+		<style is="custom-style">
+			.flex-vertical {
+		      @apply --layout-vertical;
+		      height: 100vh;
+		    }
+
+		    .flexchild-vertical {
+		      @apply --layout-flex;
+		      @apply --layout-horizontal;
+		    }
 
 			.header1 {
 		      font-family: 'Open Sans', sans-serif;
@@ -19,28 +29,29 @@
 		      color: #FF5722;
 		    }
 
-		    .flex-container {
-		      display: flex;
-		    }
-
 		    .left-spacer {
 		      width: 33%;
 		      margin-left: 0px;
+		      flex: 1;
 		    }
 
 		    .right-spacer {
 		      width: 33%;
+		      flex: 1;
 		    }
 
 		    .main-content {
 		      width: 33%;
-		      height: 630px;
+		      display: flex;
+		      flex: 1;
+		      flex-direction: column;
+		      justify-content: center;
+  			  align-items: center;
 		    }
 
 		    .main-text {
 		      text-align: center;
 		      font-family: 'Open Sans', sans-serif;
-		      margin-top: 170px;
 		      font-size: 75px;
 		      color: #767676;
 		      font-weight: 600;
@@ -59,10 +70,11 @@
 		    }
 
 		    .footer {
-		      margin-top: 10px;
+		      margin-top: 5px;
 		      font-size: 16px;
 		      display: flex;
 		      font-family: 'Open Sans', sans-serif;
+		      margin-left: 20px;
 		    }
 
 		    .siginBtn {
@@ -75,28 +87,30 @@
 		      margin-top: 60px;
 		      text-align: center;
 		    }
+
+		    
+
 		</style>
 
 		<app-location route="{{route}}"></app-location>
 
-		<div class="header1"> HPCC <span>Info</span> </div><hr>
-		  <div class="flex-container">
-		      <div class="left-spacer"></div>
-		      <div class="main-content">
-		          <div class="main-text">
-		            HPCC <span>Info</span>
-		          </div>
-		          <div class="main-desc">
-		            An Info Worksheet (like a spreadsheet) to view HPCC data files and apply simple data manipulation
-		          </div>
-		          <div class="signBtnDiv">
-		            <paper-button raised class="siginBtn" on-tap="signIn">Sign In</paper-button>
-		          </div>
-		          
-		      </div>
-		      <div class="right-spacer"></div>
-		  </div>
-		<div class="footer">Powered By HPCCSystems</div>
+		<div class="container flex-vertical">
+			<div class="header1">HPCC <span>Info</span><hr></div>
+			<div class="flexchild-vertical">
+				<div class="left-spacer"></div>
+		      	<div class="main-content">
+		        	<div class="main-text">HPCC <span>Info</span></div>
+		          	<div class="main-desc">
+		            	An Info Worksheet (like a spreadsheet) to view HPCC data files and apply simple data manipulation
+		          	</div>
+		         	<div class="signBtnDiv">
+		            	<paper-button raised class="siginBtn" on-tap="signIn">Sign In</paper-button>
+		          	</div> 
+		      	</div> 
+		      	<div class="right-spacer"></div>
+			</div>
+			<div class="footer">Powered By HPCCSystems</div>
+		</div>
 
 	</template>
 	<script type="text/javascript">
