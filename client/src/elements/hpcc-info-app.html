@@ -92,7 +92,7 @@
 
             .headerLabels{
                 color: gray;
-                font-size: 12px;
+                font-size: 14px;
                 font-weight: bold;
             }
 
@@ -106,7 +106,7 @@
             }
 
             .btnSaveClusterDetails {
-                background-color: #4caf50;
+                background-color: #FF5722;
                 color: white;
                 text-transform: none;
                 font-size: 15px;
@@ -120,9 +120,9 @@
             }
 
             paper-toggle-button.toggleBtn {
-                --paper-toggle-button-checked-bar-color:  var(--paper-indigo-500);
-                --paper-toggle-button-checked-button-color:  var(--paper-indigo-500);
-                --paper-toggle-button-checked-ink-color: var(--paper-indigo-500);
+                --paper-toggle-button-checked-bar-color:  #FF5722;
+                --paper-toggle-button-checked-button-color:  #FF5722;
+                --paper-toggle-button-checked-ink-color: #FF5722;
                 --paper-toggle-button-unchecked-bar-color:  gray;
                 --paper-toggle-button-unchecked-button-color:  gray;
                 --paper-toggle-button-unchecked-ink-color: gray;
@@ -135,15 +135,17 @@
                 font-size: 15px;
             }
 
+            paper-button.btnNewWorkbook {
+                font-size: 14px;
+                text-transform: none;
+                color: gray;
+            }
 
-            paper-button.btnSaveClusterDetails {
-                background-color: var(--paper-indigo-500);
-                color: white;
-                --paper-button-raised-keyboard-focus: {
-                    background-color: var(--paper-pink-a200) !important;
-                    color: white !important;
-                }
-                ;
+            .icnNewWorkbook {
+                color: #FF5722;
+                --iron-icon-height: 20px;
+                --iron-icon-width: 20px;
+                margin-right: 5px;
             }
 
         </style>
@@ -170,15 +172,18 @@
             <div class="listbx_div" role="listbox">
                 <section class="main">
                     <h2><iron-label>Actions</iron-label></h2><hr>
-                    <p><dialog-button id="new-worksheet-dialog" icon="create"></dialog-button>
-                        <iron-label class="headerLabels">New Workbook</iron-label>
+                    <p style="margin-left: 20px">
+                        <paper-button class="btnNewWorkbook" on-tap="_newWorkbook">
+                            <iron-icon class="icnNewWorkbook" icon="create"></iron-icon>
+                            <iron-label class="headerLabels">New Workbook</iron-label>  
+                        </paper-button>
                     </p>
-                    <paper-tooltip for="new-worksheet-dialog" offset="10">New Workbook</paper-tooltip>
-                    <p><dialog-button id="open-worksheet-dialog" icon="mail"></dialog-button>
-                        <iron-label class="headerLabels">Open Workbook</iron-label>
+                    <p style="margin-left: 20px">
+                        <paper-button class="btnNewWorkbook" on-tap="_openWorkbook">
+                            <iron-icon class="icnNewWorkbook" icon="mail"></iron-icon>
+                            <iron-label class="headerLabels">Open Workbook</iron-label>
+                        </paper-button>
                     </p>
-                    <paper-tooltip for="open-worksheet-dialog" offset="10">Open Workbook</paper-tooltip>
-
                     <h2><iron-label>Cluster Details</iron-label></h2><hr>
                     <paper-input class="paperInputs" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
                     <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
@@ -188,11 +193,10 @@
                     </br>
                     <paper-toggle-button class="toggleBtn" id="httpSecured">
                         <iron-label class="headerLabels">HTTP Secured</iron-label>
-                    </paper-toggle-button></br></br>
-                    <!--<paper-button class="btnSaveClusterDetails" on-tap="addAllToSession">Save Cluster Details</paper-button>-->
-                    <paper-button style="background-color: #4caf50;;color: white;text-transform: none;"  on-tap="saveProjectDtls">Save</paper-button>
+                    </paper-toggle-button></br>
+                    
+                    <paper-button class="btnSaveClusterDetails" on-tap="saveProjectDtls">Save</paper-button>
 
-                    <!--<paper-button raised class="green" onclick="drawer.toggle()">Cancel</paper-button>-->
                 </section>
             </div>
         </app-drawer>
@@ -407,6 +411,16 @@
                 infoBox.properties.password = this.$.password.value;
                 infoBox.properties.httpSecured = this.$.httpSecured.value;
                 
+            },
+
+            _newWorkbook: function(e) {
+                var dialog = document.querySelector('#newwork');
+                dialog.open();
+            },
+
+            _openWorkbook: function(e) {
+                var dialog = document.querySelector('#openwork');
+                dialog.open();
             }
         });
     </script>
