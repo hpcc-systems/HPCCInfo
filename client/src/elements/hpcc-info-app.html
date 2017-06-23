@@ -52,10 +52,10 @@
         <style>
             
             app-toolbar {
-                /*background-color: #4285f4;*/
                 background-color: #FF5722;
                 height: 50px;
                 color: #fff;
+                border-bottom: 1px solid white;
             }
             
             main-title {
@@ -107,7 +107,7 @@
             }
 
             .btnSaveClusterDetails {
-                background-color: #FF5722;
+                background-color: #4caf50;
                 color: white;
                 text-transform: none;
                 font-size: 15px;
@@ -180,20 +180,24 @@
                             <iron-label class="headerLabels">New Workbook</iron-label>  
                         </paper-button>
                     </p>
-                    <paper-tooltip for="new-worksheet-dialog" offset="10">New Worksheet</paper-tooltip>
-                    <p><dialog-button id="edit-worksheet-dialog" disabled=true icon="create"></dialog-button>
-                        <iron-label class="headerLabels">Edit Worksheet</iron-label>
+
+                    <p style="margin-left: 20px">
+                        <paper-button id="edit-worksheet-dialog" class="btnNewWorkbook" on-tap="_editWorkbook" disabled=true>
+                            <iron-icon class="icnNewWorkbook" icon="mail"></iron-icon>
+                            <iron-label class="headerLabels">Edit Workbook</iron-label>
+                        </paper-button>
                     </p>
 
-                    <paper-tooltip for="edit-worksheet-dialog" offset="10">Edit Worksheet</paper-tooltip>
-                    <p><dialog-button id="open-worksheet-dialog" icon="mail"></dialog-button>
-                        <iron-label class="headerLabels">Open Worksheet</iron-label>
+                    <p style="margin-left: 20px">
+                        <paper-button id="open-worksheet-dialog" class="btnNewWorkbook" on-tap="_openWorkbook">
+                            <iron-icon class="icnNewWorkbook" icon="mail"></iron-icon>
+                            <iron-label class="headerLabels">Open Workbook</iron-label>
+                        </paper-button>
                     </p>
-                    <paper-tooltip for="open-worksheet-dialog" offset="10">Open Worksheet</paper-tooltip>
 
-                    </paper-toggle-button></br></br>-->
-                    <!--<paper-button class="btnSaveClusterDetails" on-tap="addAllToSession">Save Cluster Details</paper-button>-->
-                    <paper-button style="background-color: #4caf50;;color: white;text-transform: none;"  on-tap="saveProjectDtls">Save</paper-button>
+                    </br></br>
+
+                    <paper-button class="btnSaveClusterDetails" on-tap="saveProjectDtls">Save</paper-button>
                 </section>
             </div>
         </app-drawer>
@@ -416,6 +420,11 @@
 
             _openWorkbook: function(e) {
                 var dialog = document.querySelector('#openwork');
+                dialog.open();
+            },
+
+            _editWorkbook: function(e) {
+                var dialog = document.querySelector('#editwork');
                 dialog.open();
             }
         });

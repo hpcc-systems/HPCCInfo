@@ -45,7 +45,6 @@
         }
         
         app-toolbar {
-                /*background-color: #4285f4;*/
                 background-color: #FF7043;
                 height: 50px;
                 color: #fff;
@@ -61,12 +60,10 @@
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
 
-            <!--<paper-icon-button id="btnExportProject" icon="export" on-tap="_projectExportOpenHandler"></paper-icon-button>-->
-            <p><paper-icon-button id="export-project-dialog" disabled="true" icon="social:share"></paper-icon-button></p>
-
-            <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
-            <paper-tooltip for="export-project-dialog"  offset="0">Share Project</paper-tooltip>
             <paper-icon-button id="btnEditPlugin" disabled="true" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+            <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
+            
+            
             <paper-menu-button horizontal-align="right" disabled="true" id="pluginMenu">
                 <paper-icon-button id="btnAddPlugin" icon="add" class="dropdown-trigger"></paper-icon-button>
                 <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
@@ -77,7 +74,8 @@
                                    icon="social:share" 
                                    on-tap="_projectExportOpenHandler">                       
             </paper-icon-button>
-            <paper-tooltip for="btnExportProject" offset="0">Share Project</paper-tooltip>    
+            <paper-tooltip for="btnExportProject" offset="0">Share Project</paper-tooltip>
+
         </app-toolbar>
         <export-project-dialog id="export-project-dialog"></export-project-dialog>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
