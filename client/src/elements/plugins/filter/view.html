@@ -1,8 +1,12 @@
 <link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-filter-view">
     <template>
-        <div><vaadin-grid class="projectworksheet" name="worksheet" page-size="10"></</div>
+        <style include="shared-styles"></style>
+        <div>
+            <vaadin-grid class="projectworksheet" name="worksheet" page-size="10">
+        </div>
     </template>
     <script>
         Polymer({

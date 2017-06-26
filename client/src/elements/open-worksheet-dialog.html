@@ -163,7 +163,9 @@
             infoBox.properties.port = clusterDetails.port;
             infoBox.properties.username = clusterDetails.username;
             infoBox.properties.password = clusterDetails.password;
-            infoBox.properties.httpSecured = clusterDetails.httpsecured;                 
+            infoBox.properties.httpSecured = clusterDetails.httpsecured;
+
+            infoBox.$.btnEditPlugin.disabled = false;                
 
                 for(var cnt =0; cnt < tabs.length; cnt++){
                     var tab = tabs[cnt];
