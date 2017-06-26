@@ -282,7 +282,7 @@
                             // infobox.addTab(pluginId, "Input", pluginId);
 
                             //Initialize projecttitle handler for inline editing of projecttitle
-                            editProjectTitleHandler();  
+                            //editProjectTitleHandler();
 
                         }catch(e2){
                             console.log("Error occurred");
@@ -338,7 +338,13 @@
                 var projectid = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.projectid : 'projectid' + '_' +  Math.random().toString(36).substr(2, 4);
                 //  infobox.properties.projectid;
 
-                var title = this.$.projecttitle.textContent;
+                var title = '';
+
+                 if(this.$.projecttitle.textContent.startsWith('HPCCInfo-')) {
+                    title = this.$.projecttitle.textContent.substring(9);
+                } else {
+                    title = this.$.projecttitle.textContent;
+                }   
 
                 var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 

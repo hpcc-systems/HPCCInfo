@@ -100,7 +100,7 @@
 
                  var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
-                 projecttitlediv.textContent = this.$.worksheettitle.value;
+                 projecttitlediv.textContent = "HPCCInfo-" + this.$.worksheettitle.value;
 
 
                  var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
