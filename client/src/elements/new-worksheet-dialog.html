@@ -9,7 +9,6 @@
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 
-
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
 
 
@@ -70,7 +69,9 @@
                 <paper-button dialog-confirm raised class="indigo" on-tap="_addNewTab">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
             </div>
+
         </paper-dialog>
+
     </template>
 
     <script>
@@ -83,11 +84,13 @@
                     value: 'common-input'
                 },
              },
+
             open: function (e) {
                 document.querySelector('#drawer').toggle(); 
                this.$.dialog.open();
             },
-        _addNewTab : function(act){
+
+            _addNewTab : function(act){
                  //var infobox = document.querySelector("#infobox");
                  var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
 
@@ -98,7 +101,7 @@
                 infoBox.properties.password = this.$.password.value;
                 infoBox.properties.httpSecured = this.$.httpSecured.value;
 
-                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
+                var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
                  var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
                                     // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
@@ -106,31 +109,19 @@
                                      ":" + infoBox.properties.port;
 
                 var titleval = this.$.worksheettitle.value;
-
-                getFileListForSearch(eclIP, '', infoBox.properties.username, infoBox.properties.password).then(function(data){
-                
- 
                 projecttitlediv.textContent = "HPCCInfo-" + titleval ;
 
-
-                var isValid = hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password);
-
-                if(isValid === false){
-                        alert("The Cluster details provided are invalid! Please check");
-                        return;
-                    }      
-                
-                infoBox.properties.title = titleval;
-
-                infoBox.addTab('common-input', "Input", 'common-input');  
-
-                document.querySelector('#btnEditPlugin').disabled = false; 
-
-                document.querySelector('#edit-worksheet-dialog').disabled = false;        
-                });
+                hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
+                    alert("The Cluster details provided are valid");
+                    infoBox.properties.title = titleval;
+                    infoBox.addTab('common-input', "Input", 'common-input');
+                    document.querySelector('#btnEditPlugin').disabled = false; 
+                    document.querySelector('#edit-worksheet-dialog').disabled = false;
+                }, function(error) {
+                    alert("The Cluster details provided are invalid! Please check");
+                    return;
+                });                                                 
             },
- 
-
 
             handleCancel: function() {
                 //  this.toggleAppDrawer();

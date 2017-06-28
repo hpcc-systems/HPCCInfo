@@ -37,38 +37,22 @@ function editProjectTitleHandler() {
 	}
 }
 
-function hostReachable(url, hpccuser, password) {
-
-  // Handle IE and more capable browsers
-  var xhr = new ( window.ActiveXObject || XMLHttpRequest )( "Microsoft.XMLHTTP" );
-  var status;
-
-  // Open new request as a HEAD to the root hostname with a random param to bust the cache
-  xhr.open( "GET", url);
-
-	xhr = $.ajax({
-		//url : "http://10.240.33.54:8010/WsDfu/DFUQuery.json", 
-		url: url ,
-		headers: { 'Access-Control-Allow-Origin': '*' },
-		dataType: "JSONP",
-		jsonp: 'jsonp',
-		type: 'GET',
-		async: 'false',
-		headers: {
-			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
-		}
+function hostReachable(eclIP, hpccuser, password) {
+	var promise = new Promise(function (resolve, reject) {
+		$.ajax({
+			url: "/clusterDetails/checkConnection",
+			contentType: "application/json",
+			type: 'POST',
+			data: JSON.stringify({"password": btoa(hpccuser + ":" + password), "url": eclIP}),
+			success: function (data) {
+				resolve(data);
+			},
+			error: function (request, status, error) {
+		        reject(error);
+		    }
+		});
 	});
-
-
-  // Issue request and handle response
-//   try {
-//     xhr.send();
-//     return ( xhr.status >= 200 && (xhr.status < 300 || xhr.status === 304) );
-//   } catch (error) {
-//     return false;
-//   }
-
-return true;
+	return promise;
 }
 
 function workunitStatus(url, queryparam, hpccuser, password) {

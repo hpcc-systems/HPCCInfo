@@ -131,31 +131,18 @@
                     infoBox.properties.cluster_address +
                     ":" + infoBox.properties.port;
 
-
                 var titleval = this.$.worksheettitle.value;
-
-                getFileListForSearch(eclIP, '', infoBox.properties.username, infoBox.properties.password).then(function(data){
-                
- 
                 projecttitlediv.textContent = "HPCCInfo-" + titleval ;
-
-
-                var isValid = hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password);
-
-                if(isValid === false){
-                        alert("The Cluster details provided are invalid! Please check");
-                        return;
-                    }      
-                
-                infoBox.properties.title = titleval;
-
-                document.querySelector('#btnEditPlugin').disabled = false;   
-
-                });
-                                            
-            },
  
-
+                hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
+                    alert("The Cluster details provided are valid");
+                    infoBox.properties.title = titleval;
+                    document.querySelector('#btnEditPlugin').disabled = false;
+                }, function(error) {
+                    alert("The Cluster details provided are invalid! Please check");
+                    return;
+                });
+            },
 
             handleCancel: function() {
                 //  this.toggleAppDrawer();

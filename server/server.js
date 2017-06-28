@@ -1,9 +1,9 @@
 // Dependencies
-var express = require('express');
-var bodyParser = require('body-parser');
-var path = require('path');
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
 
-var app = express();
+const app = express();
 
 // Body Parser MiddleWare
 app.use(bodyParser.json());
@@ -14,11 +14,9 @@ app.use(bodyParser.urlencoded({
 // Set static path
 app.use(express.static(path.join(__dirname, '../client')));
 
+const clusterDetailsRouter = require('./routes/ClusterDetailsRouter');
 
-
-var clusterDetailsRouter = require('./routes/ClusterDetailsRouter');
-
-var projectDetailsRouter = require('./routes/ProjectDetailsRouter');
+const projectDetailsRouter = require('./routes/ProjectDetailsRouter');
 
 app.use('/clusterDetails', clusterDetailsRouter);
 

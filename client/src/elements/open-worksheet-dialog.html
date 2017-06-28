@@ -138,7 +138,7 @@
             infoBox.properties.projectid = this.$.worksheetlist.selectedItems[0].projectid;
             infoBox.properties.title = this.$.worksheetlist.selectedItems[0].title;
             var titleElement = document.querySelector('#projecttitle');
-            titleElement.textContent  = this.$.worksheetlist.selectedItems[0].title ;
+            titleElement.textContent  = "HPCCInfo-" + this.$.worksheetlist.selectedItems[0].title;
             infoBox.properties.file = this.$.worksheetlist.selectedItems[0].file;
             this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
             this.$.ajaxRetrieveProjectByName.generateRequest();
