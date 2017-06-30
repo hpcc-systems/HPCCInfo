@@ -20,7 +20,7 @@ var ProjectDetails = {
 		},
 		
 		updateProject: function(projectid, projectDetails, callback) {
-	    	return  mysql_pool.query("update projectdetails set projectdata = ?,  dateupdate = ?, title = ?, file = ? where projectid = ?",
+	    	return  mysql_pool.query("update projectdetails set projectdata = ?,  dateupdated = ?, title = ?, file = ? where projectid = ?",
 	    		[projectDetails.projectdata, projectDetails.dateupdated, projectDetails.title, projectDetails.file, projectid], callback);
 		},
 
