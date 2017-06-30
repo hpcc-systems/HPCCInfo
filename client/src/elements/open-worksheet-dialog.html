@@ -9,12 +9,9 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
-
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
-  <script src="https://apis.google.com/js/client:platform.js?onload=startApp"></script>
+<link rel="import" href="shared-styles.html">
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
-
 
 <dom-module id="open-worksheet-dialog">
 
@@ -24,55 +21,57 @@
         <iron-ajax id="ajaxRetrieveAllProjects" method="GET" handle-as="json" on-response="ajaxRetrieveAllProjectsResponse">
            </iron-ajax>
 
-        <style>
-            paper-button.green {
-                background-color: var(--paper-green-500);
-                color: white;
-            }
-            
-            paper-button.indigo {
-                background-color: var(--paper-indigo-500);
-                color: white;
-                --paper-button-raised-keyboard-focus: {
-                    background-color: var(--paper-pink-a200) !important;
-                    color: white !important;
-                }
-                ;
-            }
-            
-            paper-button.indigo:hover {
-                background-color: var(--paper-indigo-400);
-            }
-            
-            
+        <style include="shared-dialog-styles">
             paper-dialog {
-                width: 500px;
+                width: 1400px;
             }
+
+            .buttons {
+                margin-right: 30px;
+            }
+
+            #worksheetlist {
+                margin: 20px;
+                --iron-data-table-header: {
+                    background-color: #e3e3e3;
+                    font-size: 1.2em;
+                    font-weight: 400;
+                    border-bottom: 1px solid
+                    padding: 10px;
+                }
+            }
+
         </style>
 
-        <paper-dialog id="dialog" modal style="width:1400px">
-          <!--<iron-ajax url='http://' + window.location.hostname + ':3000/projectDetails' last-response="{{projects}}" auto></iron-ajax>-->
-          <iron-data-table  id="worksheetlist" items="[[projects.projectdata]]" selection-enabled multi-selection
-               on-selecting-item='handleSelect' on-deselecting-item='handleDeselect' on-selecting-all-items = 'handleselectall' on-deselecting-all-items = 'handledeselectall'>
-
-                <data-table-column name="title">
-                <template>[[item.title]]</template>
-                </data-table-column>
-                    <data-table-column name="file">
-                <template>[[item.file]]</template>
-                </data-table-column>
-                <data-table-column name="updatedby">
-                <template>[[item.updatedby]]</template>
-                </data-table-column>
-                    <data-table-column name="dateupdated">
-                <template>[[item.dateupdated]]</template>
-                </data-table-column>
-    
-            </iron-data-table>
-
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo"  on-tap="_okHandler">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
+        <paper-dialog id="dialog" modal>
+            <div class="container">
+                <iron-label>
+                    <div class="headerDiv">
+                        <span>
+                            Open Workbook
+                        </span>
+                    </div>
+                </iron-label>
+                <iron-data-table  id="worksheetlist" items="[[projects.projectdata]]" selection-enabled multi-selection
+                   on-selecting-item='handleSelect' on-deselecting-item='handleDeselect' on-selecting-all-items = 'handleselectall' on-deselecting-all-items = 'handledeselectall'>
+                    <data-table-column name="Title">
+                    <template>[[item.title]]</template>
+                    </data-table-column>
+                        <data-table-column name="File">
+                    <template>[[item.file]]</template>
+                    </data-table-column>
+                    <data-table-column name="Updated By">
+                    <template>[[item.updatedby]]</template>
+                    </data-table-column>
+                        <data-table-column name="Date Updated">
+                    <template>[[item.dateupdated]]</template>
+                    </data-table-column>
+                </iron-data-table>
+                <br><br>
+                <div class="buttons">
+                    <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+                    <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
+                </div>
             </div>
         </paper-dialog>
     </template>

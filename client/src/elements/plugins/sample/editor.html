@@ -5,47 +5,32 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-sample-editor">
     <template>
-
-        <style>
-        paper-button.green {
-            background-color: var(--paper-green-500);
-            color: white;
-        }
-        
-        paper-button.indigo {
-            background-color: var(--paper-indigo-500);
-            color: white;
-            --paper-button-raised-keyboard-focus: {
-                background-color: var(--paper-pink-a200) !important;
-                color: white !important;
-            }
-            ;
-        }
-        
-        paper-button.indigo:hover {
-            background-color: var(--paper-indigo-400);
-        }
-        
-        paper-dialog {
-            width: 500px;
-        }
-        </style>
+    	<style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
-            <!-- User cannot enter title value beginning with a number -->
-            <paper-input id='TabTitle' label="[[editortitle]]" 
-                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
-                   error-message="Title is Required"></paper-input>
-            <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
-            <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
-            <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-            </div>
+        	<div>
+        		<iron-label>
+		            <div class="headerDiv">
+		                <span>Sample Plugin Editor</span>
+		        	</div>
+		        </iron-label>
+	            <!-- User cannot enter title value beginning with a number -->
+	            <paper-input id='TabTitle' label="[[editortitle]]" 
+	                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+	                   error-message="Title is Required"></paper-input>
+	            <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+	            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
+	            <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
+	            <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
+	            <br><br><br>
+	            <div class="buttons">
+	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+	            </div>
+	        </div>
         </paper-dialog>
     </template>
     <script>

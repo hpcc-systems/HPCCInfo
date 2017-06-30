@@ -5,46 +5,36 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-sort-editor">
     <template>
-
-        <style>
-        paper-button.green {
-            background-color: var(--paper-green-500);
-            color: white;
-        }
-        
-        paper-button.indigo {
-            background-color: var(--paper-indigo-500);
-            color: white;
-            --paper-button-raised-keyboard-focus: {
-                background-color: var(--paper-pink-a200) !important;
-                color: white !important;
-            }
-            ;
-        }
-        
-        paper-button.indigo:hover {
-            background-color: var(--paper-indigo-400);
-        }
-        
-        paper-dialog {
-            width: 500px;
-        }
-        </style>
+    	<style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
-            <paper-input id='sortoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='sortInputtab' on-value-changed='changeSortInput' required label="Input Dataset"></vaadin-combo-box>
-            <vaadin-combo-box id='sortfield' required label="Field"></vaadin-combo-box>
-            <vaadin-combo-box id='fieldOrder' required label="Field Order" items='["ASC", "DSC"]'></vaadin-combo-box>
-            <paper-button on-tap="ADDFunction">ADD</paper-button>
-            <paper-input id='sortformulas' label="Value"></paper-input>
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-            </div>
+        	<div>
+        		<iron-label>
+		            <div class="headerDiv">
+		                <span>Sort Plugin Editor</span>
+		        	</div>
+		        </iron-label>
+	            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
+	            <paper-input id='sortoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+	            <vaadin-combo-box id='sortInputtab' on-value-changed='changeSortInput' required label="Input Dataset"></vaadin-combo-box>
+	            <vaadin-combo-box id='sortfield' required label="Field"></vaadin-combo-box>
+	            <vaadin-combo-box id='fieldOrder' required label="Field Order" items='["ASC", "DSC"]'></vaadin-combo-box>
+	            <!-- 
+	            	style="justify-content: left;     
+	            	justify-content: left;
+    				margin-left: 0px;
+    				padding-left: 0px;"-->
+	            <paper-button class="addBtn" on-tap="ADDFunction">Add</paper-button>
+	            <paper-input id='sortformulas' label="Value"></paper-input>
+	            <br><br><br>
+	            <div class="buttons">
+	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+	            </div>
+	        </div>
         </paper-dialog>
     </template>
     <script>

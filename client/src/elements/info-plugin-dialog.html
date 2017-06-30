@@ -1,44 +1,21 @@
-<dom-module id="info-plugin-dialog">
+<link rel="import" href="shared-styles.html">
 
-    <style>
-        paper-button.green {
-            background-color: var(--paper-green-500);
-            color: white;
-        }
-        
-        paper-button.indigo {
-            background-color: var(--paper-indigo-500);
-            color: white;
-            --paper-button-raised-keyboard-focus: {
-                background-color: var(--paper-pink-a200) !important;
-                color: white !important;
-            }
-            ;
-        }
-        
-        paper-button.indigo:hover {
-            background-color: var(--paper-indigo-400);
-        }
-        
-        paper-dialog {
-            width: 500px;
-        }
-    </style>
-
+<dom-module id="info-plugin-dialog"> 
     <template>
+        <style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
-            <iron-label>
-                <div style="text-align: center;">
-                    <span style="font-size: x-large;text-transform: capitalize;">
-                             {{plugintitle}} 
-                    </span>
-                </div>
+            <div class="container">
+                <iron-label>
+                    <div class="headerDiv">
+                        <span>{{plugintitle}}</span>
+                    </div>
                 </iron-label>
-            <paper-input id='label' label="label"></paper-input>
-
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="handleOk">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+                <paper-input id='label' label="label"></paper-input>
+                <br><br><br>
+                <div class="buttons">
+                    <paper-button dialog-confirm raised class="indigo" on-tap="handleOk">Ok</paper-button>
+                    <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+                </div>
             </div>
         </paper-dialog>
     </template>
@@ -52,7 +29,8 @@
                     type: String
                 },
                 plugintitle: {
-                    type: String
+                    type: String,
+                    observer: '_capitalizeFirstCharacter'               
                 }
             },
 
@@ -71,8 +49,16 @@
 
             handleCancel: function (e) {
                 this.fire('cancel');
-            }
+            },
 
+            /*
+             * Convert the first letter of Plugin Title to Uppercase
+             */
+            _capitalizeFirstCharacter: function() {
+                var oldPluginTitle = this.plugintitle;
+                var updatePluginTitle = oldPluginTitle.charAt(0).toUpperCase() + oldPluginTitle.slice(1);
+                this.plugintitle = updatePluginTitle;
+            }
 
         });
     </script>

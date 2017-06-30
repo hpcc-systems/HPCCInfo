@@ -5,49 +5,52 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-aggregate-editor">
     <template>
-        <style>
-        paper-button.green {
-            background-color: var(--paper-green-500);
-            color: white;
-        }
-        
-        paper-button.indigo {
-            background-color: var(--paper-indigo-500);
-            color: white;
-            --paper-button-raised-keyboard-focus: {
-                background-color: var(--paper-pink-a200) !important;
-                color: white !important;
+    	<style include="shared-dialog-styles">
+    		paper-dialog {
+    			line-height: 15px;
+    		}
+
+            paper-button.addBtn {
+                margin-bottom: 0px;
             }
-            ;
-        }
-        
-        paper-button.indigo:hover {
-            background-color: var(--paper-indigo-400);
-        }
-        
-        paper-dialog {
-            width: 500px;
-        }
-        </style>
+
+            .headerDiv{
+                font-size: 20px;
+            }
+
+            vaadin-combo-box {
+            	padding: 5px 0px;
+            }
+
+    	</style>
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
-            <paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
-            <paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
-            <vaadin-combo-box id='crosstabfield' required label="GroupBy Field"></vaadin-combo-box>
-            <paper-button id='addMeasureKey' on-tap="tableKeyAddFunction">ADD</paper-button>
-            <paper-input id='aggregateformulas' required label="Group Fields" label="Value"></paper-input>
-            <vaadin-combo-box id='aggregategroupfunc' required label="Aggregate Function" items='["SUM", "COUNT", "MAX", "MIN", "AVE"]'></vaadin-combo-box>
-            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
-            <paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction">ADD</paper-button>
-            <paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-            </div>
+        	<div>
+        		<iron-label>
+		            <div class="headerDiv">
+		                <span>Aggregate Plugin Editor</span>
+		        	</div>
+		        </iron-label>
+	            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
+	            <paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+	            <vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
+	            <paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
+	            <vaadin-combo-box id='crosstabfield' required label="GroupBy Field"></vaadin-combo-box>
+	            <paper-button id='addMeasureKey' on-tap="tableKeyAddFunction" class="addBtn">ADD</paper-button>
+	            <paper-input id='aggregateformulas' required label="Group Fields" label="Value"></paper-input>
+	            <vaadin-combo-box id='aggregategroupfunc' required label="Aggregate Function" items='["SUM", "COUNT", "MAX", "MIN", "AVE"]'></vaadin-combo-box>
+	            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
+	            <paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction" class="addBtn">ADD</paper-button>
+	            <paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
+	            <br><br><br>
+	            <div class="buttons">
+	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+	            </div>
+	        </div>
         </paper-dialog>
     </template>
     <script>

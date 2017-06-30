@@ -8,71 +8,42 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
-
+<link rel="import" href="shared-styles.html">
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
 
 
 <dom-module id="edit-worksheet-dialog">
-
     <template>
-        <style>
-            paper-button.green {
-                background-color: var(--paper-green-500);
-                color: white;
-            }
-            
-            paper-button.indigo {
-                background-color: var(--paper-indigo-500);
-                color: white;
-                --paper-button-raised-keyboard-focus: {
-                    background-color: var(--paper-pink-a200) !important;
-                    color: white !important;
-                }
-                ;
-            }
-            
-            paper-button.indigo:hover {
-                background-color: var(--paper-indigo-400);
-            }
-            
-            
-            paper-dialog {
-                width: 500px;
-            }
-        </style>
-
+        <style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
-            <iron-label>
-                <div style="text-align: center;">
-                    <span style="font-size: x-large;">
-                            Edit Worksheet
-                    </span>
-                </div>
-
+            <div class="container">
+                <iron-label>
+                    <div class="headerDiv">
+                        <span>
+                            Edit Workbook
+                        </span>
+                    </div>
                 </iron-label>
-                <paper-input id='worksheettitle' label="WorkSheet Title"  class="worksheettitle" ></paper-input>
-            <!--<paper-input id='label' label="label"  class="projectlabel" ></paper-input>-->
-
-
-                    <h2><iron-label>Cluster Details</iron-label></h2>
-                    <paper-input class="paperInputs" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
-                    <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
-                    <paper-input class="paperInputs" id='port' label="Port" value="[[port]]"></paper-input>
-                    <paper-input class="paperInputs" id='username' label="Username" value="[[username]]"></paper-input>
-                    <paper-input class="paperInputs" id='password' label="Password" type="password" value="[[password]]"></paper-input>
-                     </br>
-                    <paper-toggle-button class="toggleBtn" id="httpSecured">
-                        <iron-label class="headerLabels">HTTP Secured</iron-label>
-                    </paper-toggle-button>
-
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="_editWorkbook">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+                <paper-input id='worksheettitle' label="WorkSheet Title"></paper-input>
+                <h2><iron-label>Cluster Details</iron-label></h2>
+                <paper-input class="paperInputs" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
+                <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
+                <paper-input class="paperInputs" id='port' label="Port" value="[[port]]"></paper-input>
+                <paper-input class="paperInputs" id='username' label="Username" value="[[username]]"></paper-input>
+                <paper-input class="paperInputs" id='password' label="Password" type="password" value="[[password]]"></paper-input>
+                <br>
+                <paper-toggle-button class="toggleBtn" id="httpSecured">
+                    <iron-label class="headerLabels">HTTP Secured</iron-label>
+                </paper-toggle-button>
+                <br><br>
+                <div class="buttons">
+                    <paper-button dialog-confirm raised class="indigo" on-tap="_editWorkbook">Ok</paper-button>
+                    <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+                </div>
             </div>
         </paper-dialog>
     </template>
-
     <script>
 
         Polymer({
@@ -120,10 +91,12 @@
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
+                var titleval;
+
                 if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
-                    projecttitlediv.textContent = this.$.worksheettitle.value;
+                   titleval = this.$.worksheettitle.value;
                 } else {
-                    projecttitlediv.textContent = 'HPCCInfo-' + this.$.worksheettitle.value;
+                    titleval = 'HPCCInfo-' + this.$.worksheettitle.value;
                 }
 
                 var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
@@ -131,11 +104,9 @@
                     infoBox.properties.cluster_address +
                     ":" + infoBox.properties.port;
 
-                var titleval = this.$.worksheettitle.value;
-                projecttitlediv.textContent = "HPCCInfo-" + titleval ;
- 
                 hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
                     alert("The Cluster details provided are valid");
+                    projecttitlediv.textContent = titleval ;
                     infoBox.properties.title = titleval;
                     document.querySelector('#btnEditPlugin').disabled = false;
                 }, function(error) {
