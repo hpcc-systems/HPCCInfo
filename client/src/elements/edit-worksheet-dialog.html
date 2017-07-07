@@ -94,13 +94,13 @@
                 //Check if the ProjectTitle starts with 'HPCCInfo-'. 
                 // If it does, then the project name will the remaining string after 'HPCCInfo-'
                 // e.g. HPCCInfo-MyFirstWorkbook then the project named saved in Db will be MyFirstWorkbook
-                if(projecttitlediv.textContent.startsWith('HPCCInfo-')) {
+                /*if(projecttitlediv.textContent.startsWith('HPCCInfo-')) {
                     this.$.worksheettitle.value = projecttitlediv.textContent.substring(9);
                 } else {
                     this.$.worksheettitle.value = projecttitlediv.textContent ;
-                }               
-
-               this.$.dialog.open();
+                } */              
+                this.$.worksheettitle.value = projecttitlediv.textContent
+                this.$.dialog.open();
             },
             _editWorkbook : function(act){
                 if(!this.validate()) {
@@ -120,13 +120,13 @@
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
-                var titleval;
+                var titleval = this.$.worksheettitle.value;;
 
-                if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
+                /*if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
                    titleval = this.$.worksheettitle.value;
                 } else {
                     titleval = 'HPCCInfo-' + this.$.worksheettitle.value;
-                }
+                }*/
 
                 var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
                 // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +

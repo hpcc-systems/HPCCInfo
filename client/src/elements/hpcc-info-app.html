@@ -53,15 +53,16 @@
         <style>
             
             app-toolbar {
-                background-color: #FF5722;
+                background-color: #FFFFFF;
                 height: 50px;
-                color: #fff;
-                border-bottom: 1px solid white;
             }
             
-            main-title {
-                margin-left: 15px;
+            .main-title {
+                margin-left: 20px;
                 font-size: 18px;
+                color: #767676;
+                font-weight: bold;
+                padding-top: 5px;
             }
 
             app-drawer {
@@ -73,6 +74,7 @@
                 --paper-icon-button: {
                     width: 36px;
                     height: 36px;
+                    color: #767676;
                 }
             }
 
@@ -151,6 +153,19 @@
                 margin-right: 5px;
             }
 
+            .main-text {
+                font-family: 'Open Sans', sans-serif;
+                color: #767676;
+                font-weight: 600;
+                font-size: 24px;
+            }
+
+            .main-text span {
+                margin-left: 0px;
+                padding-left: 0px;
+                color: #FF5722;
+            }
+
         </style>
 
         <app-location route="{{route}}"></app-location>
@@ -159,7 +174,8 @@
 
         <app-toolbar>
             <paper-icon-button icon="menu" onclick="drawer.toggle()" ></paper-icon-button>
-            <div class="main-title" id="projecttitle">HPCCInfo</div>
+            <div class="main-text">HPCC <span>Info</span></div>
+            <div class="main-title" id="projecttitle"></div>
             <span style="flex: 1;"></span>
             <my-login signed-in="{{signedIn}}" user={{user}}></my-login>
 
@@ -344,13 +360,13 @@
                 var projectid = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.projectid : 'projectid' + '_' +  Math.random().toString(36).substr(2, 4);
                 //  infobox.properties.projectid;
 
-                var title = '';
+                var title = this.$.projecttitle.textContent;
 
-                 if(this.$.projecttitle.textContent.startsWith('HPCCInfo-')) {
+                /* if(this.$.projecttitle.textContent.startsWith('HPCCInfo-')) {
                     title = this.$.projecttitle.textContent.substring(9);
                 } else {
                     title = this.$.projecttitle.textContent;
-                }   
+                } */  
 
                 var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 

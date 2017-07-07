@@ -119,13 +119,13 @@
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
 
-                var titleval;
+                var titleval = this.$.worksheettitle.value;
 
-                if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
+                /*if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
                    titleval = this.$.worksheettitle.value;
                 } else {
                     titleval = 'HPCCInfo-' + this.$.worksheettitle.value;
-                }
+                }*/
                 
                 var that = this;
                 hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
