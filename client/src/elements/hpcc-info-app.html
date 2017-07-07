@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
 <link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
@@ -202,6 +203,9 @@
                 </section>
             </div>
         </app-drawer>
+
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
+
     </template>
     
     <script>   
@@ -405,7 +409,8 @@
                     this.$.ajaxAddProject.generateRequest();
                 }
 
-                alert('WorkSheet Details are saved successfully!!!')
+                this.$.toast.text = "Workbook Details are saved successfully!!!";
+                this.$.toast.open();
             },
 
             addAllToSession  : function(event){

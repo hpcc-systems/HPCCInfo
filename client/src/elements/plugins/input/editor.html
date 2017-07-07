@@ -1,9 +1,16 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-input-editor">
   <template>
-    <style include="shared-dialog-styles"></style>
+    <style include="shared-dialog-styles">
+      #toast {
+        --paper-toast-background-color: red;
+        --paper-toast-color: white;
+      }
+
+    </style>
 
     <paper-dialog id="dialog" modal>
       <div class="container">
@@ -24,6 +31,8 @@
             <paper-button dialog-dismiss raised class="green" on-tap="_cancelHandler">Cancel</paper-button>
           </div>
         </div>
+
+        <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
     </paper-dialog>
     </template>
 
@@ -288,12 +297,13 @@
                                     // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
-    
+              var that = this;
               getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.username, infoBox.properties.password).then(function(data) {
               console.log(data);
 
-              if(data.DFUQueryResponse.NumFiles === 0){
-                alert('No logical files matched for the given filescope, please try with different value!');
+              if(data.DFUQueryResponse.NumFiles === 0) {
+                that.$.toast.text = "No logical files matched for the given filescope, please try with different value";
+                that.$.toast.open();
                 return;
               }
 

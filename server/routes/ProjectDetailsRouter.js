@@ -9,7 +9,6 @@ router.get('/:name?',function(req, res, next) {
 	        if(err) {
 	        	res.json(err);
 	        } else {
-	        	console.log("Rows: ", rows);
 	            res.json(rows);
 	        }
 	    });

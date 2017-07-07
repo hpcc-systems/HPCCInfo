@@ -31,6 +31,9 @@
 	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
 	            </div>
 	        </div>
+
+	        <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
+
         </paper-dialog>
     </template>
     <script>
@@ -193,8 +196,8 @@ changeSampleInput: function(e){
  		var infoBox = document.querySelector('#infobox');
 
 		if(Number(this.$.samplingInterval.value) < Number(this.$.ordinalNumber.value)){
-			alert('Ordinal Number should be a valid number and less than Interval !!!');
-
+			this.$.toast.text = "Ordinal Number should be a valid number and less than Interval";
+            this.$.toast.open();
 			return;
 		}
 
