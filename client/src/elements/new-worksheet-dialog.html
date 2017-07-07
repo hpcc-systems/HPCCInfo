@@ -8,6 +8,8 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="shared-styles.html">
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
@@ -18,6 +20,11 @@
     <template>
         <style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
+
+        <template is="dom-if" if={{loading}}>
+            <paper-progress indeterminate="true" style="width: 90%; margin-top: 2px;"></paper-progress>
+        </template>
+
         <div class="container">
             <iron-label>
                 <div class="headerDiv">
@@ -26,22 +33,31 @@
                     </span>
                 </div>
             </iron-label>
-            <paper-input id='worksheettitle' label="Workbook Title"></paper-input>
+            <paper-input id='worksheettitle' label="Workbook Title" 
+                         required auto-validate error-message="Please enter workbook title"></paper-input>
             <h2><iron-label>Cluster Details</iron-label></h2>
-            <paper-input class="paperInputs" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
-            <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
-            <paper-input class="paperInputs" id='port' label="Port" value="[[port]]"></paper-input>
-            <paper-input class="paperInputs" id='username' label="Username" value="[[username]]"></paper-input>
-            <paper-input class="paperInputs" id='password' label="Password" type="password" value="[[password]]"></paper-input>
+            <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
+                         required auto-validate error-message="Please enter cluster name"></paper-input>
+            <paper-input id='cluster_address' label="Cluster Address" value="[[clusteraddress]]" 
+                         required auto-validate error-message="Please enter cluster address"></paper-input>
+            <paper-input id='port' label="Port" value="[[port]]" allowed-pattern="[0-9]" 
+                         required auto-validate error-message="Please enter a valid port number"></paper-input>
+            <paper-input id='username' label="Username" value="[[username]]" 
+                         required auto-validate error-message="Please enter username"></paper-input>
+            <paper-input id='password' label="Password" type="password" value="[[password]]" 
+                         required auto-validate error-message="Please enter password"></paper-input>
             <br>
             <paper-toggle-button class="toggleBtn" id="httpSecured">
                 <iron-label class="headerLabels">HTTP Secured</iron-label>
             </paper-toggle-button>
             <br><br>
             <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-tap="_addNewTab">Ok</paper-button>
+                <paper-button raised class="indigo" on-tap="_addNewTab">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
             </div>
+
+            <paper-toast id="toast" class="fit-bottom"></paper-toast>
+
         </div>
         </paper-dialog>
 
@@ -56,26 +72,37 @@
                     type: String,
                     value: 'common-input'
                 },
+                loading: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
              },
 
             open: function (e) {
                 document.querySelector('#drawer').toggle();
-                this.$.cluster_name.value = '';
-                this.$.cluster_address.value = '';
-                this.$.port.value = '';
-                this.$.username.value = '';
-                this.$.password.value = '';
-                this.$.httpSecured.value = false;
 
+                // Reset all form fields
+                this.resetFormFields();
+                
+                // Invalidate all form fields so that the auto-validation does not happen after user reopens the dialog
+                this.invalidateFormFields();
+                
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
                 infoBox.clearWorkBook();
 
                 this.$.dialog.open();
             },
 
-            _addNewTab : function(act){
-                 //var infobox = document.querySelector("#infobox");
-                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
+            _addNewTab : function(act) {
+
+                if(!this.validate()) {
+                    return;
+                }
+
+                this.loading = true;
+
+                var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
 
                 infoBox.properties.cluster_name = this.$.cluster_name.value;
                 infoBox.properties.cluster_address = this.$.cluster_address.value;
@@ -100,18 +127,26 @@
                     titleval = 'HPCCInfo-' + this.$.worksheettitle.value;
                 }
                 
-
+                var that = this;
                 hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
-                    alert("The Cluster details provided are valid");
-                    //var titleval = this.$.worksheettitle.value;
                     projecttitlediv.textContent = titleval;
                     document.querySelector('#btnExportProject').disabled = true;
                     infoBox.properties.title = titleval;
                     infoBox.addTab('common-input', "Input", 'common-input');
                     document.querySelector('#btnEditPlugin').disabled = false; 
                     document.querySelector('#edit-worksheet-dialog').disabled = false;
+
+                    that.loading = false;
+                    that.$.toast.text = "Cluster details entered validated successfully";
+                    that.$.toast.open();
+                    setTimeout(function () {
+                        that.$.dialog.close();
+                      }, 3000);
+
                 }, function(error) {
-                    alert("The Cluster details provided are invalid! Please check");
+                    that.loading = false;
+                    that.$.toast.text = "Cluster details provided are invalid! Please check";
+                    that.$.toast.open();
                     return;
                 });                                                 
             },
@@ -121,8 +156,46 @@
             },
  
             toggleAppDrawer: function() {
-                 Polymer.dom(Polymer.dom(this).parentNode).querySelector('#drawer').toggle();
-             }
+                Polymer.dom(Polymer.dom(this).parentNode).querySelector('#drawer').toggle();
+            },
+
+            validate : function() {
+                const isValidWorksheettitle = this.$.worksheettitle.validate();
+                const isValidClusterName = this.$.cluster_name.validate();
+                const isValidClusterAddress = this.$.cluster_address.validate();
+                const isValidPort = this.$.port.validate();
+                const isValidUsername = this.$.username.validate();
+                const isValidPassword = this.$.password.validate();
+
+                if(isValidWorksheettitle && isValidClusterName && isValidClusterAddress 
+                    && isValidPort && isValidUsername && isValidPassword) {
+                    console.log('returning true');
+                    return true;
+                } else {
+                    console.log('returning false');
+                    return false;
+                }
+            },
+
+            resetFormFields: function() {
+                this.$.worksheettitle.value = '';
+                this.$.cluster_name.value = '';
+                this.$.cluster_address.value = '';
+                this.$.port.value = '';
+                this.$.username.value = '';
+                this.$.password.value = '';
+                this.$.httpSecured.value = false;
+            },
+
+            invalidateFormFields: function() {
+                this.$.worksheettitle.invalid = false;
+                this.$.cluster_name.invalid = false;
+                this.$.cluster_address.invalid = false;
+                this.$.port.invalid = false;
+                this.$.username.invalid = false;
+                this.$.password.invalid = false;
+                this.$.httpSecured.invalid = false;
+            }
  
         });
 
