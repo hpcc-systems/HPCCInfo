@@ -27,7 +27,6 @@
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
-<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
 
 <link rel="import" href="info-box.html">
@@ -147,11 +146,16 @@
                 color: gray;
             }
 
+            
             .icnNewWorkbook {
                 color: #FF5722;
                 --iron-icon-height: 20px;
                 --iron-icon-width: 20px;
                 margin-right: 5px;
+            }
+
+            paper-button[disabled] .icnNewWorkbook {
+                color: gray;   
             }
 
             .main-text {
@@ -334,6 +338,7 @@
             },
 
             exportProjectDtls : function(exportTo){
+                document.querySelector('#drawer').toggle();
                 this.$.exportTo =  exportTo;
                 var infoBox = this.$$('#infobox');
                 var projectid = infobox.properties.projectid;
@@ -368,23 +373,13 @@
                     title = this.$.projecttitle.textContent;
                 } */  
 
-                var exportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? true : false;
-
-                var updatedby = exportAction ? infobox.properties.updatedby :  this.$.exportTo;
-
-                var responseMsg = exportAction ? 
-                                    "Workbook Details are saved successfully!!!" :  
-                                        "Workbook is exported to " + this.$.exportTo + " successfully";
-
-                var responseMsg = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? 
-                                    "Workbook Details are saved successfully!!!" :  
-                                        "Workbook is exported to " + this.$.exportTo + " successfully";
+                var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 
                 if(updatedby === undefined || updatedby === null ||updatedby === ''){
                     return;
                 }
                 
-                // infobox.properties.updatedby = updatedby;
+                infobox.properties.updatedby = updatedby;
 
                 var dateupdated = infobox.properties.dateupdated;
 
@@ -436,7 +431,7 @@
                     this.$.ajaxAddProject.generateRequest();
                 }
 
-                this.$.toast.text = responseMsg;
+                this.$.toast.text = "Workbook Details are saved successfully!!!";
                 this.$.toast.open();
             },
 
