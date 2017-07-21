@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
-
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
@@ -22,7 +22,7 @@
             <template is="dom-if" if={{loading}}>
                 <paper-progress indeterminate="true" style="width: 90%; margin-top: 2px;"></paper-progress>
             </template>
-            <div class="container">
+            
                 <iron-label>
                     <div class="headerDiv">
                         <span>
@@ -30,27 +30,29 @@
                         </span>
                     </div>
                 </iron-label>
-                <paper-input id='worksheettitle' label="Workbook Title" 
-                         required auto-validate error-message="Please enter workbook title"></paper-input>
 
-                <h2><iron-label>Cluster Details</iron-label></h2>
-                <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
-                         required auto-validate error-message="Please enter cluster name"></paper-input>
-                <paper-input id='cluster_address' on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
-                             required auto-validate error-message="Please enter cluster address"></paper-input>
-                <paper-input id='port' label="Port" value="[[port]]"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
-                             required auto-validate error-message="Please enter a valid port number"></paper-input>
-                <paper-input id='username' label="Username"  on-change = "disableClusternames"  value="[[username]]" 
-                             required auto-validate error-message="Please enter username"></paper-input>
-                <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
-                             required auto-validate error-message="Please enter password"></paper-input>
-                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' 
-                             required label="Choose Cluster" items='[]'></vaadin-combo-box>
-                <br>
-                <paper-toggle-button class="toggleBtn" id="httpSecured">
-                    <iron-label class="headerLabels">HTTP Secured</iron-label>
-                </paper-toggle-button>
-                <br><br>
+                <paper-dialog-scrollable>
+                    <paper-input id='worksheettitle' label="Workbook Title" 
+                             required auto-validate error-message="Please enter workbook title"></paper-input>
+
+                    <h2><iron-label>Cluster Details</iron-label></h2>
+                    <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
+                             required auto-validate error-message="Please enter cluster name"></paper-input>
+                    <paper-input id='cluster_address' on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
+                                 required auto-validate error-message="Please enter cluster address"></paper-input>
+                    <paper-input id='port' label="Port" value="[[port]]"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
+                                 required auto-validate error-message="Please enter a valid port number"></paper-input>
+                    <paper-input id='username' label="Username"  on-change = "disableClusternames"  value="[[username]]" 
+                                 required auto-validate error-message="Please enter username"></paper-input>
+                    <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
+                                 required auto-validate error-message="Please enter password"></paper-input>
+                    <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' 
+                                 required label="Choose Cluster" items='[]'></vaadin-combo-box>
+                    <br>
+                    <paper-toggle-button class="toggleBtn" id="httpSecured">
+                        <iron-label class="headerLabels">HTTP Secured</iron-label>
+                    </paper-toggle-button>
+                </paper-dialog-scrollable>
                 <div class="buttons">
                     <paper-button raised class="indigo" on-tap="_editWorkbook">Ok</paper-button>
                     <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
@@ -58,7 +60,6 @@
 
                 <paper-toast id="toast" class="fit-bottom"></paper-toast>
 
-            </div>
         </paper-dialog>
     </template>
     <script>

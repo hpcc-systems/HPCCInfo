@@ -2,7 +2,12 @@
 
 <dom-module id="info-plugin-dialog"> 
     <template>
-        <style include="shared-dialog-styles"></style>
+        <style include="shared-dialog-styles">
+            paper-dialog {
+                min-height: 150px;
+            }
+        </style>
+        
         <paper-dialog id="dialog" modal>
             <div class="container">
                 <iron-label>

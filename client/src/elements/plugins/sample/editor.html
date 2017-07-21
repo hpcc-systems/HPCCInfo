@@ -1,4 +1,5 @@
 <link rel="import" href="../../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../../bower_components/paper-styles/color.html">
@@ -11,30 +12,28 @@
     <template>
     	<style include="shared-dialog-styles"></style>
         <paper-dialog id="dialog" modal>
-        	<div>
         		<iron-label>
 		            <div class="headerDiv">
 		                <span>Sample Plugin Editor</span>
 		        	</div>
 		        </iron-label>
-	            <!-- User cannot enter title value beginning with a number -->
-	            <paper-input id='TabTitle' label="[[editortitle]]" 
-	                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
-	                   error-message="Title is Required"></paper-input>
-	            <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-	            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
-	            <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
-	            <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
-				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
-                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
-                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
-
-	            <br><br><br>
+		        <paper-dialog-scrollable>
+		            <!-- User cannot enter title value beginning with a number -->
+		            <paper-input id='TabTitle' label="[[editortitle]]" 
+		                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+		                   error-message="Title is Required"></paper-input>
+		            <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+		            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
+		            <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
+		            <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
+					<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
+	                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+	                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
+	            </paper-dialog-scrollable>
 	            <div class="buttons">
 	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
 	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
 	            </div>
-	        </div>
 
 	        <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
 

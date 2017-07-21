@@ -25,6 +25,7 @@
     "paper-datatable": "David-Mulder/paper-datatable#^0.9.8",
     "polymerfire": "firebase/polymerfire#^2.0.0",
     "app-route": "PolymerElements/app-route#^2.0.0",
-    "paper-progress": "PolymerElements/paper-progress#^2.0.1"
+    "paper-progress": "PolymerElements/paper-progress#^2.0.1",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#1.1.5"
   }
 }

@@ -1,8 +1,7 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/paper-toast/paper-toast.html">
-
-
-
+<link rel="import" href="../../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-input-editor">
@@ -16,27 +15,24 @@
     </style>
 
     <paper-dialog id="dialog" modal>
-      <div class="container">
           <iron-label>
             <div class="headerDiv">
                 <span>Input Plugin Editor</span>
             </div>
           </iron-label>
-          <!-- User cannot enter title value beginning with a number -->
-          <paper-input id='TabTitle' label="[[editortitle]]" 
-                       required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
-                       error-message="Title is Required"></paper-input>
-          <paper-input id='scope' label="File Scope" ></paper-input>
-          <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
-          <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-
-          <br><br><br>
+          <paper-dialog-scrollable>
+              <!-- User cannot enter title value beginning with a number -->
+              <paper-input id='TabTitle' label="[[editortitle]]" 
+                           required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
+                           error-message="Title is Required"></paper-input>
+              <paper-input id='scope' label="File Scope" ></paper-input>
+              <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
+              <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+          </paper-dialog-scrollable>
           <div class="buttons">
             <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
             <paper-button dialog-dismiss raised class="green" on-tap="_cancelHandler">Cancel</paper-button>
           </div>
-        </div>
-
          <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
 
      </paper-dialog>
