@@ -100,6 +100,9 @@ function getThorList(url, hpccuser, password) {
 function loadGridwithEcl(QueryStr, recLimit) {
 
 	var infoBox = document.querySelector('#infobox');
+	var currentPage = document.querySelector("#pages").selectedItem;
+	//Set paper-progress when the grid is being loaded
+    currentPage.loading = true;
 
 	var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +
 		// (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '') +
@@ -157,8 +160,12 @@ function loadGridwithEcl(QueryStr, recLimit) {
 
 		sessionStorage.setItem('gridColumns', colArray);
 		// Add some example data as an array.
+		currentPage.loading = false;
 
 	});
+
+	
+
 	return;
 }
 

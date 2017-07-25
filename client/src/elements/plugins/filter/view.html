@@ -1,9 +1,14 @@
 <link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-filter-view">
     <template>
         <style include="shared-grid-styles"></style>
+        <template is="dom-if" if={{loading}}>
+            <paper-progress indeterminate="true" style="width: 100%;"></paper-progress>
+            <h4 style="margin-left: 20px; color: #767676">Please Wait. Fetching data from server.</h4>
+        </template>
         <div>
             <vaadin-grid class="projectworksheet" name="worksheet" page-size="10">
         </div>
@@ -16,13 +21,18 @@
                 label: String,
                 id: String,
                 editor: Object,
-                tab: Object
+                tab: Object,
+                loading: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
             },
 
             ready : function(e){
                 var grid =   this.querySelector(".projectworksheet");
                 grid.items = [];
-                grid.addColumn({name: "<b>Please use this Edit button to filter on the Data </b>"});
+                //grid.addColumn({name: "<b>Please use this Edit button to filter on the Data </b>"});
             },
 
             setGeneralProperties: function (properties) {

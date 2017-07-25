@@ -146,6 +146,9 @@
                                      ":" + infoBox.properties.port;
 			      var currentPage = document.querySelector("#pages").selectedItem;
 
+            //Set paper-progress when the grid is being loaded
+            currentPage.loading = true;
+
 			      var grid = currentPage.querySelector(".projectworksheet");
 
             var getFileData = new Promise(function(resolve, reject) {
@@ -192,6 +195,8 @@
               if(grid.items.length === 0){
                 grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
               }
+
+              currentPage.loading = false;
           }
         );
       },
@@ -221,6 +226,8 @@
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
 			      var currentPage = document.querySelector("#pages").selectedItem;
+            //Set paper-progress when the grid is being loaded
+            currentPage.loading = true;
 
 			      var grid = currentPage.querySelector(".projectworksheet");
 
@@ -270,6 +277,8 @@
               if(grid.items.length === 0){
                 grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
               }
+
+              currentPage.loading = false;
               // this.fire('complete');
           }
         );
