@@ -2,11 +2,10 @@
 var express = require('express');
 var router = express.Router();
 const rp = require('request-promise');
+const logger = require("../utils/logger");
 
 //Routes
 router.post('/checkConnection', function(req, res, next) {
-	console.log('req.body.password: ', req.body.password);
-	console.log('req.body.url: ', req.body.url);
 	const password = req.body.password;
 	const url = req.body.url;
 	rp({
@@ -18,12 +17,13 @@ router.post('/checkConnection', function(req, res, next) {
 		}
 	})
 	.then((data) => {
-		console.log(data);
+		logger.info("REQUEST URL: "+ req.url +", REQUEST IP:  "+ req.ip +", RESPONSE STATUS CODE: " +res.statusCode);
 		const statusCode = res.statusCode;
 		return res.status(statusCode).json(data);
 	})
 	.catch((err) => {
-		console.log(err);
+		logger.info("REQUEST URL: "+ req.url +", REQUEST IP:  "+ req.ip +", RESPONSE STATUS CODE: " +res.statusCode);
+		logger.error("ERROR MESSAGE: "+ err.message);
 		return res.status(400).json(err.message);
 	})
 });

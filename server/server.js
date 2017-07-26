@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const logger = require("./utils/logger");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/projectDetails', projectDetailsRouter);
 //Start Server
 app.listen(3000, function() {
 	console.log('server started at port 3000');
+	logger.info("Listening on port 3000");
 });
 
 // Render index.html on the main page
