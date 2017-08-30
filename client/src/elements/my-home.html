@@ -1,6 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="signon-dialog.html">
+
 <<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans: 300, 600" rel="stylesheet">
 
@@ -94,6 +97,9 @@
 
 		<app-location route="{{route}}"></app-location>
 
+		<signon-dialog id="signoneditor"></signon-dialog>
+
+ 
 		<div class="container flex-vertical">
 			<div class="header1">HPCC <span>Info</span><hr></div>
 			<div class="flexchild-vertical">
@@ -104,7 +110,7 @@
 		            	A Workbook (like an Excel workbook) to view HPCC data files and apply simple data manipulation
 		          	</div>
 		         	<div class="signBtnDiv">
-		            	<paper-button raised class="siginBtn" on-tap="signIn">Sign In</paper-button>
+					 <paper-button raised class="siginBtn" on-tap="_signoneditor">Sign In</paper-button>
 		          	</div> 
 		      	</div> 
 		      	<div class="right-spacer"></div>
@@ -118,7 +124,12 @@
 			is: "my-home",
 			signIn: function() {
         		this.fire('sign-in', null, { bubbles: false });
-      		}
+      		},
+			   _signoneditor: function(e) {
+                var dialog = document.querySelector('#signoneditor');
+                dialog.open();
+            }
+
 		});
 	</script>
 </dom-module>

@@ -182,17 +182,14 @@
             <div class="main-text">HPCC <span>Info</span></div>
             <div class="main-title" id="projecttitle"></div>
             <span style="flex: 1;"></span>
-            <my-login signed-in="{{signedIn}}" user={{user}}></my-login>
 
         </app-toolbar> 
         <new-worksheet-dialog id="newwork"></new-worksheet-dialog>
         <edit-worksheet-dialog id="editwork"></edit-worksheet-dialog>
         <open-worksheet-dialog id="openwork"></open-worksheet-dialog>
         
-         <template is="dom-if" if="[[user]]">
              <info-box id="infobox"></info-box>
-        </template>
-       
+      
         <app-drawer id="drawer" >
             <div class="listbx_div" role="listbox">
                 <section class="main">

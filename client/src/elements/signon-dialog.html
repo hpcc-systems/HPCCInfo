@@ -1,0 +1,123 @@
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+
+<dom-module id="signon-dialog">
+  <template>
+		   <iron-ajax id="ajaxRetrieveUserByName" method="GET" handle-as="json" on-response="ajaxRetrieveUserByNameResponse">
+        </iron-ajax>
+
+        		<app-location route="{{route}}"></app-location>
+    	<app-route
+        	route="{{route}}"
+        	pattern="/:page"
+        	data="{{routeData}}"
+        	tail="{{subroute}}">
+        </app-route>
+
+    <paper-dialog id="dialog" modal>
+          <iron-label>
+            <div class="headerDiv">
+                <span>Login HPCC</span>
+            </div>
+          </iron-label>
+              <paper-input id='username'  label="UserName" value=""></paper-input>
+      			  <paper-input id='pwd'  label="Password" value=""></paper-input>
+          <div class="buttons">
+            <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+            <paper-button dialog-dismiss raised class="green" on-tap="_cancelHandler">Cancel</paper-button>
+          </div>
+     </paper-dialog>
+    </template>
+
+
+  <script>
+    Polymer({
+      is: 'signon-dialog',
+    	properties: {
+		        page: {
+		          type: String,
+		          reflectToAttribute: true,
+		          observer: '_pageChanged',
+		        },
+		        user: {
+					type: Object,
+					notify: true
+				}
+	  },
+
+    observers: [
+      '_routePageChanged(routeData.page)',
+    ],
+
+    behaviors: [
+          Polymer.HPCCInfoBehavior
+        ],
+
+      _routePageChanged: function(page) {
+        this.page = page || 'home';
+      },
+
+      _pageChanged: function(page) {
+        var resolvedPageUrl;
+        // Load page import on demand. Show 404 page if fails
+        if(page === 'info') {
+          resolvedPageUrl = this.resolveUrl('hpcc-info-app.html');
+        } else {
+      resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+        }
+        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+
+    open: function (e) {
+          this.$.dialog.open();
+      },  
+
+      _okHandler : function (e) {
+
+          if(this.$.username === '' || this.$.pwd === ''){
+            return;
+          }
+
+          var infoBox = this.$$('#infobox');
+          // var projectid = infobox.properties.projectid;
+          this.$.ajaxRetrieveUserByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/userDetails';
+          this.$.ajaxRetrieveUserByName.params = {'username' : this.$.username.value, 'pwd' : this.$.pwd.value};
+          this.$.ajaxRetrieveUserByName.body = '{\"username\" : \"' + this.$.username.value + '\", \"pwd\" : \"' + this.$.pwd.value + '\"}';
+          // document.querySelector('#infobox').parentNode.querySelector('#drawer').toggle();
+          // document.querySelector('#btnExportProject').disabled = false;
+          this.$.ajaxRetrieveUserByName.generateRequest();
+                
+      },
+      ajaxRetrieveUserByNameResponse : function(eve){
+          console.log(eve);
+          var that = this;
+          that.user = 'raja';
+          var user = {'displayName':'raja'};
+          sessionStorage['user'] = JSON.stringify(user);
+          console.log(sessionStorage['user']);
+				  return 	that.set("route.path", "/info");
+							 
+      },
+      _cancelHandler : function (e) {
+        this.fire('cancel');
+      },
+
+      setGeneralProperties : function (properties) {
+
+      },
+
+      setViewProperties : function(properties) {
+
+      },
+
+      getViewProperties : function() {
+      }
+  
+    });      
+  </script>
+</dom-module>

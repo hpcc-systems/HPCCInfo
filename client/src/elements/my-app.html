@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+
 
 <link rel="import" href="na-behavior.html">
 
@@ -25,15 +25,6 @@
           <my-home name="home" on-sign-in="signIn" signed-in="{{signedIn}}"></my-home>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
-
-        <firebase-auth
-    				   id="auth" 
-					   user="{{user}}" 
-					   provider="google" 
-					   signed-in="{{signedIn}}"
-					   status-known="{{statusKnown}}"
-					   on-error="handleError">
-		</firebase-auth>
 		
 	</template>
 
