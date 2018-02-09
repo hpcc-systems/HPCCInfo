@@ -8,7 +8,7 @@
 
 <dom-module id="my-app">
 	<template>
-		<app-location route="{{route}}"></app-location>
+		<app-location route="{{route}}" ></app-location>
     	<app-route
         	route="{{route}}"
         	pattern="/:page"
@@ -22,7 +22,8 @@
             fallback-selection="view404"
             role="main">
           <hpcc-info-app name="info" id="hpccinfoappid" signed-in="{{signedIn}}" user="{{user}}" on-sign-out="signOut"></hpcc-info-app>
-          <my-home name="home" on-sign-in="signIn" signed-in="{{signedIn}}"></my-home>
+		  <reset-password name="reset" id="resetpassword" ></reset-password>
+		  <my-home name="home" on-sign-in="signIn" signed-in="{{signedIn}}" user="{{user}}"></my-home>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
 
@@ -38,9 +39,10 @@
 	</template>
 
 	<script type="text/javascript">
-		Polymer({
-			is: "my-app",
-			properties: {
+		class MyApp extends Polymer.mixinBehaviors([Polymer.HPCCInfoBehavior], Polymer.Element){
+			static get is() {return 'my-app'; }
+			
+			static get properties() { return {
 		        page: {
 		          type: String,
 		          reflectToAttribute: true,
@@ -50,48 +52,44 @@
 					type: Object,
 					notify: true
 				}
-	      	},
-
-		    observers: [
-		    	'_routePageChanged(routeData.page)',
-		    ],
-
-		    behaviors: [
-            	Polymer.HPCCInfoBehavior
-          	],
-
-	      	_routePageChanged: function(page) {
+	      	}
+			}
+			static get observers() { return [
+				'_routePageChanged(routeData.page)'
+				]}
+	      	_routePageChanged(page) {
 	        	this.page = page || 'home';
-	      	},
-
-	      	_pageChanged: function(page) {
+	      	}
+	      	_pageChanged(page) {
 	      		var resolvedPageUrl;
 	        	// Load page import on demand. Show 404 page if fails
 	        	if(page === 'info') {
 	        		resolvedPageUrl = this.resolveUrl('hpcc-info-app.html');
-	        	} else {
+				} 
+				else if(page==='reset'){
+					resolvedPageUrl = this.resolveUrl('reset-password.html');
+				}
+				else {
 					resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
 	        	}
-	        	this.importHref(resolvedPageUrl, null, this._showPage404, true);
-	      	},
-
-	      	_showPage404: function() {
+	        	Polymer.importHref(resolvedPageUrl, null, this._showPage404, true);
+	      	}
+	      	_showPage404() {
 	        	this.page = 'view404';
-	      	},
-
-	      	signIn: function() {
+	      	}
+	      	signIn() {
 				var that = this;
 				return this.$.auth.signInWithPopup()
 							  .then(function(response) {
 							  	if(that.$.auth.user){
-							  		that.user = that.$.auth.user;
+									  that.user = that.$.auth.user;
+									  that.user.dbauth=false;
 							  	}
 							  	
 							  	that.set("route.path", "/info");
 							  });
-
 			}
-
-		});
+		}
+		customElements.define(MyApp.is, MyApp);
 	</script>
 </dom-module>

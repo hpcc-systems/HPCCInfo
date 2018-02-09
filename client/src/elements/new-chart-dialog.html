@@ -1,0 +1,250 @@
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="shared-styles.html">
+<script src="../../echarts.js"></script>
+
+<dom-module id="new-chart-dialog">
+	<template>
+		<style include="shared-dialog-styles">
+			vaadin-combo-box {
+				width: 100%;
+				display: block !important;
+			}
+		</style>
+		<paper-dialog id="dialog" modal>
+			<iron-label>
+				<div class="headerDiv">
+					<span>{{heading}}</span>
+				</div>
+			</iron-label>
+			<paper-dialog-scrollable>
+				<!-- User cannot enter title value beginning with a number -->
+				<paper-input id='TabTitle' label="Chart Title" required  error-message="Title is Required"></paper-input>
+				<paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+				<vaadin-combo-box id='filterInputTab' on-value-changed='changeInput' required label="Input Dataset"></vaadin-combo-box>
+
+				<vaadin-combo-box id='ChartType' required label="Chart Type" items='["bar", "pie","line"]'></vaadin-combo-box>
+				<vaadin-combo-box id='xcoordinate' required label="x-coordinate" items='[]'></vaadin-combo-box>
+				<vaadin-combo-box id='ycoordinate' required label="y-coordinate"></vaadin-combo-box>
+			</paper-dialog-scrollable>
+			<div class="buttons">
+				<paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+				<paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+			</div>
+		</paper-dialog>
+		<paper-toast id="toast" class="fit-bottom"></paper-toast>
+	</template>
+	<script>
+		class NewChartDialog extends Polymer.Element {
+			static get is() { return 'new-chart-dialog'; }
+			static get properties() {
+				return {
+					inputeclcode: String,
+					outputdsname: String,
+					inputdsname: String,
+					hpccuser: String,
+					displayFields: String,
+					xdisplayFields: String,
+					ydisplayFields: String,
+					expression: String,
+					title: String,
+					eclcode: String,
+					selectedchartyype: String,
+					selectedxcoordinate: String,
+					selectedycoordinate: String,
+					inputTab: String,
+					heading :String
+				}
+			}
+			constructor() {
+				super();
+			}
+			ready(e) {
+				super.ready();
+				this.displayFields = '';
+				this.xdisplayFields = '';
+				this.ydisplayFields = '';
+				this.eclcode = '';
+				this.inputeclcode = '';
+				this.$.TabTitle.value = '';
+				this.heading="Add New Chart";
+				this.inputdsname = '';
+				this.outputdsname = '';
+				this.expression = '';
+				this.selectedchartyype = '';
+				this.selectedxcoordinate = '';
+				this.selectedycoordinate = '';
+				this.inputTab = '';
+				//Style for vaadin-combobox				
+				this.$.xcoordinate.$.overlay.shadowRoot.querySelector('#dropdown').shadowRoot.querySelector('#overlay').shadowRoot.querySelector('#content').style.padding = 0;
+			}
+			open(id) {
+				var pages = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs");
+				var tabnames = "";
+				var inputidx = 0;
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (pages.selectedItem.id === papertabs[cnt].id) {
+						break;
+					}
+					tabnames += (tabnames === "" ? "" : ",") + papertabs[cnt].textContent.trim();
+					if (this.inputTab === papertabs[cnt].textContent.trim()) {
+						inputidx = cnt;
+					}
+				}
+				this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
+				this.$.filterInputTab.selectedItem = tabnames.split(",")[inputidx].trim();
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+				var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+				if (id == "") {
+					sessionStorage.setItem('ChartId', id);
+					this.$.TabTitle.value = '';
+					this.$.ChartType.selectedItem = '';
+					this.$.xcoordinate.selectedItem = '';
+					this.$.ycoordinate.selectedItem = '';
+					this.heading="Add New Chart";
+				}
+				else {
+					var chartId = 'Chart' + id.replace('edit', '');
+					sessionStorage.setItem('ChartId', chartId);
+					this.heading="Edit Chart";
+					for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+						var chart = currentPage.editor.chartDetails[i];
+						if (chart.ChartId == chartId) {
+							this.$.TabTitle.value = chart.chartTitle.replace(/ *\([^)]*\) */g, "");
+							this.$.ChartType.selectedItem = chart.ChartType;
+							this.$.xcoordinate.selectedItem = chart.xcoordinate;
+							this.$.ycoordinate.selectedItem = chart.ycoordinate;
+							break;
+						}
+					}
+				}
+				if (infoBox.editChartStatus === false) {
+					var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+					var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+					var JSON = currentPage.editor.interactionDetails;
+					if (JSON.length > 0) {
+						for (var index = 0; index < JSON.length; ++index) {
+							var interaction = JSON[index];
+							var chartId = 'Chart' + id.replace('edit', '');
+							if (interaction.ChildChartId === chartId) {
+								var title = interaction.ChildChartTitle + " ( Filtered By " + interaction.InteractionFieldvalue.replace(/%20/g, " ") + " )";
+								infoBox.shadowRoot.querySelector('#messageinfo').open(id, title);
+								break;
+							}
+							else {
+								this.$.dialog.open();
+							}
+						}
+					}
+					else {
+						this.$.dialog.open();
+					}
+				}
+				else {
+					this.$.dialog.open();
+				}
+			}
+			deSerialize(tabTtitle) {
+
+				var jsonTabContent = null;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+
+				var tabs = infoBox.tabsdata.Tabs;
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (tabTtitle === tabs[cnt].title) {
+						jsonTabContent = tabs[cnt];
+						this.displayFields = jsonTabContent.displayFields;
+						this.$.TabTitle.value = jsonTabContent.title;
+						this.eclcode = jsonTabContent.eclcode;
+						this.inputeclcode = jsonTabContent.eclcode;
+						this.inputdsname = jsonTabContent.inputdsname;
+						this.outputdsname = jsonTabContent.outputdsname;
+						this.pluginId = jsonTabContent.pluginId;
+						this.title = jsonTabContent.title;
+						this.expression = jsonTabContent.expression;
+						this.inputTab = jsonTabContent.inputTab;
+						this.$.filterInputTab.value = jsonTabContent.inputdsname;
+
+						break;
+					}
+				}
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (this.inputdsname === tabs[cnt].title) {
+						this.$.xcoordinate.items = tabs[cnt].xdisplayFields.split(",");
+						this.$.xcoordinate.items = tabs[cnt].ydisplayFields.split(",");
+					}
+				}
+			}
+
+			_okHandler(e) {
+				this.title = this.$.TabTitle.value;
+				var currentPage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").selectedItem;
+
+				currentPage.outputdsname = 'filterdsName' + '_' + Math.random().toString(36).substr(2, 4);
+
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+
+				this.outputdsname = currentPage.outputdsname;
+				var QueryStr1 = this.inputeclcode + "\n" + currentPage.outputdsname + " := " +
+					this.inputdsname + " : PERSIST(\'" + currentPage.outputdsname + "_persist\', EXPIRE(1));";
+
+				var QueryStr = QueryStr1 + "\n OUTPUT(" + (currentPage.outputdsname) + ");";
+
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +
+					infoBox.cluster_address +
+					":" + infoBox.port;
+
+				currentPage.eclcode = QueryStr1;
+
+				this.inputTab = this.$.filterInputTab.value;
+
+				this.eclcode = QueryStr1;
+
+				currentPage.chartTitle = this.$.TabTitle.value;
+				currentPage.selectedchartyype = this.$.ChartType.selectedItem;
+				currentPage.selectedxcoordinate = this.$.xcoordinate.selectedItem;
+				currentPage.selectedycoordinate = this.$.ycoordinate.selectedItem;
+				return loadGridwithEcl(QueryStr, this.$.filteroutputlimit.value);
+			}
+			_cancelHandler(e) {
+				this.fire('cancel');
+			}
+			changeInput(event) {
+
+				var tabid = "";
+
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (event.currentTarget.value === papertabs[cnt].textContent.trim()) {
+						tabid = papertabs[cnt].id;
+						break;
+					}
+				}
+
+				if (tabid === '') {
+					return;
+				}
+
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#" + tabid);
+				this.eclcode = selpage.editor.eclcode;
+				this.inputeclcode = selpage.editor.eclcode;
+				this.inputdsname = selpage.editor.outputdsname;
+				this.displayFields = selpage.editor.displayFields;
+				this.$.xcoordinate.items = selpage.editor.xdisplayFields.split(",");
+				this.$.ycoordinate.items = selpage.editor.ydisplayFields.split(",");
+				return;
+
+			}
+		}
+		customElements.define(NewChartDialog.is, NewChartDialog);
+	</script>
+</dom-module>

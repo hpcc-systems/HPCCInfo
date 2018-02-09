@@ -5,12 +5,18 @@
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.17.1",
+    "echarts": "^3.7.2",
     "express": "^4.15.2",
     "mysql": "^2.13.0",
+    "nodemailer": "^4.4.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "winston": "^2.3.1",
     "winston-daily-rotate-file": "^1.4.6"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "node-mailer": "^0.1.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"

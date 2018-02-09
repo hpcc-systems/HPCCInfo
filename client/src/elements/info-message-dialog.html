@@ -1,0 +1,87 @@
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="info-message-dialog">
+    <template>
+        <style include="shared-dialog-styles">
+            paper-dialog {
+                min-height: 150px;
+            }
+            paper-dialog .container {
+                width: 500px;
+                padding: 0;
+                margin: 0;
+            }
+            .head {
+                font-weight: bold;
+                font-size: 20px;
+                padding-bottom: 10px;
+                background: #4caf50;
+                color: #fff;
+                padding: 15px 20px;
+            }
+            .text {
+                line-height: 1.6;
+                color: #333;
+                font-size: 15px;
+                padding: 20px;
+                border-bottom: 1px solid #eee;
+            }
+            .buttons {
+                padding: 15px 15px 15px;
+            }
+        </style>
+
+        <paper-dialog id="dialog" modal>
+            <div class="container">
+                <iron-label>
+                    <div class="head"  id="divTitle"></div>
+                  <div class="text">An Interaction is applied to this chart.If you continue with edit you will lost the interaction and you need to set the interaction again.</div>
+                </iron-label>
+              
+            </div>
+            <div class="buttons">
+                <paper-button dialog-confirm raised class="indigo" on-tap="handleOk">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        class InfoMessageDialog extends Polymer.Element {
+            static get is() { return 'info-message-dialog'; }
+
+            static get properties() {
+                return {
+                    ChartId: {
+                        type: String
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+            open(id,title) {
+                this.ChartId=id;
+                this.$.divTitle.innerHTML=title;
+                this.$.dialog.open();
+            }
+            handleOk(e) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                infoBox.editChartStatus=true;
+                var currentPage =infoBox.shadowRoot.querySelector("#pages").selectedItem;
+                currentPage.shadowRoot.querySelector('#newchart').open(this.ChartId);              
+            }
+            handleCancel(e) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                infoBox.editChartStatus=false;
+                this.dispatchEvent(new CustomEvent('cancel', { bubbles: true, composed: true }));
+            }
+
+        }
+        customElements.define(InfoMessageDialog.is, InfoMessageDialog);
+    </script>
+
+</dom-module>

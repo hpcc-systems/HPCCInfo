@@ -1,6 +1,6 @@
 const winston = require('winston');
 const fs = require('fs');
-const logDir = './logs'
+const logDir = './logs';
 
 winston.emitErrs = true;
 
@@ -26,8 +26,7 @@ var logger = new winston.Logger({
             handleExceptions: true,
             timestamp: tsFormat,
             datePattern: 'yyyy-MM-dd',
-            prepend: true,
-            timestamp: tsFormat
+            prepend: true
         })
     ],
     exitOnError: false

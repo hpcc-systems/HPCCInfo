@@ -1,0 +1,236 @@
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../shared-styles.html">
+<link rel="import" href="../../new-chart-dialog.html">
+<link rel="import" href="../../interchart-interaction-dialog.html">
+<link rel="import" href="../../list-interchart-interaction-dialog.html">
+
+<dom-module id="common-dashboard-view">
+    <template>
+        <style>
+            .add-col {
+                display: inline-block;
+                width: 100%;
+                font-weight: bold;
+                font-size: 14px;
+                text-align: right;
+                background: #ffffff;
+                border-bottom: 1px solid #eee;
+                padding: 5px 7px;
+                box-sizing: border-box;
+            }
+
+            .add-col paper-button {
+                background: #3f51b5;
+                color: #fff;
+                min-width: 170px;
+                padding: 6px;
+            }
+
+            .divDashboard {
+                display: inline-block;
+                width: 100%;
+                padding: 5px;
+                box-sizing: border-box;
+                background: #f2f2f2;
+                margin-bottom: 4px;
+            }
+
+            .divChart {
+                padding: 5px;
+                width: 50%;
+                float: left;
+                box-sizing: border-box;
+                margin-bottom: -4px;
+            }
+
+            .divColumn {
+                border: 1px solid #eee;
+                background: #fff;
+                padding: 10px;
+                box-sizing: border-box;
+                display: inline-block;
+                width: 100%;
+            }
+
+            .divColumn:hover {
+                border: 1px solid #ff7043;
+            }
+
+            .chartDiv {
+                width: 94%;
+                height: 400px;
+                float: left;
+                padding-right: 5px;
+                box-sizing: border-box;
+            }
+
+            .chartEdit {
+                width: 3%;
+                float: left;
+                padding: 4px 0 14px 0;
+                color: #666;
+            }
+
+            @media (max-width: 1366px) {
+                .chartDiv {
+                    width: 92%;
+                }
+                .chartEdit {
+                    width: 4%;
+                }
+            }
+
+            @media (max-width: 1024px) {
+                .divChart {
+                    width: 100%;
+                }
+            }
+        </style>
+        <style include="shared-grid-styles"></style>
+        <template is="dom-if" if={{loading}}>
+            <paper-progress indeterminate="true" style="width: 100%;"></paper-progress>
+            <h4 style="margin-left: 20px; color: #767676">Please Wait. Fetching data from server.</h4>
+        </template>
+        <div class="add-col">
+            <paper-menu-button horizontal-align="right" id="dashboardMenu">
+                <paper-icon-button id="btnDashboardMenu" icon="apps" slot="dropdown-trigger"></paper-icon-button>
+                <paper-listbox id="dashboardmenu" slot="dropdown-content">
+                    <paper-item id="btnAddChart" on-tap="_addNewChart">Add New Chart</paper-item>
+                    <paper-item id="btnInteractions" on-tap="OpenInteractionPopup">Add Interactions</paper-item>
+                    <paper-item id="btnEditInteractions" on-tap="OpenListInteractionPopup">Edit Interactions</paper-item>
+                </paper-listbox>
+            </paper-menu-button>
+        </div>
+
+        <div id="divDashboard" class="divDashboard"></div>
+        <paper-tooltip for="btnEditPlugin" offset="0">Edit Worksheet</paper-tooltip>
+        <new-chart-dialog id="newchart"></new-chart-dialog>
+        <interchart-interaction-dialog id="interactiondialog"></interchart-interaction-dialog>
+        <list-interchart-interaction-dialog id="listinteractiondialog"></list-interchart-interaction-dialog>
+
+    </template>
+    <script>
+        class CommonDashboardView extends Polymer.Element {
+            static get is() { return 'common-dashboard-view'; }
+            static get properties() {
+                return {
+                    pluginId: String,
+                    label: String,
+                    id: String,
+                    editor: Object,
+                    tab: Object,
+                    loading: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    }
+                }
+            }
+            ready(e) {
+                super.ready();
+                var grid;
+                if (this.shadowRoot.querySelector('.projectworksheet') != null) {
+                    grid = this.shadowRoot.querySelector(".projectworksheet");
+                    grid.items = [];
+                }
+            }
+            _addNewChart(e) {
+                var dialog = this.$.newchart;
+                var id = "";
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                infoBox.editChartStatus = false;
+                dialog.open(id);
+            }
+            editChart(e) {
+                var dialog = this.$.newchart;
+                var id = e.target.id;
+                dialog.open(id);
+            }
+            deleteChart(e) {
+                var dialog = this.$.newchart;
+                var id = e.target.id;
+                var divId = 'divChart' + id.replace('delete', '');
+                var chartId = 'Chart' + id.replace('delete', '');
+                var index = 0;
+                var newindex = [];
+                for (var i = 0; i < this.editor.chartDetails.length; i++) {
+                    var chart = this.editor.chartDetails[i];
+                    if (chart.ChartId == chartId) {
+                        index = i;
+                        break;
+                    }
+                }
+                this.editor.chartDetails.splice(index, 1);
+                var k = 0;
+                var isParentChart = 0;
+                var childCharts = [];
+                for (var i = 0; i < this.editor.interactionDetails.length; i++) {
+                    var interactionchart = this.editor.interactionDetails[i];
+                    if (interactionchart.ParentChartId === chartId || interactionchart.ChildChartId === chartId) {
+                        newindex[k] = i;
+                        k++;
+                    }
+                    if (interactionchart.ParentChartId === chartId) {
+                        isParentChart = 1;
+                        childCharts.push(interactionchart.ChildChartId);
+                    }
+                }
+                if (isParentChart == 1) {
+                    for (var i = 0; i < this.editor.chartDetails.length; i++) {
+                        var chart = this.editor.chartDetails[i];
+                        for (var j = 0; j < childCharts.length; j++) {
+                            if (chart.ChartId == childCharts[j]) {
+                                chart.chartTitle = chart.chartTitle.replace(/ *\([^)]*\) */g, "");
+                                break;
+                            }
+                        }
+                    }
+                }
+                for (var i = newindex.length - 1; i >= 0; i--)
+                    this.editor.interactionDetails.splice(newindex[i], 1);
+                if(isParentChart == 1)
+                    this.editor.loadChart();
+                else
+                this.shadowRoot.querySelector('#divDashboard').removeChild(this.shadowRoot.querySelector("#" + divId));
+                //this.shadowRoot.querySelector('#divDashboard').removeChild(this.shadowRoot.querySelector("#" + divId));
+            }
+            OpenInteractionPopup() {
+                var dialog = this.$.interactiondialog;
+                dialog.open();
+            }
+            OpenListInteractionPopup() {
+                var dialog = this.$.listinteractiondialog;
+                dialog.open();
+            }
+
+            setGeneralProperties(properties) {
+
+            }
+            setViewProperties(properties) {
+
+            }
+
+            getViewProperties() {
+
+            }
+
+        }
+        customElements.define(CommonDashboardView.is, CommonDashboardView);
+    </script>
+    <!-- <script type="text/javascript">
+    if (document.addEventListener) { // IE >= 9; other browsers
+        document.addEventListener('contextmenu', function(e) {
+            document.getElementById("divAddChart").style.display = "block";  
+            e.preventDefault();
+        }, false);
+    } else { // IE < 9
+        document.attachEvent('oncontextmenu', function() {
+            document.getElementById("divAddChart").style.display = "block";  
+            window.event.returnValue = false;
+        });
+    }
+</script> -->
+</dom-module>

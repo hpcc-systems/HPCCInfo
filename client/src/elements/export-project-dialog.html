@@ -14,14 +14,12 @@
 
 
 <dom-module id="export-project-dialog">
-
     <template>
         <style>
             paper-button.green {
                 background-color: var(--paper-green-500);
                 color: white;
             }
-            
             paper-button.indigo {
                 background-color: var(--paper-indigo-500);
                 color: white;
@@ -31,14 +29,17 @@
                 }
                 ;
             }
-            
             paper-button.indigo:hover {
                 background-color: var(--paper-indigo-400);
             }
-            
-            
             paper-dialog {
                 width: 500px;
+            }
+            .buttons {
+                padding: 15px 19px 20px;
+            }
+            .worksheettitle {
+                margin-top:0;
             }
         </style>
 
@@ -50,8 +51,8 @@
                     </span>
                 </div>
 
-                </iron-label>
-                <paper-input id='exportto' label="ID to Share Project"  class="worksheettitle" ></paper-input>
+            </iron-label>
+            <paper-input id='exportto' label="ID to Share Project" class="worksheettitle"></paper-input>
             <!--<paper-input id='label' label="label"  class="projectlabel" ></paper-input>-->
 
             <div class="buttons">
@@ -62,28 +63,30 @@
     </template>
 
     <script>
-
-        Polymer({
-            is: 'export-project-dialog',
-            properties : {
-               pluginId: {
-                    type: String,
-                    value: 'common-input'
-                },
-             },
-            open: function (e) {
-               this.$.dialog.open();
-            },
-        _exportProject : function(event){
-                 //var infobox = document.querySelector("#infobox");
-                 var infoapp = document.querySelector('#hpccinfoappid');
-
+        class ExportProjectDialog extends Polymer.Element {
+            static get is() { return 'export-project-dialog'; }
+            static get properties() {
+                return {
+                    pluginId: {
+                        type: String,
+                        value: 'common-input'
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+            open(e) {
+                this.$.dialog.open();
+            }
+            _exportProject(event) {
+                var infoapp = document.querySelector('my-app').shadowRoot.querySelector('#hpccinfoappid')
                 infoapp.exportProjectDtls(this.$.exportto.value);
-            },
-        });
-
-
+            }
+        }
+        customElements.define(ExportProjectDialog.is, ExportProjectDialog);
     </script>
-
-
 </dom-module>

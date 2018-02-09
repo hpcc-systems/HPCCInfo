@@ -1,0 +1,299 @@
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="edit-interchart-interaction-dialog">
+	<template>
+		<style include="shared-dialog-styles">
+			vaadin-combo-box {
+				width: 100%;
+				display: block !important;
+			}
+		</style>
+		<paper-dialog id="dialog" modal>
+			<iron-label>
+				<div class="headerDiv">
+					<span>Edit Interaction</span>
+				</div>
+			</iron-label>
+			<paper-dialog-scrollable>
+				<!-- User cannot enter title value beginning with a number -->
+				<paper-input id='interactiontitle' label="Interaction Title" required auto-validate error-message="Please enter Interaction title"></paper-input>
+				<vaadin-combo-box id='parentchartTitle' on-selected-item-changed="loadParentChartInput" required label="Select Parent Chart"></vaadin-combo-box>
+				<vaadin-combo-box id='ParentChartInput' required label="Parent Chart Input"></vaadin-combo-box>
+				<vaadin-combo-box id='childchartTitle' required label="Select Child Chart"></vaadin-combo-box>
+				<vaadin-combo-box id='ChildChartInput' required label="Child Chart Input"></vaadin-combo-box>
+			</paper-dialog-scrollable>
+			<div class="buttons">
+				<paper-button dialog-confirm raised class="indigo" on-tap="UpdateInteractions">Update Interactions</paper-button>
+				<paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+			</div>
+		</paper-dialog>
+		<paper-toast id="toast" class="fit-bottom"></paper-toast>
+	</template>
+	<script>
+		class InterchartInteractionEditDialog extends Polymer.Element {
+			static get is() { return 'edit-interchart-interaction-dialog'; }
+			static get properties() {
+				return {
+					parentChartTitle: String,
+					childChartTitle: String,
+					childChartId: String,
+					parentChartId: String
+				}
+			}
+			constructor() {
+				super();
+			}
+			ready() {
+				super.ready();
+			}
+			loadParentChartInput() {
+				this.$.ParentChartInput.value = "";
+				this.$.childchartTitle.value = "";
+				this.$.ChildChartInput.value = "";
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+				var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+				if (this.$.parentchartTitle.items === undefined || this.$.parentchartTitle.items.length === 0) {
+					return;
+				}
+				var ChildChartsList = "";
+				for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+					var chart = currentPage.editor.chartDetails[i];
+					if (chart.chartTitle == this.$.parentchartTitle.selectedItem) {
+						this.$.dialog.querySelector("#ParentChartInput").items = chart.xcoordinate.split(",");
+					}
+					else {
+						var isInteractionApplied = 0;
+						for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+							var interaction = currentPage.editor.interactionDetails[j];
+							if (interaction.ChildChartId == chart.ChartId || interaction.ParentChartId == chart.ChartId) {
+								isInteractionApplied = 1;
+								break;
+							}
+						}
+						if (isInteractionApplied == 0)
+							ChildChartsList += (ChildChartsList === "" ? "" : ",") + chart.chartTitle;
+					}
+				}
+
+				var parentChartCount = 0;
+				for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+					var interaction = currentPage.editor.interactionDetails[j];
+					if (interaction.ParentChartId == this.parentChartId) {
+						parentChartCount++;
+					}
+				}
+				if (parentChartCount <= 1) {
+					if (this.parentChartTitle != this.$.parentchartTitle.selectedItem) {
+						ChildChartsList += (ChildChartsList === "" ? "" : ",") + this.parentChartTitle;
+					}
+				}
+
+				var childChartCount = 0;
+				for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+					var interaction = currentPage.editor.interactionDetails[j];
+					if (interaction.ChildChartId == this.childChartId) {
+						childChartCount++;
+					}
+				}
+				if (childChartCount <= 1) {
+					if (this.childChartTitle != this.$.parentchartTitle.selectedItem) {
+						ChildChartsList += (ChildChartsList === "" ? "" : ",") + this.childChartTitle;
+					}
+				}
+				var ChildCharts = ChildChartsList.split(",");
+				if (ChildCharts.length == 1 && ChildCharts[0] == "") {
+					this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+					this.$.toast.text = "No charts remaining to apply interaction";
+					this.$.toast.open();
+				}
+				else {
+					this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+				}
+				//this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+				this.$.dialog.querySelector("#ChildChartInput").items = currentPage.editor.displayFields.split(",");
+			}
+			open(interactionTitle) {
+				this.$.interactiontitle.value = interactionTitle;
+				this.$.parentchartTitle.value = "";
+				this.$.ParentChartInput.value = "";
+				this.$.childchartTitle.value = "";
+				this.$.ChildChartInput.value = "";
+				var parentChartTitleValue = "";
+				var childChartTitleValue = "";
+
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+				var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+				for (var i = 0; i < currentPage.editor.interactionDetails.length; i++) {
+					var interaction = currentPage.editor.interactionDetails[i];
+					if (interaction.InteractionTitle === interactionTitle) {
+						parentChartTitleValue = interaction.ParentChartTitle;
+						childChartTitleValue = interaction.ChildChartTitle;
+						this.parentChartTitle = interaction.ParentChartTitle;
+						this.childChartTitle = interaction.ChildChartTitle;
+						this.childChartId = interaction.ChildChartId;
+						this.parentChartId = interaction.ParentChartId;
+					}
+				}
+				var ChartsList = "";
+				for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+					var chart = currentPage.editor.chartDetails[i];
+					var ischildChart = 0;
+					for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+						var interaction = currentPage.editor.interactionDetails[j];
+						if (interaction.ChildChartId == chart.ChartId) {
+							ischildChart = 1;
+							break;
+						}
+					}
+					if (ischildChart == 0)
+						ChartsList += (ChartsList === "" ? "" : ",") + chart.chartTitle;
+				}
+
+				var childChartCount = 0;
+				for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+					var interaction = currentPage.editor.interactionDetails[j];
+					if (interaction.ChildChartId == this.childChartId) {
+						childChartCount++;
+					}
+				}
+				if (childChartCount <= 1)
+					ChartsList += (ChartsList === "" ? "" : ",") + this.childChartTitle;
+				var ParentchartList = ChartsList.split(",");
+
+				if (ParentchartList.length < 1) {
+					this.$.toast.text = "No charts remaining to apply interaction";
+					this.$.toast.open();
+				}
+				else {
+					this.$.dialog.querySelector("#parentchartTitle").items = ChartsList.split(",");
+				}
+				if (this.$.parentchartTitle.items === undefined || this.$.parentchartTitle.items.length === 0) {
+					return;
+				}
+				var ChildChartsList = "";
+
+				for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+					var chart = currentPage.editor.chartDetails[i];
+					if (chart.chartTitle === this.$.parentchartTitle.selectedItem) {
+						this.$.dialog.querySelector("#ParentChartInput").items = chart.xcoordinate.split(",");
+					}
+					else {
+						var isInteractionApplied = 0;
+						for (var j = 0; j < currentPage.editor.interactionDetails.length; j++) {
+							var interaction = currentPage.editor.interactionDetails[j];
+							if (interaction.ChildChartId == chart.ChartId || interaction.ParentChartId == chart.ChartId) {
+								isInteractionApplied = 1;
+								break;
+							}
+						}
+						if (isInteractionApplied == 0)
+							ChildChartsList += (ChildChartsList === "" ? "" : ",") + chart.chartTitle;
+					}
+				}
+				ChildChartsList += (ChildChartsList === "" ? "" : ",") + childChartTitleValue;
+				var ChildCharts = ChildChartsList.split(",");
+				if (ChildCharts.length == 1 && ChildCharts[0] == "") {
+					this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+					this.$.toast.text = "No charts remaining to apply interaction";
+					this.$.toast.open();
+				}
+				else {
+					this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+				}
+				//this.$.dialog.querySelector("#childchartTitle").items = ChildChartsList.split(",");
+				this.$.dialog.querySelector("#ChildChartInput").items = currentPage.editor.displayFields.split(",");
+
+				for (var i = 0; i < currentPage.editor.interactionDetails.length; i++) {
+					var interaction = currentPage.editor.interactionDetails[i];
+					if (interaction.InteractionTitle === interactionTitle) {
+						this.$.dialog.querySelector("#parentchartTitle").selectedItem = interaction.ParentChartTitle;
+						this.$.dialog.querySelector("#ParentChartInput").selectedItem = interaction.FilteringField;
+						this.$.dialog.querySelector("#childchartTitle").selectedItem = interaction.ChildChartTitle;
+						this.$.dialog.querySelector("#ChildChartInput").selectedItem = interaction.FilteringField;
+					}
+				}
+				this.$.dialog.open();
+			}
+			UpdateInteractions(e) {
+				debugger;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+				var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+				if (this.$.interactiontitle.value != "" && this.$.ParentChartInput.selectedItem != null && this.$.parentchartTitle.selectedItem != null && this.$.childchartTitle.selectedItem != null && this.$.ChildChartInput.selectedItem != null) {
+					if (this.$.ParentChartInput.selectedItem === this.$.ChildChartInput.selectedItem) {
+						var interactionTitle = this.$.interactiontitle.value;
+						var parentChartId;
+						var parentChartTitle;
+						var filteringField = this.$.ParentChartInput.selectedItem;
+						var childChartId;
+						var childChartTitle;
+						var childChartType;
+						var childChartxcoordinate;
+						var childchartycoordinate;
+
+						for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+							var chart = currentPage.editor.chartDetails[i];
+							if (chart.chartTitle === this.$.parentchartTitle.selectedItem) {
+								parentChartId = chart.ChartId;
+								parentChartTitle = chart.chartTitle;
+								break;
+							}
+						}
+						for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+							var chart = currentPage.editor.chartDetails[i];
+							if (chart.chartTitle === this.$.childchartTitle.selectedItem) {
+								childChartId = chart.ChartId;
+								childChartTitle = chart.chartTitle;
+								childChartType = chart.ChartType;
+								childChartxcoordinate = chart.xcoordinate;
+								childchartycoordinate = chart.ycoordinate;
+								break;
+							}
+						}
+						currentPage.shadowRoot.querySelector("#divColumn" + chart.ChartId.replace('Chart', '')).innerHTML = "";
+						var index;
+						var ChildChartId;
+						for (var i = 0; i < currentPage.editor.interactionDetails.length; i++) {
+							var interactionchart = currentPage.editor.interactionDetails[i];
+							if (interactionchart.InteractionTitle === interactionTitle) {
+								ChildChartId = interactionchart.ChildChartId;
+								index = i;
+								break;
+							}
+						}
+						currentPage.editor.interactionDetails.splice(index, 1);
+						currentPage.editor.interactionDetails.push({ "InteractionTitle": interactionTitle, "ParentChartId": parentChartId, "ParentChartTitle": parentChartTitle, "FilteringField": filteringField, "ChildChartId": childChartId, "ChildChartTitle": childChartTitle, "InteractionFieldvalue": '', "ChildChartType": childChartType, "childchartxcoordinate": childChartxcoordinate, "childchartycoordinate": childchartycoordinate });
+
+						for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+							var chart = currentPage.editor.chartDetails[i];
+							if (chart.ChartId === ChildChartId) {
+								chart.chartTitle = chart.chartTitle.replace(/ *\([^)]*\) */g, "");
+								initchart(infoBox.griddata, chart.chartTitle, chart.ChartType, chart.xcoordinate, chart.ycoordinate, chart.ChartId);
+							}
+						}
+						this.$.toast.text = "Interactions Updated Successfully.";
+						this.$.toast.open();
+					}
+					else {
+						this.$.toast.text = "Both the parent chart input field and child chart input field should be same to update interaction.";
+						this.$.toast.open();
+					}
+
+				}
+				else {
+					this.$.toast.text = "Please fill all fields.";
+					this.$.toast.open();
+				}
+			}
+		}
+		customElements.define(InterchartInteractionEditDialog.is, InterchartInteractionEditDialog);
+	</script>
+</dom-module>

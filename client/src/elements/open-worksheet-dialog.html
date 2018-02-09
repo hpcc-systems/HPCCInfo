@@ -1,190 +1,262 @@
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 
-<link rel="import" href="../../bower_components/iron-data-table/iron-data-table.html">
-
-<link rel="import" href="../../bower_components/iron-data-table/data-table-column.html">
+<!--<link rel="import" href="../../bower_components/iron-data-table/iron-data-table.html">
+<link rel="import" href="../../bower_components/iron-data-table/data-table-column.html">-->
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html"> 
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-selection-column.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-grid.html"> 
 <link rel="import" href="shared-styles.html">
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
 
 <dom-module id="open-worksheet-dialog">
-
     <template>
         <iron-ajax id="ajaxRetrieveProjectByName" method="GET" handle-as="json" on-response="ajaxRetrieveProjectByNameResponse">
-          </iron-ajax>
+        </iron-ajax>
         <iron-ajax id="ajaxRetrieveAllProjects" method="GET" handle-as="json" on-response="ajaxRetrieveAllProjectsResponse">
-           </iron-ajax>
-
+        </iron-ajax>
         <style include="shared-dialog-styles">
             paper-dialog {
-                width: 1400px;
+                width: 100%;
+                max-width: 1400px;
+                min-width: 340px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
             }
-
-            .buttons {
-                margin-right: 30px;
-            }
-
             #worksheetlist {
-                margin: 20px;
+                margin: 25px;
+                padding: 0;
+                height: auto;
+                min-height: 300px;
                 --iron-data-table-header: {
                     background-color: #e3e3e3;
                     font-size: 1.2em;
                     font-weight: 400;
-                    border-bottom: 1px solid
-                    padding: 10px;
+                    border-bottom: 1px solid padding: 10px;
                 }
             }
-
         </style>
-
+         <style is="custom-style">
+            vaadin-grid.projectworksheet {
+              position: relative;
+              font: 300 16px/1.55 "Open Sans", sans-serif;
+              -webkit-font-smoothing: antialiased;
+              --divider-color: #d4d4d4;
+        
+              --vaadin-grid-cell: {
+                padding: 0 18px;
+                height: 38px;
+                border-right: 1px solid #d4d4d4;
+                box-sizing: border-box;
+              };
+        
+              --vaadin-grid-header-cell: {
+                border-bottom: 1px solid #d4d4d4;
+                background-image: linear-gradient(to bottom,#ececec 2%, #d6d6d6 98%);
+                font-weight: bold;
+                color: #333;
+                font-size: 15px;          
+                text-transform:capitalize;
+              };
+        
+              --vaadin-grid-footer-cell: {
+                background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
+              };
+        
+              --vaadin-grid-cell-last-frozen: {
+                box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+              };
+        
+              --vaadin-grid-body-row-active-cell: {
+                background-image: linear-gradient(to bottom,#1b87e3 2%, #166ed5 98%);
+                color: #c8dbed;
+                text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+                border-right-color: #1d69b4;
+              };
+        
+              --vaadin-grid-body-row-odd-cell: {
+                background-color: #f5f5f5;
+              };
+        
+              --vaadin-grid-loading-spinner: {
+                display: none;
+              };
+        
+              --vaadin-grid-body-cell: {
+                transition: opacity 0.2s;
+                border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08)); /* added */
+              };
+        
+              --vaadin-grid-loading-body-cell: {
+                opacity: 0.2;
+              };
+        
+            }
+                           
+            vaadin-grid.projectworksheet input {
+              width: 100%;
+              box-sizing: border-box;
+            }
+                
+            @keyframes loading-expand {
+              0% {
+                transform: scaleX(0);
+              }
+              100% {
+                transform: scaleX(1);
+              }
+            }
+            vaadin-grid.projectworksheet::before {
+              content: "";
+              width: 100%;
+              position: absolute;
+              height: 4px;
+              background: var(--primary-color);
+              z-index: 1;
+              opacity: 0.5;
+              transform-origin: left;
+              opacity: 0;
+              transition: opacity 0.2s;
+            }
+        
+            vaadin-grid.projectworksheet[loading]::before {
+              opacity: 1;
+              animation: loading-expand 1s linear;
+            }
+        
+          </style>
         <paper-dialog id="dialog" modal>
-            <div class="container">
-                <iron-label>
-                    <div class="headerDiv">
-                        <span>
+            <iron-label>
+                <div class="headerDiv">
+                    <span>
                             Open Workbook
                         </span>
-                    </div>
-                </iron-label>
-                <iron-data-table  id="worksheetlist" items="[[projects.projectdata]]" selection-enabled multi-selection
-                   on-selecting-item='handleSelect' on-deselecting-item='handleDeselect' on-selecting-all-items = 'handleselectall' on-deselecting-all-items = 'handledeselectall'>
-                    <data-table-column name="Title">
-                    <template>[[item.title]]</template>
-                    </data-table-column>
-                        <data-table-column name="File">
-                    <template>[[item.file]]</template>
-                    </data-table-column>
-                    <data-table-column name="Updated By">
-                    <template>[[item.updatedby]]</template>
-                    </data-table-column>
-                        <data-table-column name="Date Updated">
-                    <template>[[item.dateupdated]]</template>
-                    </data-table-column>
-                </iron-data-table>
-                <br><br>
-                <div class="buttons">
-                    <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-                    <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
                 </div>
+            </iron-label>
+
+            <vaadin-grid class="projectworksheet" id="worksheetlist" items="[[projects.projectdata]]" active-item="{{activeItem}}">
+                
+                <vaadin-grid-column>
+                    <template class="header">Title</template>
+                    <template>[[item.title]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header">File</template>
+                    <template>[[item.file]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header">Updated By</template>
+                    <template>[[item.updatedby]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header">Date Updated</template>
+                    <template>[[item.dateupdated]]</template>
+                </vaadin-grid-column>
+            </vaadin-grid>
+
+           
+            <div class="buttons">
+                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
             </div>
+
         </paper-dialog>
     </template>
-    
-    <script>
 
-        Polymer({
-        is: 'open-worksheet-dialog',
-        properties : {
-                data : Array
-        },
-        handleSelect : function(e){
-            var table = document.querySelector('#worksheetlist');
-            e.preventDefault(); // this will cancel the default selection behavior
-            table.clearSelection();
-            table.selectItem(e.detail.item);
-        },
-        handleselectall : function(e){
-            e.preventDefault();
-        },
-        handledeselectall : function(e){
-            e.preventDefault();
-        },
-        handleDeselect : function(e){
-
-            var table = document.querySelector('#worksheetlist');
-
-             if (table.selectedItems.length > 1 || table.selectedItems[0] !== e.detail.item) {
-                    e.preventDefault(); // this will cancel the default selection behavior
-                    table.clearSelection();
-                    table.selectItem(e.detail.item);
-              }
-        },
-        fireAjaxToFetchAllProjects : function(updatedby){
-             var infoBox = document.querySelector('#infobox');
-            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + updatedby;
-            this.$.ajaxRetrieveAllProjects.generateRequest();
-            console.log('check');
-            this.$.dialog.open();
-      },
-       open : function(e){
-            document.querySelector('#drawer').toggle();
-            // loginThenLoadAll : function({
-                var infoApp = document.querySelector('#hpcc-info-app');
-                var infoBox = document.querySelector('#infobox');
-          		var updatedby = infoBox.properties.updatedby;
-                var openworksheet = document.querySelector('#openwork');
-                if(updatedby === undefined || updatedby === null ||updatedby === ''){
+    <script type="text/javascript">
+        class OpenWorksheetDialog extends Polymer.Element {
+            static get is() { return 'open-worksheet-dialog'; }
+            static get properties() {
+                return {
+                    data: Array,
+                    activeItem: {
+                        observer: '_activeItemChanged'
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+            /**
+              * This handler is called every time a row is selected which in-turn resets the selectedItems[] 
+              */
+            _activeItemChanged(item) {
+                this.$.worksheetlist.selectedItems = item ? [item] : [];
+            }
+            
+            fireAjaxToFetchAllProjects(updatedby) {
+                var infoBox = this.parentNode.querySelector('#infobox');
+                this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + updatedby;
+                this.$.ajaxRetrieveAllProjects.generateRequest();
+                console.log('check');
+                this.$.dialog.open();
+            }
+            open(e) {
+                this.parentNode.querySelector('#drawer').toggle();
+                var infoBox = this.parentNode.querySelector('#infobox');
+                var updatedby = infoBox.updatedby;
+                if (updatedby === undefined || updatedby === null || updatedby === '') {
                     e.preventDefault();
                     return;
                 }
-               openworksheet.fireAjaxToFetchAllProjects(updatedby);
-        },
-        ready : function(){
-        },
-        ajaxRetrieveAllProjectsResponse : function(){
-            var app = document.querySelector('#app');
-            this.$.worksheetlist.items = this.$.ajaxRetrieveAllProjects.lastResponse;
-        },
-
-        _okHandler: function (event) {
-            var infoBox = document.querySelector('#infobox');
-            infoBox.properties.projectid = this.$.worksheetlist.selectedItems[0].projectid;
-            infoBox.properties.title = this.$.worksheetlist.selectedItems[0].title;
-            var titleElement = document.querySelector('#projecttitle');
-            /*titleElement.textContent  = "HPCCInfo-" + this.$.worksheetlist.selectedItems[0].title;*/
-            titleElement.textContent  = this.$.worksheetlist.selectedItems[0].title;
-            infoBox.properties.file = this.$.worksheetlist.selectedItems[0].file;
-            this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
-            this.$.ajaxRetrieveProjectByName.generateRequest();
-            document.querySelector('#edit-worksheet-dialog').disabled = false;        
-            document.querySelector('#btnExportProject').disabled = false; 
-            // document.querySelector('#drawer').toggle(); //Toggle the app-drawer
-        },
-        _cancelHandler : function(event){
-            //  document.querySelector('#drawer').toggle();
-        },
-        ajaxRetrieveProjectByNameResponse : function(eve){
-
-            console.log(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace(/\s*\n\s*/g,""));
-            var infoBox = document.querySelector('#infobox');
-
-            infoBox.properties.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n","").replace(/\s*\n\s*/g,""));
-
-                var tabs = infoBox.properties.tabsdata.Tabs;
-
-                var clusterDetails = infoBox.properties.tabsdata.cluster_details;
-
-            infoBox.properties.cluster_name =  clusterDetails.name;
-            infoBox.properties.cluster_address = clusterDetails.ip;
-            infoBox.properties.port = clusterDetails.port;
-            infoBox.properties.username = clusterDetails.username;
-            infoBox.properties.password = clusterDetails.password;
-            infoBox.properties.httpSecured = clusterDetails.httpsecured;
-            infoBox.properties.clusterid = clusterDetails.clusterid;
-
-            infoBox.$.btnEditPlugin.disabled = false;                
-
-                for(var cnt =0; cnt < tabs.length; cnt++){
+                this.fireAjaxToFetchAllProjects(updatedby);
+            }
+            ajaxRetrieveAllProjectsResponse() {
+                this.$.worksheetlist.items = this.$.ajaxRetrieveAllProjects.lastResponse;
+            }
+            _okHandler(event) {
+                var infoBox = this.parentNode.querySelector('#infobox');
+                infoBox.projectid = this.$.worksheetlist.selectedItems[0].projectid;
+                infoBox.title = this.$.worksheetlist.selectedItems[0].title;
+                var titleElement = this.getRootNode().querySelector('#projecttitle');
+                titleElement.textContent = this.$.worksheetlist.selectedItems[0].title;
+                infoBox.file = this.$.worksheetlist.selectedItems[0].file;
+                this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
+                this.$.ajaxRetrieveProjectByName.generateRequest();
+                this.getRootNode().querySelector('#edit-worksheet-dialog').disabled = false;
+                infoBox.shadowRoot.querySelector('app-toolbar').querySelector('#btnExportProject').disabled = false;
+            }
+            _cancelHandler(event) {
+                //  document.querySelector('#drawer').toggle();
+            }
+            ajaxRetrieveProjectByNameResponse(eve) {
+                console.log(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace(/\s*\n\s*/g, ""));
+                var infoBox = this.parentNode.querySelector('#infobox');
+              //  infoBox.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n", "").replace(/\s*\n\s*/g, ""));
+              infoBox.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n", "").replace(/\s*\n\s*/g, ""));
+                var tabs = infoBox.tabsdata.Tabs;
+                infoBox.TabsList=infoBox.tabsdata.Tabs;
+                
+                var clusterDetails = infoBox.tabsdata.cluster_details;
+                infoBox.cluster_name = clusterDetails.name;
+                infoBox.cluster_address = clusterDetails.ip;
+                infoBox.port = clusterDetails.port;
+                infoBox.username = clusterDetails.username;
+                infoBox.password = clusterDetails.password;
+                infoBox.httpSecured = clusterDetails.httpsecured;
+                infoBox.clusterid = clusterDetails.clusterid;
+                infoBox.$.btnEditPlugin.disabled = false;
+                for (var cnt = 0; cnt < tabs.length; cnt++) {
                     var tab = tabs[cnt];
-                    
                     console.log(tab.title);
-
-                    infobox.addTab(tab.pluginId,tab.title, tab.pluginId, true);    
-
+                    infoBox.addTab(tab.pluginId, tab.title, tab.pluginId, true);
                 }
                 infoBox.$.tabs.selected = 0;
                 infoBox.$.pages.selected = 0;
-            return; 
-    },
-
-    });
+                return;
+            }
+        }
+        customElements.define(OpenWorksheetDialog.is, OpenWorksheetDialog);
     </script>
-
-
 </dom-module>

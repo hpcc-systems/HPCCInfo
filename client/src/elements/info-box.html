@@ -1,8 +1,10 @@
+<link rel="import" href="../../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<!--<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">-->
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
@@ -10,14 +12,15 @@
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
-
 <link rel="import" href="info-plugin-dialog.html">
-
+<link rel="import" href="info-message-dialog.html">
 <!-- Import Custom Plugins here -->
 <link rel="import" href="plugins/input/editor.html">
 <link rel="import" href="plugins/input/view.html">
 <link rel="import" href="plugins/filter/editor.html">
 <link rel="import" href="plugins/filter/view.html">
+<link rel="import" href="plugins/dashboard/editor.html">
+<link rel="import" href="plugins/dashboard/view.html">
 <link rel="import" href="plugins/sort/editor.html">
 <link rel="import" href="plugins/sort/view.html">
 <link rel="import" href="plugins/aggregate/editor.html">
@@ -26,53 +29,67 @@
 <link rel="import" href="plugins/sample/view.html">
 <link rel="import" href="export-project-dialog.html">
 
+<!-- Needed for paper-listbox -->
+ <!-- Ensure Web Animations polyfill is loaded since neon-animation 2.0 doesn't import it -->
+ <link rel="import" href="../../bower_components/neon-animation/web-animations.html">
+
 <dom-module id="info-box">
     <template>
-    <style>
-        paper-tabs {
-            font-family: 'Roboto', 'Noto', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            width: 100%;
-            text-transform: uppercase;
-            color: #767676;
-            --paper-tabs-selection-bar-color: white;
-        }
-
-        paper-tab.iron-selected {
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        app-toolbar {
+        <style>
+            paper-tabs {
+                font-family: 'Roboto', 'Noto', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                width: 100%;
+                text-transform: uppercase;
+                color: #767676;
+                --paper-tabs-selection-bar-color: white;
+            }
+            paper-tab.iron-selected {
+                color: white;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+            app-toolbar {
                 background-color: #FF7043;
                 height: 50px;
                 color: #fff;
             }
-
-        paper-icon-button {
+            paper-icon-button {
                 --paper-icon-button: {
                     width: 40px;
                     height: 40px;
                 }
             }
-    </style>
+            paper-listbox {
+                font-size: 15px;
+                font-weight: bold;
+                color: #333;
+                min-width: 200px;
+            }
+            paper-listbox paper-item {
+                cursor: pointer
+            }
+            paper-listbox paper-item:hover {
+                background: #f2f2f2
+            }
+        </style>
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
 
-            <paper-icon-button id="btnEditPlugin" disabled="true" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+            <paper-icon-button id="btnEditPlugin" disabled="true" hidden$="{{hideedit}}" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
             <paper-tooltip for="btnEditPlugin" offset="0">Edit Worksheet</paper-tooltip>
-            
-            
-            <paper-menu-button horizontal-align="right" disabled="true" id="pluginMenu">
-                <paper-icon-button id="btnAddPlugin" icon="add" class="dropdown-trigger"></paper-icon-button>
-                <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
-            </paper-menu-button>
-            <paper-tooltip for="btnAddPlugin" offset="0">Plugin List</paper-tooltip>   
 
-            <paper-icon-button id="btnExportProject" disabled="true"
-                                   icon="social:share" 
-                                   on-tap="_projectExportOpenHandler">                       
+
+            <paper-icon-button id="btnEditDashboard" hidden$="{{hidden}}" icon="create" on-tap="_pluginEditDashboardHandler"></paper-icon-button>
+            <paper-tooltip for="btnEditDashboard" offset="0">Edit Worksheet</paper-tooltip>
+
+            <paper-menu-button horizontal-align="right" disabled="true" id="pluginMenu">
+                <paper-icon-button id="btnAddPlugin" icon="add" slot="dropdown-trigger"></paper-icon-button>
+                <paper-listbox id="pluginmenu" slot="dropdown-content"> </paper-listbox>
+            </paper-menu-button>
+            <paper-tooltip for="btnAddPlugin" offset="0">Plugin List</paper-tooltip>
+
+            <paper-icon-button id="btnExportProject" disabled="true" icon="social:share" on-tap="_projectExportOpenHandler">
             </paper-icon-button>
             <paper-tooltip for="btnExportProject" disabled="true" offset="0">Share Project</paper-tooltip>
 
@@ -80,226 +97,309 @@
         <export-project-dialog id="export-project-dialog"></export-project-dialog>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
         <info-plugin-dialog id="plugininfo"></info-plugin-dialog>
+        <info-message-dialog id="messageinfo"></info-message-dialog>
     </template>
     <script>
-        Polymer({
-            is: 'info-box',
-            listeners : {
-                'iron-select' : 'handleTabTap'
-            },
-            properties: {
-                viewList: {
-                    type: Array
-                },
-                pluginList: {
-                    type: Array
-                },
-                selected: {
-                    type: Number,
-                    value: 0
-                },
-                cluster_address : {
-                    type : String,
-                    value : ''
-                },
-                cluster_name : {
-                    type : String,
-                    value : ''
-                },
-                clusterid : {
-                    type : String,
-                    value : ''
-                },
-                port : {
-                    type : String,
-                    value : ''
-                },
-                httpSecured : {
-                    type : Boolean,
-                    value : false
-                },
-                username : {
-                    type :  String,
-                    value : ''
-                
-                },
-                password  : {
-                    type : String,
-                    value : ''
-                },
-                projectid  : {
-                    type : String,
-                    value : ''
-                },
-                title : {
-                    type : String,
-                    value : ''
-                },
-                updatedby : {
-                    type : String,
-                    value : ''
-                },
-                dateupdated : {
-                    type : Date,
-                    value : null
-                }, 
-                file : {
-                    type : String,
-                    value : ''
-                } ,
-                fieldDtls :{
-                    type : Map,
-                    value : {}
-
+        class InfoBox extends Polymer.Element {
+            static get is() { return 'info-box'; }
+            static get properties() {
+                return {
+                    viewList: {
+                        type: Array
+                    },
+                    pluginList: {
+                        type: Array
+                    },
+                    selected: {
+                        type: Number,
+                        value: 0
+                    },
+                    cluster_address: {
+                        type: String,
+                        value: ''
+                    },
+                    cluster_name: {
+                        type: String,
+                        value: ''
+                    },
+                    clusterid: {
+                        type: String,
+                        value: ''
+                    },
+                    port: {
+                        type: String,
+                        value: ''
+                    },
+                    httpSecured: {
+                        type: Boolean,
+                        value: false
+                    },
+                    username: {
+                        type: String,
+                        value: ''
+                    },
+                    password: {
+                        type: String,
+                        value: ''
+                    },
+                    projectid: {
+                        type: String,
+                        value: ''
+                    },
+                    title: {
+                        type: String,
+                        value: ''
+                    },
+                    updatedby: {
+                        type: String,
+                        value: ''
+                    },
+                    dateupdated: {
+                        type: Date,
+                        value: null
+                    },
+                    file: {
+                        type: String,
+                        value: ''
+                    },
+                    fieldDtls: {
+                        type: Map,
+                        value: {}
+                    },
+                    charttype: {
+                        type: String,
+                        value: null
+                    },
+                    xcoordinate: {
+                        type: String,
+                        value: null
+                    },
+                    ycoordinate: {
+                        type: String,
+                        value: null
+                    },
+                    TabsList: {
+                        type: Array
+                    },
+                    chartDtls: {
+                        type: Array
+                    },
+                    griddata: {
+                        type: Array
+                    },
+                    hidden: {
+                        type: Boolean,
+                        value: true
+                    },
+                    hideedit: {
+                        type: Boolean,
+                        value: false
+                    },
+                    parentchartinput: {
+                        type: String,
+                        value: null
+                    },
+                    parentchartfield: {
+                        type: String,
+                        value: null
+                    },
+                    parentchartfieldvalue: {
+                        type: String,
+                        value: null
+                    },
+                    parentchartId: {
+                        type: String,
+                        value: null
+                    },
+                    parentchartTitle: {
+                        type: String,
+                        value: null
+                    },
+                    filtereddata: {
+                        type: Array
+                    },
+                    childchartId: {
+                        type: String,
+                        value: null
+                    },
+                    childchartTitle: {
+                        type: String,
+                        value: null
+                    },
+                    childchartType: {
+                        type: String,
+                        value: null
+                    },
+                    childchartxcoordinate: {
+                        type: String,
+                        value: null
+                    },
+                    childchartycoordinate: {
+                        type: String,
+                        value: null
+                    },
+                    IsInteraction: {
+                        type: Number,
+                        value: 0
+                    },
+                    interactiontitle: {
+                        type: String,
+                        value: null
+                    },
+                    filteredcharttitle: {
+                        type: String,
+                        value: null
+                    },
+                    editChartStatus: {
+                        type: Boolean,
+                        value: false
+                    }
                 }
-
-            },
-
-            ready: function() {
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.addEventListener('iron-select', (e) => this.handleTabTap(e));
                 this.addPlugin("common-filter", "Filter", "common");
                 this.addPlugin("common-aggregate", "Aggregate", "common");
                 this.addPlugin("common-sort", "Sort", "common");
                 this.addPlugin("common-sample", "Data Sampling", "common");
-            },
-            handleTabTap : function(e){
-                console.log(e);
-                if(e.detail.item.editor != undefined){
-                    if(e.detail.item.querySelector('.projectworksheet').items.length === 0){
-                        e.detail.item.editor.loadgrid();
+                this.addPlugin("common-dashboard", "Dashboard", "common");
+            }
+            handleTabTap(e) {
+                if (e.detail.item.editor != undefined) {
+                    if (e.detail.item.id.includes("common-dashboard")) {
+                        this.hidden = false;
+                        this.hideedit = true;
+                        if (e.detail.item.editor != undefined) {
+                            e.detail.item.editor.loadChart();
+                        }
+                    }
+                    else {
+                        this.hidden = true;
+                        this.hideedit = false;
+                    }
+                    if (e.detail.item.shadowRoot.querySelector('.projectworksheet') != null) {
+                        if (e.detail.item.shadowRoot.querySelector('.projectworksheet').items.length === 0) {
+                            e.detail.item.editor.loadgrid();
+                        }
                     }
                 }
-            },
-            attached : function() {
-                this.listen(this.$.plugininfo, 'complete', '_pluginNewTabHandler');
-            },
-
-            addPlugin: function (id, label, category) {
+            }
+            connectedCallback() {
+                Polymer.RenderStatus.afterNextRender(this, function () {
+                    this.$.plugininfo.addEventListener('complete', this._pluginNewTabHandler);
+                });
+            }
+            addPlugin(id, label, category) {
                 var item = document.createElement("paper-item");
                 item.id = "item_" + id;
                 item.textContent = label;
                 Polymer.dom(this.$.pluginmenu).appendChild(item);
-
-                this.listen(item, 'tap', '_pluginMenuTapHandler');
+                item.addEventListener('tap', (e) => this._pluginMenuTapHandler(e));
                 if (this.pluginList == null) {
                     this.pluginList = [];
                 }
                 var plugin = new Plugin(id, label, category);
                 this.pluginList.push(plugin);
-            },
-
-            clearWorkBook(){
-
-                document.querySelector('#btnExportProject').disabled = true;
-                document.querySelector('#export-project-dialog').disabled = true;
-
-                this.properties.cluster_name = '';
-                this.properties.cluster_address = '';
-                this.properties.port = '';
-                this.properties.username = '';
-                this.properties.password = '';
-                this.properties.httpSecured = '';
-                this.properties.file = '';
+            }
+            _clear(items) {
+                while (items.childNodes.length) {
+                    items.removeChild(items.childNodes[0]);
+                }
+            }
+            clearWorkBook() {
+                this.shadowRoot.querySelector('#btnExportProject').disabled = true;
+                this.shadowRoot.querySelector('#export-project-dialog').disabled = true;
+                this.cluster_name = '';
+                this.cluster_address = '';
+                this.port = '';
+                this.username = '';
+                this.password = '';
+                this.httpSecured = '';
+                this.file = '';
                 this.pluginList = [];
-                this.properties.pluginList = [];
-                this.properties.httpSecured = '';
-
+                this.pluginList = [];
+                this.httpSecured = '';
                 var tabitems = Polymer.dom(this.$.tabs);
                 var pageitems = Polymer.dom(this.$.pages);
                 var cnt = 0;
-                tabitems._clear();
                 this.$.tabs.items = [];
-                pageitems._clear(); 
-                if(this.viewList === undefined ||  this.viewList.length > 0){
-
-                    if(this.viewList != undefined ){
+                this._clear(tabitems);
+                this._clear(pageitems);
+                if (this.viewList === undefined || this.viewList.length > 0) {
+                    if (this.viewList != undefined) {
                         var listsize = this.viewList.length;
-                        for(var cnt =0; cnt < listsize; cnt++){
+                        for (var cnt = 0; cnt < listsize; cnt++) {
                             this.viewList.pop();
                         }
                     }
-
-                    if(this.$.tabs != undefined ){
+                    if (this.$.tabs != undefined) {
                         var listsize = this.$.tabs.length;
-                        for(var cnt =0; cnt < listsize; cnt++){
+                        for (var cnt = 0; cnt < listsize; cnt++) {
                             this.$.tabs.pop();
                         }
                     }
                 }
-            },
-            
-            addTab: function (id, label, pluginId, reload = false) {
-
-               if(pluginId === "common-input"){
-
-                   document.querySelector('#export-project-dialog').disabled = true;
-
-
-                   
-                   var tabitems = Polymer.dom(this.$.tabs);
-                   var pageitems = Polymer.dom(this.$.pages);
-                   var cnt = 0;
-                    tabitems._clear();
+            }
+            addTab(id, label, pluginId, reload = false) {
+                if (pluginId === "common-input") {
+                    this.shadowRoot.querySelector('#export-project-dialog').disabled = true;
+                    var tabitems = Polymer.dom(this.$.tabs);
+                    var pageitems = Polymer.dom(this.$.pages);
+                    var cnt = 0;
+                    this._clear(tabitems);
+                    this._clear(pageitems);
                     this.$.tabs.items = [];
-                    pageitems._clear(); 
-                    if(this.viewList === undefined ||  this.viewList.length > 0){
-
-                        if(this.viewList != undefined ){
+                    if (this.viewList === undefined || this.viewList.length > 0) {
+                        if (this.viewList != undefined) {
                             var listsize = this.viewList.length;
-                            for(var cnt =0; cnt < listsize; cnt++){
+                            for (var cnt = 0; cnt < listsize; cnt++) {
                                 this.viewList.pop();
                             }
                         }
-
-                        if(this.$.tabs != undefined ){
+                        if (this.$.tabs != undefined) {
                             var listsize = this.$.tabs.length;
-                            for(var cnt =0; cnt < listsize; cnt++){
+                            for (var cnt = 0; cnt < listsize; cnt++) {
                                 this.$.tabs.pop();
                             }
                         }
                     }
-
-                var pluginMenu = document.querySelector('#pluginMenu');
-                pluginMenu.disabled = true;
-               }
+                    var pluginMenu = this.shadowRoot.querySelector('#pluginMenu')
+                    pluginMenu.disabled = true;
+                }
                 var view = document.createElement(pluginId + "-view");
                 var editor = document.createElement(pluginId + "-editor");
                 var tab = document.createElement("paper-tab");
                 tab.id = id;
                 tab.textContent = label;
-                
                 view.id = id;
                 editor.id = id + '_editor_' + Math.random().toString(36).substr(2, 9);
                 view.pluginId = pluginId;
                 view.label = label;
-                view.tab = tab; 
+                view.tab = tab;
                 view.editor = editor;
                 Polymer.dom(this.$.tabs).appendChild(tab);
                 Polymer.dom(this.$.pages).appendChild(view);
                 Polymer.dom(this.$.tabs).appendChild(editor);
-                document.querySelector('#pages').items.push(view);
-                document.querySelector('#tabs').items.push(editor);
-
-                this.listen(editor, 'complete', '_pluginEditCompleteHandler');
-
+                this.shadowRoot.querySelector('#pages').items.push(view);
+                this.shadowRoot.querySelector('#tabs').items.push(editor);
                 if (this.viewList == null) {
                     this.viewList = [];
                 };
                 this.viewList.push(view);
-                if(reload){
+                if (reload) {
                     editor.deSerialize(label);
-                }else{
-                    this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length -1);//Select the new tab
-                    
-                	setTimeout(function () {
-				            document.querySelector('#btnEditPlugin').fire('click');
-			        }, 2000);
+                } else {
+                    this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length - 1);//Select the new tab
+                    setTimeout(function (that) {
+                        that.shadowRoot.querySelector('#btnEditPlugin').fire('click');
+                    }, 2000, this);
                 }
-
-
-            },
-
-
-            getView: function (id) {
+            }
+            getView(id) {
                 if (this.viewList == null) {
                     return null;
                 } else {
@@ -311,9 +411,8 @@
                     }
                     return null;
                 }
-            },
-
-            getPlugin: function (id) {
+            }
+            getPlugin(id) {
                 if (this.pluginList == null) {
                     return null;
                 } else {
@@ -325,66 +424,55 @@
                     }
                     return null;
                 }
-            },
-
-            getActiveView: function () {
+            }
+            getActiveView() {
                 var view = this.getView(this.$.tabs.selectedItem.id);
                 return view;
-            },
-
-            getGeneralProperties: function () {
-
-            },
-
-            setGeneralProperties: function () {
-
-            },
-
-
-            getViewPropertiesList: function () {
-
-            },
-
-            setViewPropertiesList: function () {
-
-            },
-
-            _pluginMenuTapHandler: function (e) {
+            }
+            getGeneralProperties() {
+            }
+            setGeneralProperties() {
+            }
+            getViewPropertiesList() {
+            }
+            setViewPropertiesList() {
+            }
+            _pluginMenuTapHandler(e) {
                 var pluginId = e.target.id.substring(5);
                 this.$.plugininfo.pluginId = pluginId;
                 this.$.plugininfo.plugintitle = pluginId.substring(7);
                 //Create a dialog to accept just the id and label
                 this.$.plugininfo.open();
-            },
-            
+            }
+            _pluginEditDashboardHandler(e) {
+                this.$.plugininfo.plugintitle = "DashBoard"
+                this.shadowRoot.querySelector('#plugininfo').openDashboardEditor(e);
+            }
             // This handler is called when the user adds a new plugin.
             // Called on 'OK' button of the dialog
-            _pluginNewTabHandler: function (e) {
+            _pluginNewTabHandler(e) {
                 var pluginId = e.target.pluginId;
                 var label = e.target.getLabel();
                 //Add a new tab
-                this.addTab((pluginId + '_' + Math.random().toString(36).substr(2, 9)), label, pluginId); //TODO: Need to generate an unique id for the tab
-            },
-
+                document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').addTab((pluginId + '_' + Math.random().toString(36).substr(2, 9)), label, pluginId); //TODO: Need to generate an unique id for the tab
+            }
             // This handler is called when the user clicks on any plugins 'Edit' button.
-            _pluginEditOpenHandler: function (e) {
-                view = this.getActiveView();
+            _pluginEditOpenHandler(e) {
+                var view = this.getActiveView();
                 view.editor.open();
-            },
-
+            }
             // This handler is called when the user clicks on any editors 'OK' button.
             // Fired from editors _okHandler method.
-            _pluginEditCompleteHandler: function (e) {
-                view = this.getActiveView();
+            _pluginEditCompleteHandler(e) {
+                var view = this.getActiveView();
                 // view.setViewProperties(tab.editor.getViewProperties());
-            },
-
-            _projectExportOpenHandler: function(e) {
-                var dialog = document.querySelector('#export-project-dialog');
+            }
+            _projectExportOpenHandler(e) {
+                var dialog = this.shadowRoot.querySelector('#export-project-dialog');
                 dialog.open();
             }
-
-        });
+        }
+        customElements.define(InfoBox.is, InfoBox);
     </script>
 
 </dom-module>

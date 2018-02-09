@@ -1,0 +1,467 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
+
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="shared-styles.html">
+<title>HPCC Register</title>
+
+
+<!--- ---------------------------------------------filter dialog------------------------------------------------>
+
+
+<dom-module id="my-registration">
+    <template>
+        <style include="shared-dialog-styles">
+            vaadin-combo-box {
+                width: 100%;
+                display: block !important;
+            }
+        </style>
+        <style include="shared-dialog-styles"></style>
+        <style include="shared-dialog-styles">
+            *,
+             ::before,
+             ::after {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                height: 100%;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+                font-family: 'Open Sans', sans-serif;
+                color: #767676;
+                font-size: 14px;
+                font-weight: normal;
+                line-height: 1.42857143;
+                background: #f8f8f8 url(images/login_bg.png) left bottom no-repeat;
+            }
+
+            a {
+                text-decoration: underline;
+                color: #767676;
+            }
+
+            a:hover {
+                color: #ff5722;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                line-height: 1.1;
+                font-weight: bold;
+            }
+
+            .mb-0 {
+                margin-bottom: 0 !important
+            }
+
+            .col-row {
+                margin-right: -10px;
+                margin-left: -10px;
+            }
+
+            .col-6 {
+                width: 50%;
+                float: left;
+                padding-right: 10px;
+                padding-left: 10px;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            label {
+                font-weight: bold;
+                font-size: 12px;
+                margin: 0;
+                width: 100%;
+                display: inline-block;
+            }
+            /*register styles*/
+
+            .register-panel {
+                /* position: absolute;
+    top: 20%; */
+                right: 0;
+                left: 0;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 504px;
+                background: #fff;
+                box-shadow: 0px 0px 12px 2px rgba(0, 0, 0, 0.1);
+                padding: 0;
+            }
+
+            .register-panel .head {
+                margin: 0;
+                padding: 25px 50px;
+                background: #767676 url(images/hpcc-logo-watermark.png) right 10px top 10px no-repeat;
+                background-size: 70px;
+                color: #fff;
+                font-size: 24px;
+            }
+
+            .register-panel .form-col {
+                padding: 35px 50px;
+                display: inline-block;
+                width: 100%;
+            }
+
+            .input-line {
+                width: 100%;
+                border: 0;
+                /* border-bottom: 1px solid #cbcbcb; */
+                padding: 0;
+                margin: 0;
+                outline: 0;
+            }
+            /* .input-line:focus {
+    border-bottom: 1px solid #ff5722;
+} */
+
+            .register-panel .form-col .form-field {
+                margin: 0 0 20px;
+                display: inline-block;
+                width: 100%;
+            }
+
+            .register-panel .form-col .btn {
+                height: 40px;
+            }
+
+            .register-panel .form-col .copyright {
+                color: #b3b3b3;
+                margin: 10px 0 0
+            }
+            /* button styles*/
+
+            .btn {
+                width: 100%;
+                height: 36px;
+                border: 0;
+                font-weight: bold;
+                letter-spacing: 0.02em;
+                border-radius: 4px;
+                padding: 5px 10px;
+                text-transform: uppercase;
+                text-align: center;
+                cursor: pointer;
+                outline: 0;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-color {
+                background: #ff5722;
+                color: #fff;
+            }
+
+            .btn-grey {
+                background: #767676;
+                color: #fff;
+            }
+
+            paper-button {
+                margin: 0 0 5px;
+            }
+
+            @media (max-width: 1400px) {
+                .register-panel {
+                    top: 14%;
+                }
+            }
+
+            @media (max-width: 640px) {
+                .register-panel {
+                    right: 15px;
+                    left: 15px;
+                    width: auto;
+                }
+                .register-panel .head {
+                    padding: 20px 30px;
+                }
+                .register-panel .form-col {
+                    padding: 20px 30px;
+                }
+            }
+        </style>
+        <iron-ajax id="ajaxAddUser" method="POST" handle-as="json" on-response="ajaxAddUserResponse">
+        </iron-ajax>
+        <paper-dialog id="dialog" modal>
+            <div class="register-panel">
+                <h2 class="head">HPCC Info - Registration Form</h2>
+
+                <div class="form-col">
+
+                    <div class="form-field">
+                        <div class="col-row">
+                            <div class="col-6">
+                                <label>First Name</label>
+                                <paper-input no-label-float id='first_name' class="input-line" placeholder="First Name" required auto-validate error-message="Please enter First Name"></paper-input>
+                            </div>
+                            <div class="col-6">
+                                <label>Last Name</label>
+
+                                <paper-input no-label-float id='last_name' class="input-line" placeholder="Last Name" required auto-validate error-message="Please enter Last Name"></paper-input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Email Address</label>
+                        <paper-input no-label-float id='email_id'  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
+                        invalid="{{invalid}}"
+                        error-message="Invalid Email Id" class="input-line" placeholder="Email Id" required auto-validate error-message="Please enter Email Id" ></paper-input>
+                    </div>
+                    <div class="form-field">
+                        <label>Username</label>
+
+                        <paper-input no-label-float id='username' placeholder="Username" class="input-line" required auto-validate error-message="Please enter User Name"></paper-input>
+                    </div>
+                    <div class="form-field">
+                        <label>Password</label>
+
+                        <paper-input no-label-float id='password' placeholder="Password" class="input-line" type="password" required auto-validate
+                            error-message="Please enter password"></paper-input>
+                    </div>
+                    <div class="form-field">
+                        <label>Re-type Password</label>
+                        <paper-input no-label-float id='re_password' class="input-line" placeholder="ReType Password" type="password" required auto-validate
+                            error-message="Please Re-enter password"></paper-input>
+
+                    </div>
+                    <div class="form-field mb-0">
+                        <div class="col-row">
+                            <div class="col-6">
+                                <paper-button raised class="btn btn-color" on-tap="Register">Register</paper-button>
+                            </div>
+                            <div class="col-6">
+                                <paper-button dialog-dismiss raised class="btn btn-grey" on-tap="handleCancel">Cancel</paper-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="copyright">©2017 Powered By HPCCSystems</div>
+                </div>
+
+            </div>
+
+        </paper-dialog>
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
+    </template>
+
+    <script type="text/javascript">
+        class MyRegistration extends Polymer.Element {
+            static get is() { return 'my-registration'; }
+
+            static get properties() {
+                return {
+                    pluginId: {
+                        type: String,
+                        value: 'common-input'
+                    },
+                    loading: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+
+            open(e) {
+                //  this.parentNode.querySelector('#drawer').toggle();
+                //document.querySelector('#drawer').toggle();
+                // Reset all form fields
+                this.resetFormFields();
+                // Invalidate all form fields so that the auto-validation does not happen after user reopens the dialog
+                this.invalidateFormFields();
+                this.$.dialog.open();
+            }
+            resetFormFields() {
+                this.$.first_name.value = '';
+                this.$.last_name.value = '';
+                this.$.email_id.value = '';
+                // this.$.phone_number.value = '';
+                this.$.username.value = '';
+                this.$.password.value = '';
+                this.$.re_password.value = '';
+            }
+
+            invalidateFormFields() {
+                this.$.first_name.invalid = false;
+                this.$.last_name.invalid = false;
+                this.$.email_id.invalid = false;
+                // this.$.phone_number.invalid =false;
+                this.$.username.invalid = false;
+                this.$.password.invalid = false;
+                this.$.re_password.invalid = false;
+
+            }
+
+            Register() {
+                var firstname = this.$.first_name.value.trim();
+                var lastname = this.$.last_name.value.trim();
+                var emailid = this.$.email_id.value.trim();
+                var uname = this.$.username.value.trim();
+                var pwd = this.$.password.value.trim();
+                var repwd = this.$.re_password.value.trim();
+                var firstnamestatus;
+                var lastnamestatus;
+                var emailidstatus;
+                var unamestatus;
+                var pwdstatus;
+                var repwdstatus;
+                var that = this;
+                if (firstname === undefined || firstname === null || firstname === '') {
+                    firstnamestatus = false;
+                    this.$.first_name.invalid = true;
+                }
+                else {
+                    firstnamestatus = true;
+                    this.$.first_name.invalid = false;
+                }
+                if (lastname === undefined || lastname === null || lastname === '') {
+                    lastnamestatus = false;
+                    this.$.last_name.invalid = true;
+                }
+                else {
+                    lastnamestatus = true;
+                    this.$.last_name.invalid = false;
+                }
+                if (emailid === undefined || emailid === null || emailid === '') {
+                    emailidstatus = false;
+                    this.$.email_id.invalid = true;
+                }
+                else {
+                    var invalid = this.$.email_id.invalid;
+                    if(!invalid){
+                        emailidstatus = true;
+                    this.$.email_id.invalid = false;
+                    } 
+                    else
+                    {
+                        emailidstatus = false;
+                    this.$.email_id.invalid = true;
+                    } 
+                }
+                if (uname === undefined || uname === null || uname === '') {
+                    unamestatus = false;
+                    this.$.username.invalid = true;
+                }
+                else {
+                    unamestatus = true;
+                    this.$.username.invalid = false;
+                }
+                if (pwd === undefined || pwd === null || pwd === '') {
+                    pwdstatus = false;
+                    this.$.password.invalid = true;
+                }
+                else {
+                    pwdstatus = true;
+                    this.$.password.invalid = false;
+                }
+                if (repwd === undefined || repwd === null || repwd === '') {
+                    repwdstatus = false;
+                    this.$.re_password.invalid = true;
+                }
+                else {
+                    repwdstatus = true;
+                    this.$.re_password.invalid = false;
+                }
+                if (firstnamestatus === true && lastnamestatus === true && emailidstatus === true && unamestatus === true && pwdstatus === true && repwdstatus === true) {
+                    if (pwd === repwd) {
+                        var userJsonStr = '';
+                        userJsonStr += '{\"fname\" : \"' + firstname +
+                            '",\"lname\" : \"' + lastname +
+                            '",\"emailid\" : \"' + emailid +
+                            '",\"uname\" : \"' + uname +
+                            '",\"password\" : \"' + btoa(pwd) +
+                            '",\"dateupdated\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') +
+                            '",\"datemodified\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') +
+                            '\"}';
+                        console.log(userJsonStr);
+                        console.log(JSON.parse(userJsonStr));
+                        this.$.ajaxAddUser.url = 'http://' + window.location.hostname + ':' + window.location.port + '/userDetails';
+
+                        this.$.ajaxAddUser.body = JSON.stringify(JSON.parse(userJsonStr));
+                        this.$.ajaxAddUser.contentType = 'application/json';
+                        this.$.ajaxAddUser.generateRequest();
+                        this.$.toast.text = "User details entered  successfully";
+                        this.$.toast.open();
+                        this.$.dialog.close();
+                    }
+                    else {
+                        this.$.re_password.invalid = true;
+                    }
+
+                }
+
+            }
+            // ajaxAddUserResponse() {
+            // 					if(this.$.ajaxAddUser.lastResponse.length > 0 )
+            // 					{
+            //                         alert("user registered successfully");
+            // 						this.$.dialog.close();
+            // 					}
+            // 					// else
+            // 					// {
+            // 					// 	this.set('route.path', '/');
+            // 					// }
+            // 		}
+        }
+
+        customElements.define(MyRegistration.is, MyRegistration);
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(".btn").click(function (e) {
+            $(".ripple").remove();
+            var posX = $(this).offset().left,
+                posY = $(this).offset().top,
+                buttonWidth = $(this).width(),
+                buttonHeight = $(this).height();
+            $(this).prepend("<span class='ripple'></span>");
+            if (buttonWidth >= buttonHeight) {
+                buttonHeight = buttonWidth;
+            } else {
+                buttonWidth = buttonHeight;
+            }
+            var x = e.pageX - posX - buttonWidth / 2;
+            var y = e.pageY - posY - buttonHeight / 2;
+            $(".ripple").css({
+                width: buttonWidth,
+                height: buttonHeight,
+                top: y + 'px',
+                left: x + 'px'
+            }).addClass("rippleEffect");
+        });
+
+    </script>
+
+</dom-module>

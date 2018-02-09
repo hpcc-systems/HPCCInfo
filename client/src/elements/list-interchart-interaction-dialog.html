@@ -1,0 +1,286 @@
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="edit-interchart-interaction-dialog.html">
+<dom-module id="list-interchart-interaction-dialog">
+    <template>
+        <style include="shared-dialog-styles">
+            paper-dialog {
+                width: 100%;
+                max-width: 1400px;
+                min-width: 340px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+            }
+
+            #interactionslist {
+                margin: 25px;
+                padding: 0;
+                height: auto;
+                min-height: 300px;
+                --iron-data-table-header: {
+                    background-color: #e3e3e3;
+                    font-size: 1.2em;
+                    font-weight: 400;
+                    border-bottom: 1px solid padding: 10px;
+                }
+            }
+
+            .btn-link {
+                padding: 2px 5px;
+                background: #e6e6e6;
+                border-radius: 3px;
+                color: #666;
+                font-weight: bold;
+                font-size: 13px;
+                width: 70px;
+                margin: 0;
+            }
+        </style>
+        <style is="custom-style">
+            vaadin-grid.interactionlistclass {
+                position: relative;
+                font: 300 16px/1.55 "Open Sans", sans-serif;
+                -webkit-font-smoothing: antialiased;
+                --divider-color: #d4d4d4;
+
+                --vaadin-grid-cell: {
+                    padding: 0 18px;
+                    height: 38px;
+                    border-right: 1px solid #d4d4d4;
+                    box-sizing: border-box;
+                }
+                ;
+
+                --vaadin-grid-header-cell: {
+                    border-bottom: 1px solid #d4d4d4;
+                    background-image: linear-gradient(to bottom, #ececec 2%, #d6d6d6 98%);
+                    font-weight: bold;
+                    color: #333;
+                    font-size: 15px;
+                    text-transform: capitalize;
+                }
+                ;
+
+                --vaadin-grid-footer-cell: {
+                    background-image: linear-gradient(to bottom, #fafafa 2%, #efefef 98%);
+                }
+                ;
+
+                --vaadin-grid-cell-last-frozen: {
+                    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+                }
+                ;
+
+                --vaadin-grid-body-row-active-cell: {
+                    background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%);
+                    color: #c8dbed;
+                    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+                    border-right-color: #1d69b4;
+                }
+                ;
+
+                --vaadin-grid-body-row-odd-cell: {
+                    background-color: #f5f5f5;
+                }
+                ;
+
+                --vaadin-grid-loading-spinner: {
+                    display: none;
+                }
+                ;
+
+                --vaadin-grid-body-cell: {
+                    transition: opacity 0.2s;
+                    border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+                    /* added */
+                }
+                ;
+
+                --vaadin-grid-loading-body-cell: {
+                    opacity: 0.2;
+                }
+                ;
+            }
+
+            vaadin-grid.interactionlistclass input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            @keyframes loading-expand {
+                0% {
+                    transform: scaleX(0);
+                }
+                100% {
+                    transform: scaleX(1);
+                }
+            }
+
+            vaadin-grid.interactionlistclass::before {
+                content: "";
+                width: 100%;
+                position: absolute;
+                height: 4px;
+                background: var(--primary-color);
+                z-index: 1;
+                opacity: 0.5;
+                transform-origin: left;
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+
+            vaadin-grid.interactionlistclass[loading]::before {
+                opacity: 1;
+                animation: loading-expand 1s linear;
+            }
+        </style>
+
+        <paper-dialog id="dialog" modal>
+            <iron-label>
+                <div class="headerDiv">
+                    <span>
+                      Interactions
+                    </span>
+                </div>
+            </iron-label>
+            <vaadin-grid class="interactionlistclass"  id="interactionslist" active-item="{{activeItem}}">
+                <vaadin-grid-column>
+                    <template class="header">Interaction Chart Title</template>
+                    <template>[[item.InteractionTitle]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header">Parent Chart</template>
+                    <template>[[item.ParentChartTitle]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header">Parent Chart Input</template>
+                    <template>[[item.FilteringField]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header"> Child Chart</template>
+                    <template>[[item.ChildChartTitle]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header"> Child Chart Input</template>
+                    <template>[[item.FilteringField]]</template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header"> Edit</template>
+                    <template>
+                        <paper-button dialog-confirm on-tap="OpenEditInteractionPopup" class="btn-link">Edit</paper-button>
+                    </template>
+                </vaadin-grid-column>
+                <vaadin-grid-column>
+                    <template class="header"> Delete</template>
+                    <template>
+                        <paper-button dialog-confirm on-tap="DeleteInteractions" class="btn-link">Delete</paper-button>
+                    </template>
+                </vaadin-grid-column>
+            </vaadin-grid>
+            <div class="buttons">
+                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
+        <edit-interchart-interaction-dialog id="editinteractiondialog"></edit-interchart-interaction-dialog>
+    </template>
+    <script>
+        class ListInterchartInteractionDialog extends Polymer.Element {
+            static get is() { return 'list-interchart-interaction-dialog'; }
+            static get properties() {
+                return {
+                    data: Array,
+                    activeItem: {
+                        observer: '_activeItemChanged'
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();              
+            }
+            _activeItemChanged(item) {
+                this.$.interactionslist.selectedItems = item ? [item] : [];
+            }
+            open() {
+                this.$.interactionslist.items = [];
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                if (currentPage.editor != undefined) {
+                    if (currentPage.editor.interactionDetails.length > 0) {
+                        this.$.interactionslist.items = currentPage.editor.interactionDetails;
+                        this.$.dialog.open();
+                    }
+                    else {
+                        this.$.toast.text = "No Interaction Exists";
+                        this.$.toast.open();
+                    }
+                }
+                else {
+                    this.$.toast.text = "No Interaction Exists";
+                    this.$.toast.open();
+                }
+            }
+            OpenEditInteractionPopup() {
+                if (this.$.interactionslist.selectedItems[0] != null) {
+                    var InteractionTitle = this.$.interactionslist.selectedItems[0].InteractionTitle;
+                    var ParentChartTitle = this.$.interactionslist.selectedItems[0].ParentChartTitle;
+                    var ChildChartTitle = this.$.interactionslist.selectedItems[0].ChildChartTitle;
+                    var FilteringField = this.$.interactionslist.selectedItems[0].FilteringField;
+                    var dialog = this.$.editinteractiondialog;
+                    dialog.open(InteractionTitle);
+                }
+                else {
+                    this.$.toast.text = "Please Select an Interaction";
+                    this.$.toast.open();
+                }
+            }
+            DeleteInteractions() {
+                if (this.$.interactionslist.selectedItems[0] != null) {
+                    var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                    var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                    var interactionTitle = this.$.interactionslist.selectedItems[0].InteractionTitle;
+                    var index;
+                    var ChildChartId;
+                    for (var i = 0; i < currentPage.editor.interactionDetails.length; i++) {
+                        var interactionchart = currentPage.editor.interactionDetails[i];
+                        if (interactionchart.InteractionTitle == interactionTitle) {
+                            ChildChartId = interactionchart.ChildChartId;
+                            index = i;
+                            break;
+                        }
+                    }
+                    currentPage.editor.interactionDetails.splice(index, 1);
+                    sessionStorage.setItem('ChartId', ChildChartId);
+                    for (var i = 0; i < currentPage.editor.chartDetails.length; i++) {
+                        var chart = currentPage.editor.chartDetails[i];
+                        if (chart.ChartId === ChildChartId) {
+                            chart.chartTitle = chart.chartTitle.replace(/ *\([^)]*\) */g, "");
+                            initchart(infoBox.griddata, chart.chartTitle, chart.ChartType, chart.xcoordinate, chart.ycoordinate, chart.ChartId);
+                            break;
+                        }
+                    }
+                    this.$.toast.text = "Interactions Deleted Successfully.";
+                    this.$.toast.open();
+                }
+
+                else {
+                    this.$.toast.text = "Please Select an Interaction";
+                    this.$.toast.open();
+                }
+            }
+        }
+        customElements.define(ListInterchartInteractionDialog.is, ListInterchartInteractionDialog);
+    </script>
+</dom-module>

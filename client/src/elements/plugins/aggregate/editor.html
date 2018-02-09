@@ -9,350 +9,301 @@
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-aggregate-editor">
-    <template>
-    	<style include="shared-dialog-styles">
-    		paper-dialog {
-    			line-height: 15px;
-    		}
-
-            paper-button.addBtn {
-                margin-bottom: 0px;
-            }
-
-            .headerDiv{
-                font-size: 20px;
-            }
-
-            vaadin-combo-box {
-            	padding: 5px 0px;
-            }
-
-    	</style>
-        <paper-dialog id="dialog" modal>
-        	<iron-label>
-		        <div class="headerDiv">
-		            <span>Apply a Aggregate</span>
-		        </div>
-		    </iron-label>
-		    <paper-dialog-scrollable>
-	            <paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
-	            <paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-	            <vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
-	            <paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
-	            <vaadin-combo-box id='crosstabfield' required label="GroupBy Field"></vaadin-combo-box>
-	            <paper-button id='addMeasureKey' on-tap="tableKeyAddFunction" class="addBtn">ADD</paper-button>
-	            <paper-input id='aggregateformulas' required label="Group Fields" label="Value"></paper-input>
-	            <vaadin-combo-box id='aggregategroupfunc' required label="Aggregate Function" items='["SUM", "COUNT", "MAX", "MIN", "AVE"]'></vaadin-combo-box>
-	            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
-	            <paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction" class="addBtn">ADD</paper-button>
-	            <paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
+	<template>
+		<style include="shared-dialog-styles">
+			paper-dialog {
+				line-height: 15px;
+			}
+			paper-button.addBtn {
+				margin-bottom: 0px;
+			}
+			.headerDiv {
+				font-size: 20px;
+			}
+			vaadin-combo-box {
+				padding: 5px 0px;
+				width:100%;
+				display: block !important;
+			}
+		</style>
+		<paper-dialog id="dialog" modal>
+			<iron-label>
+				<div class="headerDiv">
+					<span>Apply a Aggregate</span>
+				</div>
+			</iron-label>
+			<paper-dialog-scrollable>
+				<paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
+				<paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+				<vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
+				<paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
+				<vaadin-combo-box id='crosstabfield' required label="GroupBy Field"></vaadin-combo-box>
+				<paper-button id='addMeasureKey' on-tap="tableKeyAddFunction" class="addBtn">ADD</paper-button>
+				<paper-input id='aggregateformulas' required label="Group Fields" label="Value"></paper-input>
+				<vaadin-combo-box id='aggregategroupfunc' required label="Aggregate Function" items='["SUM", "COUNT", "MAX", "MIN", "AVE"]'></vaadin-combo-box>
+				<vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
+				<paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction" class="addBtn">ADD</paper-button>
+				<paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
 				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
-                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
-                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
+				<paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+				<paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
 
 			</paper-dialog-scrollable>
-	        <div class="buttons">
-	            <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-	            <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-	        </div>
-	        
-        </paper-dialog>
-    </template>
-    <script>
-    Polymer({
-        is: 'common-aggregate-editor',
+			<div class="buttons">
+				<paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+				<paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+			</div>
 
-		properties: {
-			eclcode : String,
-			outputdsname : String,
-			inputdsname : String,
-			eclIP : String,
-			hpccuser : String,
-			displayFields : String,
-			expression : String,
-			title : String,
-			sortfields : String,
-			inputTab : String
-		},
-
-		changeLayoutforFrequency : function(event){
-
-			console.log(event.currentTarget.value);
-			if(event.currentTarget.getAttribute("aria-pressed") === "true"){
-				this.$.addGroupFuncKey.disabled = true;
-				this.$.aggregategroupformulas.disabled = true;
-				this.$.aggregategroupformulas.value = "";
-				this.$.aggregategroupfunc.disabled = true;
-				this.$.aggregatefield.disabled = true;
-			}else{
-				this.$.addGroupFuncKey.disabled = false;
-				this.$.aggregategroupformulas.disabled = false;
-				this.$.aggregategroupfunc.disabled = false;
-				this.$.aggregatefield.disabled = false;
-			}
-		},
-		tableKeyAddFunction : function(event){
-			var key_value = this.$.crosstabfield.value.trim();
-			var currentformula = this.$.aggregateformulas.value.trim();
-			if(currentformula.indexOf(',' + key_value) >= 0 || key_value === '' || currentformula.indexOf(key_value + ',') >= 0 || currentformula === key_value){
-				return;
-			} else{
-				this.$.aggregateformulas.value += (currentformula === "" ? "" : ",") + key_value;
-			}
-			this.$.sortfields.items = [];
-			var fieldList = [];
-			var splitstrs =  this.$.aggregateformulas.value.split(',');
-			for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
-				fieldList.push('+' + splitstrs[cnt]);
-				fieldList.push('-' + splitstrs[cnt]);
-			}
-
-			this.$.sortfields.items = fieldList;
-
-
-        },
-
-		tableKeyAddGrpFunction : function(event){
-			var key_value = this.$.aggregategroupfunc.value.trim() + "(" + this.$.aggregatefield.value.trim() + ")";
-			var key_name = this.$.aggregatefield.value.trim() + "_" + this.$.aggregategroupfunc.value.trim();
-			var currentformula = this.$.aggregategroupformulas.value.trim();
-			if(currentformula.indexOf(key_name) >= 0 || this.$.aggregatefield.value === '' || this.$.aggregategroupfunc.value == '' || currentformula === key_name){
-				return;
-			} else{
-				this.$.aggregategroupformulas.value += (currentformula === "" ? "" : ",") + key_name + ":=" + key_value;
-			}
-
-        },
-
-		ready : function(eve){
-
-
-			console.log("Ready function");
-			var selpage = document.querySelector("#pages").querySelector("#common-input");
-			var infoBox = document.querySelector('#infobox');
-			var username = infoBox.properties.username;
-			var password = infoBox.properties.password;
-			var credentials = username === null || username === "" ? "" : (
-				password === null || password === "" ?  (username + '@') :
-				(username + ':' + password + '@')               
-			);
-
-			var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
-				":" + infoBox.properties.port;
-			this.eclIP = eclIP;
-			this.hpccuser = username;
-
-			this.displayFields = '';
-			this.eclcode = '';
-			this.$.TabTitle.value = '';
-			this.inputdsname = '';
-			this.outputdsname = '';
-			this.expression = '';
-			this.sortfields = '';
-			this.inputTab = '';
-			// setTimeout(function () {
-			// 	document.querySelector('#btnEditPlugin').fire('click');
-			// }, 2000);
-		},
-        serialize : function(){
-            var jsonStr = '{';
-            jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
-            jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
-            jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
-            jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
-            jsonStr += '\"expression\" : \"' + this.expression + '\",';
-            jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
-			jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';			
-			jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';			
-            jsonStr += '\"pluginId\" : \"' + 'common-aggregate' + '\"}';
-
-            return jsonStr;
-         },
-       deSerialize : function(tabTtitle){
-           console.log(tabTtitle);
-                
-			var jsonTabContent  = null;
-
-			var infoBox = document.querySelector('#infobox');
-
-			var tabs = infoBox.properties.tabsdata.Tabs;
-
-			for(var cnt = 0; cnt < tabs.length; cnt++){
-				if( tabTtitle === tabs[cnt].title){
-					jsonTabContent = tabs[cnt];
-					this.displayFields = jsonTabContent.displayFields;
-					this.$.crosstabfield.items = this.displayFields.split(",");
-					this.$.aggregatefield.items = this.displayFields.split(",");
-					this.$.TabTitle.value = jsonTabContent.title;
-					this.eclcode = jsonTabContent.eclcode;
-					this.pluginId = jsonTabContent.pluginId;
-					this.title = jsonTabContent.title;                        
-					this.inputdsname = jsonTabContent.inputdsname;
-					this.outputdsname = jsonTabContent.outputdsname;
-					this.expression = jsonTabContent.expression;
-					var formulas = this.expression.split('#');
-					this.$.aggregateformulas.value = formulas[1];
-					this.$.aggregategroupformulas.value = formulas[0];
-					this.inputTab = jsonTabContent.inputTab;
-					this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;
-					break;
+		</paper-dialog>
+	</template>
+	<script>
+		class CommonAggregateEditor extends Polymer.Element {
+			static get is() { return 'common-aggregate-editor'; }
+			static get properties() {
+				return {
+					eclcode: String,
+					outputdsname: String,
+					inputdsname: String,
+					eclIP: String,
+					hpccuser: String,
+					displayFields: String,
+					expression: String,
+					title: String,
+					sortfields: String,
+					inputTab: String
 				}
 			}
-			for(var cnt = 0; cnt < tabs.length; cnt++){
-				if( this.inputdsname  === tabs[cnt].title){
-					this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
+			constructor() {
+				super();
+			}
+			changeLayoutforFrequency(event) {
+				console.log(event.currentTarget.value);
+				if (event.currentTarget.getAttribute("aria-pressed") === "true") {
+					this.$.addGroupFuncKey.disabled = true;
+					this.$.aggregategroupformulas.disabled = true;
+					this.$.aggregategroupformulas.value = "";
+					this.$.aggregategroupfunc.disabled = true;
+					this.$.aggregatefield.disabled = true;
+				} else {
+					this.$.addGroupFuncKey.disabled = false;
+					this.$.aggregategroupformulas.disabled = false;
+					this.$.aggregategroupfunc.disabled = false;
+					this.$.aggregatefield.disabled = false;
 				}
 			}
-		},
-
-	   loadgrid : function(tabTtitle){
-			var QueryStr1 =  this.eclcode;
-			if(QueryStr1.trim() === ''){
+			tableKeyAddFunction(event) {
+				var key_value = this.$.crosstabfield.value.trim();
+				if (this.$.aggregateformulas.value == undefined) {
+					this.$.aggregateformulas.value = "";
+				}
+				var currentformula = this.$.aggregateformulas.value.trim();
+				if (currentformula.indexOf(',' + key_value) >= 0 || key_value === '' || currentformula.indexOf(key_value + ',') >= 0 || currentformula === key_value) {
+					return;
+				} else {
+					this.$.aggregateformulas.value += (currentformula === "" ? "" : ",") + key_value;
+				}
+				this.$.sortfields.items = [];
+				var fieldList = [];
+				var splitstrs = this.$.aggregateformulas.value.split(',');
+				for (var cnt = 0; cnt < splitstrs.length; cnt++) {
+					fieldList.push('+' + splitstrs[cnt]);
+					fieldList.push('-' + splitstrs[cnt]);
+				}
+				this.$.sortfields.items = fieldList;
+			}
+			tableKeyAddGrpFunction(event) {
+				var key_value = this.$.aggregategroupfunc.value.trim() + "(" + this.$.aggregatefield.value.trim() + ")";
+				var key_name = this.$.aggregatefield.value.trim() + "_" + this.$.aggregategroupfunc.value.trim();
+				if(this.$.aggregategroupformulas.value==undefined)
+				this.$.aggregategroupformulas.value="";
+				var currentformula = this.$.aggregategroupformulas.value.trim();
+				if (currentformula.indexOf(key_name) >= 0 || this.$.aggregatefield.value === '' || this.$.aggregategroupfunc.value == '' || currentformula === key_name) {
+					return;
+				} else {
+					this.$.aggregategroupformulas.value += (currentformula === "" ? "" : ",") + key_name + ":=" + key_value;
+				}
+			}
+			ready(eve) {
+				super.ready();
+				console.log("Ready function");
+				//var selpage = document.querySelector("#pages").querySelector("#common-input");
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#common-input");
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var username = infoBox.username;
+				var password = infoBox.password;
+				var credentials = username === null || username === "" ? "" : (
+					password === null || password === "" ? (username + '@') :
+						(username + ':' + password + '@')
+				);
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address +
+					":" + infoBox.port;
+				this.eclIP = eclIP;
+				this.hpccuser = username;
+				this.displayFields = '';
+				this.eclcode = '';
+				this.$.TabTitle.value = '';
+				this.inputdsname = '';
+				this.outputdsname = '';
+				this.expression = '';
+				this.sortfields = '';
+				this.inputTab = '';
+				// setTimeout(function () {
+				// 	document.querySelector('#btnEditPlugin').fire('click');
+				// }, 2000);
+			}
+			serialize() {
+				var jsonStr = '{';
+				jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+				jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+				jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+				jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+				jsonStr += '\"expression\" : \"' + this.expression + '\",';
+				jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+				jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';
+				jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';
+				jsonStr += '\"pluginId\" : \"' + 'common-aggregate' + '\"}';
+				return jsonStr;
+			}
+			deSerialize(tabTtitle) {
+				console.log(tabTtitle);
+				var jsonTabContent = null;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var tabs = infoBox.tabsdata.Tabs;
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (tabTtitle === tabs[cnt].title) {
+						jsonTabContent = tabs[cnt];
+						this.displayFields = jsonTabContent.displayFields;
+						this.$.crosstabfield.items = this.displayFields.split(",");
+						this.$.aggregatefield.items = this.displayFields.split(",");
+						this.$.TabTitle.value = jsonTabContent.title;
+						this.eclcode = jsonTabContent.eclcode;
+						this.pluginId = jsonTabContent.pluginId;
+						this.title = jsonTabContent.title;
+						this.inputdsname = jsonTabContent.inputdsname;
+						this.outputdsname = jsonTabContent.outputdsname;
+						this.expression = jsonTabContent.expression;
+						var formulas = this.expression.split('#');
+						this.$.aggregateformulas.value = formulas[1];
+						this.$.aggregategroupformulas.value = formulas[0];
+						this.inputTab = jsonTabContent.inputTab;
+						this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;
+						break;
+					}
+				}
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (this.inputdsname === tabs[cnt].title) {
+						this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
+					}
+				}
+			}
+			loadgrid(tabTtitle) {
+				var QueryStr1 = this.eclcode;
+				if (QueryStr1.trim() === '') {
+					return;
+				}
+				var QueryStr1 = this.eclcode;
+				var QueryStr = QueryStr1 + "\n OUTPUT(" + this.outputdsname + ");";
+				return loadGridwithEcl(QueryStr, 1000);
+			}
+			open() {
+				this.$.TabTitle.value = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent;
+				var pages = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs");
+				var tabnames = "";
+				var inputidx = 0;
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (pages.selectedItem.id === papertabs[cnt].id) {
+						break;
+					}
+					tabnames += (tabnames === "" ? "" : ",") + papertabs[cnt].textContent.trim();
+					if (this.inputTab === papertabs[cnt].textContent.trim()) {
+						inputidx = cnt;
+					}
+				}
+				this.$.aggregateInputtab.items = tabnames.split(",");
+				this.$.aggregateInputtab.selectedItem = tabnames.split(",")[inputidx].trim();
+				this.$.dialog.open();
+			}
+			_okHandler(e) {
+				document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+				var currentPage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").selectedItem;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				this.title = this.$.TabTitle.value;
+				currentPage.outputdsname = 'aggregatedsName' + '_' + Math.random().toString(36).substr(2, 4);
+				this.outputdsname = currentPage.outputdsname;
+				var ipDs = this.inputdsname;
+				var QueryStr1 = this.eclcode + "\n" + currentPage.outputdsname + " := " +
+					(this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : "SORT(") + "TABLE(" + ipDs + ", {";
+				var aggreFieldsArr = this.$.aggregateformulas.value.split(",");
+				var str = "";
+				for (var cnt = 0; cnt < aggreFieldsArr.length; cnt++) {
+					str = aggreFieldsArr[cnt];
+					QueryStr1 += (cnt > 0 ? "," : "") + " " + ipDs + "." + str;
+				}
+				QueryStr1 += "," + (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? this.$.aggregategroupformulas.value : "CNT := COUNT(GROUP)") + "}, " + this.$.aggregateformulas.value + " , few)" +
+					(this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : ", -CNT)") + " : PERSIST(\'" + currentPage.outputdsname + "_persist\', EXPIRE(1));";
+				// var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
+				if (this.$.sortbyfieldsvalue.value == undefined)
+					this.$.sortbyfieldsvalue.value = "";
+				var QueryStr = QueryStr1 + "\n OUTPUT(" + (this.$.sortbyfieldsvalue.value.length > 0 ? ('SORT(' + currentPage.outputdsname + ',' + this.$.sortbyfieldsvalue.value + ')') : currentPage.outputdsname) + ");";
+				currentPage.eclcode = QueryStr1;
+				this.eclcode = QueryStr1;
+				this.sortfields = this.$.sortbyfieldsvalue.value;
+				this.inputTab = this.$.aggregateInputtab.value;
+				this.expression = this.$.aggregategroupformulas.value.trim() + '#' + this.$.aggregateformulas.value.trim();
+				console.log(QueryStr);
+				return loadGridwithEcl(QueryStr, this.$.aggregateoutputlimit.value);
+			}
+			addSortFunction(e) {
+				if(this.$.sortbyfieldsvalue.value != undefined)
+				{
+					var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
+					for (var cnt = 0; cnt < splitstrs.length; cnt++) {
+					if (splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1)) {
+						return;
+						}
+					}
+					this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value;
+				}
+				else
+				{
+					this.$.sortbyfieldsvalue.value =  this.$.sortfields.value;
+				}
+				
+			}
+			changeAggregateInput(event) {
+				console.log(event.currentTarget.value);
+				var tabid = "";
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if(event.currentTarget.value != null || event.currentTarget.value != undefined)
+					{
+					if (event.currentTarget.value === papertabs[cnt].textContent.trim()) {
+						tabid = papertabs[cnt].id;
+						break;
+					}
+					}
+				}
+				if (tabid === '') {
+					return;
+				}
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#" + tabid);
+				this.eclcode = selpage.editor.eclcode;
+				this.inputdsname = selpage.editor.outputdsname;
+				this.$.aggregatefield.items = selpage.editor.displayFields.split(",");
+				this.$.crosstabfield.items = selpage.editor.displayFields.split(",");
 				return;
 			}
-			var QueryStr1 =  this.eclcode;
-			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
-
-			return loadGridwithEcl(QueryStr, 1000);
-	   },
-		open: function () {
-
-             this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;			 
-
-			 var pages = document.querySelector("#tabs");
-
-			var tabnames = "";
-
-			var inputidx = 0;
-
-			for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
-				if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
-					break;
-				}
-				tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
-
-				if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
-					inputidx = cnt;
-
-				}
+			_cancelHandler(e) {
+				this.fire('cancel');
 			}
-			this.$.aggregateInputtab.items = tabnames.split(",");
-
-			this.$.aggregateInputtab.selectedItem = tabnames.split(",")[inputidx].trim();
-
-			this.$.dialog.open();
-		},
-
-		_okHandler: function (e) {
-		
-			document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
-			var currentPage = document.querySelector("#pages").selectedItem;
-			var infoBox = document.querySelector('#infobox');
-		
-			this.title  = this.$.TabTitle.value;
-			currentPage.properties.outputdsname = 'aggregatedsName'  + '_' +  Math.random().toString(36).substr(2, 4);
-
-			this.outputdsname = currentPage.properties.outputdsname;
-
-            var ipDs = this.inputdsname;
-
-            var QueryStr1 = this.eclcode + "\n" + currentPage.properties.outputdsname + " := " +
-
-                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : "SORT(") + "TABLE(" + ipDs + ", {";
-
-            var aggreFieldsArr = this.$.aggregateformulas.value.split(",");
-
-            var str = "";
-
-            for (var cnt = 0; cnt < aggreFieldsArr.length; cnt++) {
-
-                str = aggreFieldsArr[cnt];
-
-                QueryStr1 += (cnt > 0 ? "," : "") + " " + ipDs + "." + str;
-            }
-
-            QueryStr1 += "," + (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? this.$.aggregategroupformulas.value : "CNT := COUNT(GROUP)") + "}, " + this.$.aggregateformulas.value + " , few)" +
-
-                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : ", -CNT)") + " : PERSIST(\'" + currentPage.properties.outputdsname + "_persist\', EXPIRE(1));";
-
-            // var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
-		
-            var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.properties.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.properties.outputdsname) + ");";
-
-			currentPage.properties.eclcode = QueryStr1;
-
-			this.eclcode = QueryStr1;
-
-			this.sortfields = this.$.sortbyfieldsvalue.value;
-
-			this.inputTab = this.$.aggregateInputtab.value;
-
-            this.expression =  this.$.aggregategroupformulas.value.trim() + '#' + this.$.aggregateformulas.value.trim();
-
-			console.log(QueryStr);  
-
-			
-			return loadGridwithEcl(QueryStr, this.$.aggregateoutputlimit.value);
-
-	},
-
-	addSortFunction: function (e) {
-		var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
-		for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
-			if(splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1) ){
-				return;
+			setGeneralProperties(properties) {
+			}
+			setViewProperties(properties) {
+			}
+			getViewProperties() {
 			}
 		}
-
-        this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value  ;            
-    },
-
-		changeAggregateInput: function(e){
-
-			console.log(event.currentTarget.value);
-
-			 var tabid = "";
-
-			for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
-				if(event.currentTarget.value === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
-					tabid =  document.getElementsByTagName("paper-tab")[cnt].id;
-					break;
-				}
-			}
-
-          if(tabid === ''){
-                return;
-           }
-
-			var selpage = document.querySelector("#pages").querySelector("#" + tabid);
-
-			this.eclcode = selpage.editor.eclcode;
-
-			this.inputdsname = selpage.editor.outputdsname;
-
-			this.$.aggregatefield.items = selpage.editor.displayFields.split(",");
-
-			this.$.crosstabfield.items = selpage.editor.displayFields.split(",");
-
-            return;
-
-        },
-
-        _cancelHandler: function(e) {
-            this.fire('cancel');
-        },
-
-        setGeneralProperties: function(properties) {
-
-        },
-
-        setViewProperties: function(properties) {
-
-        },
-
-        getViewProperties: function() {
-
-		}
- });
-    </script>
+		customElements.define(CommonAggregateEditor.is, CommonAggregateEditor);
+	</script>
 </dom-module>

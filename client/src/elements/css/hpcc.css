@@ -1,0 +1,289 @@
+*, ::before, ::after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+}
+body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    color: #767676;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.42857143;
+    background: #f8f8f8 url(../images/login_bg.png) left bottom no-repeat;
+}
+a {
+    text-decoration: underline;
+    color: #767676;
+}
+a:hover {
+    color: #ff5722;
+}
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.1;
+    font-weight: bold;
+}
+.mb-0 {
+    margin-bottom: 0 !important
+}
+.col-row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+.col-6 {
+    width: 50%;
+    float: left;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.text-right {
+    text-align: right;
+}
+label {
+    font-weight: bold;
+    font-size: 12px;
+    margin: 0 0 5px;
+    width: 100%;
+    display: inline-block;
+}
+
+/*login styles*/
+.login-panel {
+    position: absolute;
+    top: 30%;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 870px;
+    background: #ff5722;
+}
+.left-pane {
+    float: left;
+    width: 380px;
+    padding: 50px 40px;
+    background: #fff;
+}
+.left-pane .head {
+    text-transform: uppercase;
+    color: #ff5722;
+    margin: 0 0 15px;
+    font-size: 18px;
+}
+.form-field {
+    width: 100%;
+    float: left;
+    margin: 0 0 10px;
+}
+.input-control {
+    width: 100%;
+    height: 36px;
+    background: #ffffff;
+    color: #044d91;
+    border: 1px solid #cbcbcb;
+    border-radius: 4px;
+    padding: 5px 10px;
+    outline: 0;
+    letter-spacing: 0.02em;
+    transition: 0.4s ease;
+    -webkit-transition: 0.4s ease;
+    -moz-transition: 0.4s ease;
+    -o-transition: 0.4s ease;
+}
+.input-control:focus {
+    border: 1px solid #ff5722;
+}
+.username {
+    padding: 5px 30px 5px 10px;
+    background-image: url(../images/user.png);
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+}
+.password {
+    padding: 5px 30px 5px 10px;
+    background-image: url(../images/security.png);
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+}
+.ripple {
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    position: absolute;
+    opacity: 1;
+}
+.rippleEffect {
+    animation: rippleDrop .6s linear;
+}
+@keyframes rippleDrop {
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+.btn {
+    width: 100%;
+    height: 36px;
+    border: 0;
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    border-radius: 4px;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    outline: 0;
+    position: relative;
+    overflow: hidden;
+}
+.btn-color {
+    background: #ff5722;
+    color: #fff;
+}
+.btn-grey {
+    background: #767676;
+    color: #fff;
+}
+.txt-single {
+    float: left;
+    width: 100%;
+    margin: 5px 0;
+    text-transform: uppercase;
+    color: #767676;
+    text-align: center;
+    font-weight: bold
+}
+.bottom-link {
+    width: 100%;
+    float: left;
+}
+.right-pane {
+    float: left;
+    width: 490px;
+    padding: 100px 40px 50px;
+    background: #ff5722 url(../images/hpcc-logo-watermark.png) right 20px top 20px no-repeat;
+}
+.right-pane .head {
+    float: left;
+    width: 100%;
+    font-size: 48px;
+    color: #fff;
+    margin: 0 0 20px
+}
+.right-pane .text {
+    float: left;
+    width: 100%;
+    color: #fff;
+    font-size: 16px;
+    min-height: 115px;
+}
+.copyright {
+    float: left;
+    width: 100%;
+    color: #fff;
+    font-weight: 600
+}
+
+/*register styles*/
+.register-panel {
+    position: absolute;
+    top: 20%;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 504px;
+    background: #fff;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.register-panel .head {
+    margin: 0;
+    padding: 25px 50px;
+    background: #767676 url(../images/hpcc-logo-watermark.png) right 10px top 10px no-repeat;
+    background-size: 70px;
+    color: #fff;
+    font-size: 24px;
+}
+.register-panel .form-col {
+    padding: 35px 50px;
+    display: inline-block;
+    width: 100%;
+}
+.input-line {
+    width: 100%;
+    border:0;
+    border-bottom: 1px solid #cbcbcb;
+    padding: 8px 0;
+    outline: 0;
+}
+.input-line:focus {
+    border-bottom: 1px solid #ff5722;
+}
+.register-panel .form-col .form-field {
+    margin: 0 0 25px;
+}
+.register-panel .form-col .btn {
+    height: 40px;
+}
+.register-panel .form-col .copyright {
+    color: #b3b3b3;
+    margin: 10px 0 0
+}
+
+@media (max-width: 1400px) {
+.login-panel {
+    top: 26%;
+}
+.register-panel {
+    top: 14%;
+}
+}
+
+@media (max-width: 1024px) {
+.login-panel {
+    top: 25%;
+}
+}
+@media (max-width: 992px) {
+.login-panel {
+    right: 15px;
+    left: 15px;
+    width: auto;
+}
+.left-pane {
+    width: 45%;
+}
+.right-pane {
+    width: 55%;
+}
+}
+
+@media (max-width: 640px) {
+.login-panel {
+    top: 50px;
+}
+.left-pane {
+    width: 100%;
+}
+.right-pane {
+    width: 100%;
+    padding: 40px 40px 50px;
+}
+.register-panel {
+    right: 15px;
+    left: 15px;
+    width: auto;
+}
+.register-panel .head {
+    padding: 20px 30px;
+}
+.register-panel .form-col {
+    padding: 20px 30px;
+}
+}

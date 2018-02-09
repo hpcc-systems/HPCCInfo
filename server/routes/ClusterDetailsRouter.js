@@ -25,7 +25,7 @@ router.post('/checkConnection', function(req, res, next) {
 		logger.info("REQUEST URL: "+ req.url +", REQUEST IP:  "+ req.ip +", RESPONSE STATUS CODE: " +res.statusCode);
 		logger.error("ERROR MESSAGE: "+ err.message);
 		return res.status(400).json(err.message);
-	})
+	});
 });
 
 //Return router

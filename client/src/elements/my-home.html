@@ -1,124 +1,469 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+
+
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+
+
+
+<link rel="import" href="dialog-button.html">
+<link rel="import" href="my-registration.html">
+<link rel="import" href="forgot-password.html">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans: 300, 600" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
+<style>
+    html,
+    body {
+        height: 100%;
+    }
+    body {
+        padding: 0;
+        margin: 0;
+        font-family: 'Open Sans', sans-serif;
+        color: #767676;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1.42857143;
+    }
+</style>
 <dom-module id="my-home">
-	<template>
-		<style is="custom-style">
-			.flex-vertical {
-		      @apply --layout-vertical;
-		      height: 100vh;
-		    }
+    <template>
+        <style include="shared-dialog-styles">
+            *,
+             ::before,
+             ::after {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            a {
+                text-decoration: underline;
+                color: #767676;
+            }
+            a:hover {
+                color: #ff5722;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                line-height: 1.1;
+                font-weight: bold;
+            }
+            .mb-0 {
+                margin-bottom: 0 !important
+            }
+            .col-row {
+                margin-right: -15px;
+                margin-left: -15px;
+            }
+            .col-6 {
+                width: 50%;
+                float: left;
+                padding-right: 15px;
+                padding-left: 15px;
+            }
+            .text-right {
+                text-align: right;
+            }
+            label {
+                font-weight: bold;
+                font-size: 12px;
+                margin: 0 0 5px;
+                width: 100%;
+                display: inline-block;
+            }
+            .body-bg {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #f8f8f8 url(images/login_bg.png) left bottom no-repeat;
+            }
+            /*login styles*/
+            .login-panel {
+                position: absolute;
+                top: 30%;
+                right: 0;
+                left: 0;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 870px;
+                background: #ff5722;
+            }
+            .left-pane {
+                float: left;
+                width: 380px;
+                padding: 50px 40px;
+                background: #fff;
+            }
+            .left-pane .head {
+                text-transform: uppercase;
+                color: #ff5722;
+                margin: 0 0 15px;
+                font-size: 18px;
+            }
+            .form-field {
+                width: 100%;
+                margin: 0 0 10px;
+            }
+            .input-control {
+                width: 100%;
+                height: 36px;
+                background: #ffffff;
+                color: #044d91;
+                border: 1px solid #cbcbcb;
+                border-radius: 4px;
+                padding: 5px 10px;
+                outline: 0;
+                letter-spacing: 0.02em;
+                transition: 0.4s ease;
+                -webkit-transition: 0.4s ease;
+                -moz-transition: 0.4s ease;
+                -o-transition: 0.4s ease;
+            }
+            .input-control:hover,
+            .input-control:focus {
+                border: 1px solid #ff5722;
+            }
+            .username {
+                padding: 5px 30px 5px 10px;
+                background-image: url(images/user.png);
+                background-position: right 10px center;
+                background-repeat: no-repeat;
+            }
+            .password {
+                padding: 5px 30px 5px 10px;
+                background-image: url(images/security.png);
+                background-position: right 10px center;
+                background-repeat: no-repeat;
+            }
+            .ripple {
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.4);
+                transform: scale(0);
+                position: absolute;
+                opacity: 1;
+            }
+            .rippleEffect {
+                animation: rippleDrop .6s linear;
+            }
+            @keyframes rippleDrop {
+                100% {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+            .btn {
+                width: 100%;
+                height: 36px;
+                border: 0;
+                font-weight: bold;
+                letter-spacing: 0.02em;
+                border-radius: 4px;
+                padding: 5px 10px;
+                margin: 0;
+                text-transform: uppercase;
+                text-align: center;
+                cursor: pointer;
+                outline: 0;
+                position: relative;
+                overflow: hidden;
+            }
+            .btn-color {
+                background: #ff5722;
+                color: #fff;
+            }
+            .btn-grey {
+                background: #767676;
+                color: #fff;
+            }
+            .txt-single {
+                float: left;
+                width: 100%;
+                margin: 5px 0;
+                text-transform: uppercase;
+                color: #767676;
+                text-align: center;
+                font-weight: bold
+            }
+            .bottom-link {
+                width: 100%;
+                float: left;
+            }
+            .right-pane {
+                float: left;
+                width: 490px;
+                padding: 100px 40px 50px;
+                background: #ff5722 url(images/hpcc-logo-watermark.png) right 20px top 20px no-repeat;
+            }
+            .right-pane .head {
+                float: left;
+                width: 100%;
+                font-size: 48px;
+                color: #fff;
+                margin: 0 0 20px
+            }
+            .right-pane .text {
+                float: left;
+                width: 100%;
+                color: #fff;
+                font-size: 16px;
+                min-height: 115px;
+            }
+            .copyright {
+                float: left;
+                width: 100%;
+                color: #fff;
+                font-weight: 600
+            }
+            .btn-small {
+                padding: 0;
+                margin: 0;
+                text-decoration: underline;
+                text-transform: none;
+            }
+            .btn-small:hover {
+                color: #ff5722;
+            }
+            paper-input {
+                --paper-input-container: {
+                    padding: 0 !important;
+                }
+                ;
+                --iron-input: {
+                    height: 28px !important;
+                }
+                ;
+                --paper-input-error: {
+                    top: -1.6em;
+                    text-align: right;
+                    font-size: 12px;
+                }
+                ;
+                --paper-input-container-underline: {
+                    display: none;
+                }
+                ;
+                --paper-input-container-underline-focus: {
+                    display: none;
+                }
+                ;
+                --paper-input-container-underline-disabled: {
+                    display: none;
+                }
+                ;
+            }
+            @media (max-width: 1400px) {
+                .login-panel {
+                    top: 26%;
+                }
+            }
+            @media (max-width: 1024px) {
+                .login-panel {
+                    top: 25%;
+                }
+            }
+            @media (max-width: 992px) {
+                .login-panel {
+                    right: 15px;
+                    left: 15px;
+                    width: auto;
+                }
+                .left-pane {
+                    width: 45%;
+                }
+                .right-pane {
+                    width: 55%;
+                }
+            }
+            @media (max-width: 640px) {
+                .login-panel {
+                    top: 50px;
+                }
+                .left-pane {
+                    width: 100%;
+                }
+                .right-pane {
+                    width: 100%;
+                    padding: 40px 40px 50px;
+                }
+            }
+        </style>
+        <iron-localstorage name="user-storage" value="{{user}}"></iron-localstorage>
+        <iron-localstorage name="userSigned-storage" value="{{signedIn}}"></iron-localstorage>
+        <app-location route="{{route}}"></app-location>
 
-		    .flexchild-vertical {
-		      @apply --layout-flex;
-		      @apply --layout-horizontal;
-		    }
+        <body>
+            <div class="body-bg"></div>
+            <div class="login-panel">
+                <div class="left-pane">
+                    <h3 class="head">Login to HPCC Info</h3>
+                    <template is="dom-if" if="[[loginError]]">
+                        <p class="alert-error"><strong>Error:</strong> [[loginError]]</p>
+                    </template>
+                    <iron-form id="LoginForm">
+                        <form method="post" action="/userDetails/login">
+                            <div class="form-field">
+                                <paper-input no-label-float class="input-control username" id="username" name="username" placeholder="Username" auto-validate
+                                    required error-message="Username cannot be empty">
+                                </paper-input>
+                            </div>
 
-			.header1 {
-		      font-family: 'Open Sans', sans-serif;
-		      margin: 20px;
-		      font-size: 30px;
-		      color: #767676;
-		      font-weight: 300;
-		    }
+                            <div class="form-field">
+                                <paper-input no-label-float class="input-control password" id="password" name="password" placeholder="Password" auto-validate type="password"
+                                    required error-message="Password cannot be empty">
+                                </paper-input>
+                            </div>
+                        </form>
+                    </iron-form>
+                    <div class="form-field mb-0">
+                        <paper-button class="btn btn-color" raised on-tap="UserLogin">
+                            <iron-label class="headerLabels">Sign in</iron-label>
+                        </paper-button>
+                    </div>
+                    <div class="txt-single">Or</div>
+                    <div class="form-field">
+                        <paper-button raised on-tap="signIn" class="btn btn-grey">Sign in with Google</paper-button>
+                    </div>
+                    <div class="bottom-link">
+                        <div class="col-row">
+                            <div class="col-6">
+                                <paper-button class="btnForgotPassword btn-small" on-tap="ForgotPassword">
+                                    <iron-label class="headerLabels">Forgot Password?</iron-label>
+                                </paper-button>
 
-		    .header1 span {
-		      color: #FF5722;
-		    }
+                            </div>
+                            <div class="col-6 text-right">
+                                <paper-button class="btnUserRegistration btn-small" on-tap="UserRegistration">
+                                    <iron-label class="headerLabels">New User?</iron-label>
+                                </paper-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-		    .left-spacer {
-		      width: 33%;
-		      margin-left: 0px;
-		      flex: 1;
-		    }
+                <div class="right-pane">
+                    <h1 class="head">HPCC Info</h1>
+                    <div class="text">A Workbook (like an Excel workbook) to view HPCC data files and apply simple data manipulation.</div>
+                    <div class="copyright">©2018 Powered By HPCCSystems</div>
+                </div>
+            </div>
+        </body>
+        <my-registration id="registration"></my-registration>
+        <forgot-password id="forgotPassword"></forgot-password>
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
+    </template>
 
-		    .right-spacer {
-		      width: 33%;
-		      flex: 1;
-		    }
-
-		    .main-content {
-		      width: 33%;
-		      display: flex;
-		      flex: 1;
-		      flex-direction: column;
-		      justify-content: center;
-  			  align-items: center;
-		    }
-
-		    .main-text {
-		      text-align: center;
-		      font-family: 'Open Sans', sans-serif;
-		      font-size: 75px;
-		      color: #767676;
-		      font-weight: 600;
-		    }
-
-		    .main-text span {
-		      color: #FF5722;
-		    }
-
-		    .main-desc {
-		      font-family: 'Open Sans', sans-serif;
-		      margin-top: 20px;
-		      font-size: 20px;
-		      color: #767676;
-		      font-weight: 300;
-		    }
-
-		    .footer {
-		      margin-top: 5px;
-		      font-size: 16px;
-		      display: flex;
-		      font-family: 'Open Sans', sans-serif;
-		      margin-left: 20px;
-		    }
-
-		    .siginBtn {
-		      background-color: #FF5722;
-		      color: white;
-		      width: 130px;
-		    }
-
-		    .signBtnDiv {
-		      margin-top: 60px;
-		      text-align: center;
-		    }
-
-		    
-
-		</style>
-
-		<app-location route="{{route}}"></app-location>
-
-		<div class="container flex-vertical">
-			<div class="header1">HPCC <span>Info</span><hr></div>
-			<div class="flexchild-vertical">
-				<div class="left-spacer"></div>
-		      	<div class="main-content">
-		        	<div class="main-text">HPCC <span>Info</span></div>
-		          	<div class="main-desc">
-		            	A Workbook (like an Excel workbook) to view HPCC data files and apply simple data manipulation
-		          	</div>
-		         	<div class="signBtnDiv">
-		            	<paper-button raised class="siginBtn" on-tap="signIn">Sign In</paper-button>
-		          	</div> 
-		      	</div> 
-		      	<div class="right-spacer"></div>
-			</div>
-			<div class="footer">Powered By HPCCSystems</div>
-		</div>
-
-	</template>
-	<script type="text/javascript">
-		Polymer({
-			is: "my-home",
-			signIn: function() {
-        		this.fire('sign-in', null, { bubbles: false });
-      		}
-		});
-	</script>
+    <script type="text/javascript">
+        class MyHome extends Polymer.Element {
+            static get is() { return 'my-home'; }
+            static get properties() {
+                return {
+                    loginError: String,
+                    storedUser: Object,
+                    user: {
+                        type: Object,
+                        notify: true
+                    },
+                    signedIn: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    }
+                }
+            }
+            ready() {
+                super.ready();
+                this._initializeLoginEvents();
+            }
+            _initializeLoginEvents() {
+                // * Fired when Implementation Partners Login form is submitted                 
+                console.log('Initialize CALLED!!!!!');
+                this.$.LoginForm.addEventListener('iron-form-submit', function (event) {
+                    console.log("Implementation Partners ... iron-form-submit called......");
+                });
+                // * Fired before Implementation Partners Login form is submitted. 
+                this.$.LoginForm.addEventListener('iron-form-presubmit', function (event) {
+                    console.log("Implementation Partners ... iron-form-presubmit called......");
+                    this.request.body.password = btoa(this.request.body.password);
+                    console.log(this.request.body.password);
+                });
+                // * Fired when successful Implementation Partners Login form response is recieved.               
+                this.$.LoginForm.addEventListener('iron-form-response', this.LoginFormResponse.bind(this));
+                // * Fired when the there is an error in Implementation Partners Login form response.                
+                this.$.LoginForm.addEventListener('iron-form-error', this.LoginFormError.bind(this));
+                
+            }
+            LoginFormResponse(e) {
+                debugger;
+                if (e.detail.response.length === 0) {
+                    console.log("No User Found");
+                    this.loginError = 'No User Found';
+                }
+                else {
+                    this.loginError = '';
+                    console.log("RESPONSE: ", e.detail.response);
+                    
+                    let response = e.detail.response;
+                    if (response.username) {
+                        this.user = {
+                            displayName: response.username,
+                            email: response.Email,
+                            dbauth:true,
+                        };
+                        this.signedIn = true;   
+                        this.$.username.value="";
+                        this.$.password.value="";
+                        this.$.username.invalid = false;
+                        this.$.password.invalid = false;                     
+                        this.set('route.path', '/info');                        
+                    }
+                    else {
+                        console.log("User Not Found");
+                        this.$.toast.open();
+                        this.set('route.path', '/');
+                    }
+                }
+            }
+            LoginFormError(e) {
+                console.log("ERROR: ", e.detail);
+                this.loginError = 'No User Found';
+            }
+            signIn() {
+                this.dispatchEvent(new CustomEvent('sign-in', null, { bubbles: false }));
+            }
+            UserRegistration() {
+                var dialog = this.$.registration;
+                dialog.open();
+            }
+            ForgotPassword() {
+                var dialog = this.$.forgotPassword;
+                dialog.open();
+            }
+            UserLogin() {
+                console.log(this.$.username.value);
+                console.log(this.$.password.value);
+                this.$.LoginForm.submit(); 
+            }
+        }
+        customElements.define(MyHome.is, MyHome);
+    </script>
 </dom-module>

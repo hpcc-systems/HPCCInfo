@@ -9,340 +9,269 @@
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-filter-editor">
-    <template>
-    	<style include="shared-dialog-styles"></style>
-        <paper-dialog id="dialog" modal>
-        		<iron-label>
-		            <div class="headerDiv">
-		                <span>Apply a Filter</span>
-		        	</div>
-		        </iron-label>
-		        <paper-dialog-scrollable>
-		            <!-- User cannot enter title value beginning with a number -->
-		            <paper-input id='TabTitle' label="Title" 
-		                         required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
-		                         error-message="Title is Required"></paper-input>
-		            <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-		            <vaadin-combo-box id='filterInputTab' on-value-changed='changeInput' required label="Input Dataset"></vaadin-combo-box>
-		            <vaadin-combo-box id='field' required label="Field"></vaadin-combo-box>
-		            <vaadin-combo-box id='operation' required label="Operation" items='["=", ">", "<",">=","<=","IN","BETWEEN"]'></vaadin-combo-box>
-		            <paper-input id='formulavalue' label="Value"></paper-input>
-		            <paper-button on-tap="andFunction" class="addBtn">AND</paper-button>
-		            <paper-button on-tap="orFunction" class="addBtn">OR</paper-button>
-		            <paper-input id='filterformulas' label="Value"></paper-input>
-					<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
-	                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
-	                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
-	            </paper-dialog-scrollable>
-	            <div class="buttons">
-	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
-	                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-	            </div>
-        </paper-dialog>
-    </template>
-    <script>
-    Polymer({
-        is: 'common-filter-editor',
+	<template>
+		<style include="shared-dialog-styles"></style>
+		<style>
+			paper-tabs {
+				font-family: 'Roboto', 'Noto', sans-serif;
+				-webkit-font-smoothing: antialiased;
+				width: 100%;
+				text-transform: uppercase;
+				color: #767676;
+				--paper-tabs-selection-bar-color: white;
+			}
+			vaadin-combo-box {
+				width: 100%;
+				display: block !important;
+			}
+		</style>
 
 
-	properties: {
-
-
-		inputeclcode : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
-		outputdsname : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
-		inputdsname : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
-
-		hpccuser : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
-
-		displayFields : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
-		expression : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-		title: {
-			type: Object,
-			value: function() { return []; }
-		},
-	    eclcode: {
-				type: Object,
-				value: function() { return {}; }
-		},
-		sortfields: {
-			type : String,
-			value : ""
-		},
-	    inputTab: {
-			type : String,
-			value : ""
-		}
-	},
-
-	ready : function(){
-		var selpage = document.querySelector("#pages").querySelector("#common-input");
-		var infoBox = document.querySelector('#infobox');
-		var username = infoBox.username;
-		var password = infoBox.password;
-		var credentials = username === null || username === "" ? "" : (
-		password === null || password === "" ?  (username + '@') :
-		(username + ':' + password + '@')               
-		);
-		var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.cluster_address +
-		":" + infoBox.port;
-		this.eclIP = eclIP;
-		this.hpccuser = username;
-
-		this.displayFields = '';
-		this.eclcode = '';
-		this.inputeclcode = '';
-		this.$.TabTitle.value = '';
-		
-		this.inputdsname = '';
-		this.outputdsname = '';
-		this.expression = '';
-		this.sortfields = '';
-		this.inputTab = '';
-		// setTimeout(function () {
-        // 	document.querySelector('#btnEditPlugin').fire('click');
-        // }, 2000);
-	},
-
-deSerialize : function(tabTtitle){
-
- var jsonTabContent  = null;
-
-  var infoBox = document.querySelector('#infobox');
-
-  var tabs = infoBox.properties.tabsdata.Tabs;
-
-   for(var cnt = 0; cnt < tabs.length; cnt++){
-		if( tabTtitle === tabs[cnt].title){
-			jsonTabContent = tabs[cnt];
-			this.displayFields = jsonTabContent.displayFields;
-			this.$.field.items = this.displayFields.split(",");
-			this.$.TabTitle.value = jsonTabContent.title;
-			this.eclcode = jsonTabContent.eclcode;
-			this.inputeclcode = jsonTabContent.eclcode;
-			this.inputdsname = jsonTabContent.inputdsname;
-			this.outputdsname = jsonTabContent.outputdsname;
-			this.pluginId = jsonTabContent.pluginId;
-			this.title = jsonTabContent.title;
-			this.expression = jsonTabContent.expression;
-		    this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields === undefined ? '' : jsonTabContent.sortfields;						
-			this.$.filterformulas.value = jsonTabContent.expression; 
-			this.inputTab = jsonTabContent.inputTab;
-			this.$.filterInputTab.value = jsonTabContent.inputdsname;
-			
-		   break;
-		}
-   }
-	for(var cnt = 0; cnt < tabs.length; cnt++){
-		if( this.inputdsname  === tabs[cnt].title){
-			this.$.field.items = tabs[cnt].displayFields.split(",");
-		}
-	}
-},
-
-serialize : function(){
-	var jsonStr = '{';
-	jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
-	jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
-	jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
-	jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
-	jsonStr += '\"expression\" : \"' + this.expression + '\",';
-	jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
-	jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';	
-	jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';	
-	jsonStr += '\"pluginId\" : \"' + 'common-filter' + '\"}';
-
-	return jsonStr;
-},
-loadgrid : function(tabTtitle){
-	var QueryStr1 =  this.eclcode;
-	if(QueryStr1.trim() === ''){
-		return;
-	}
-	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
-	
-	return loadGridwithEcl(QueryStr, 1000);
-},
-
-
-open: function () {
-
-    this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
-
-	var pages = document.querySelector("#tabs");
-
-	var tabnames = "";
-
-	var inputidx = 0;
-
-	for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
-		if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
-			break;
-		}
-		tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
-
-		if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
-				inputidx = cnt;
-		}
-
-	}
-	this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
-
-    this.$.filterInputTab.selectedItem = tabnames.split(",")[inputidx].trim();
-
-	this.$.dialog.open();
-},
-
-_okHandler: function (e) {
-	document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
-	this.title  = this.$.TabTitle.value;
-	var currentPage = document.querySelector("#pages").selectedItem;
-
-	currentPage.outputdsname = 'filterdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
-
-	var infoBox = document.querySelector('#infobox');
-
-	this.outputdsname = currentPage.outputdsname;
-
-	var QueryStr1 =  this.inputeclcode + "\n" + currentPage.outputdsname + " := " + 
-					 this.inputdsname + "(" +                                
-					 this.$.filterformulas.value + ")" + " : PERSIST(\'" + currentPage.outputdsname + "_persist\', EXPIRE(1));";
-
-    this.expression = this.$.filterformulas.value;
-
-	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.outputdsname) + ");";
-
-	var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + 
-				// (this.hpccuser != '' ? this.hpccuser + ':' + this.password + '@' : '')  +
+		<paper-dialog id="dialog" modal>
+			<iron-label>
+				<div class="headerDiv">
+					<span>Apply a Filter</span>
+				</div>
+			</iron-label>
+			<paper-dialog-scrollable>
+				<!-- User cannot enter title value beginning with a number -->
+				<paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
+				<paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+				<vaadin-combo-box id='filterInputTab' on-value-changed='changeInput' required label="Input Dataset"></vaadin-combo-box>
+				<vaadin-combo-box id='field' required label="Field"></vaadin-combo-box>
+				<vaadin-combo-box id='operation' required label="Operation" items='["=", ">", "<",">=","<=","IN","BETWEEN"]'></vaadin-combo-box>
+				<paper-input id='formulavalue' label="Value"></paper-input>
+				<paper-button on-tap="andFunction" class="addBtn">AND</paper-button>
+				<paper-button on-tap="orFunction" class="addBtn">OR</paper-button>
+				<paper-input id='filterformulas' label="Value"></paper-input>
+				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
+				<paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+				<paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
+			</paper-dialog-scrollable>
+			<div class="buttons">
+				<paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+				<paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+			</div>
+		</paper-dialog>
+	</template>
+	<script>
+		class CommonFilterEditor extends Polymer.Element {
+			static get is() { return 'common-filter-editor'; }
+			static get properties() {
+				return {
+					inputeclcode: String,
+					outputdsname: String,
+					inputdsname: String,
+					hpccuser: String,
+					displayFields: String,
+					expression: String,
+					title: String,
+					eclcode: String,
+					sortfields: String,
+					inputTab: String
+				}
+			}
+			constructor() {
+				super();
+			}
+			ready(e) {
+				super.ready();
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#common-input");
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var username = infoBox.username;
+				var password = infoBox.password;
+				var credentials = username === null || username === "" ? "" : (
+					password === null || password === "" ? (username + '@') :
+						(username + ':' + password + '@')
+				);
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address +
+					":" + infoBox.port;
+				this.eclIP = eclIP;
+				this.hpccuser = username;
+				this.displayFields = '';
+				this.eclcode = '';
+				this.inputeclcode = '';
+				this.$.TabTitle.value = '';
+				this.inputdsname = '';
+				this.outputdsname = '';
+				this.expression = '';
+				this.sortfields = '';
+				this.inputTab = '';
+				this.$.sortfields.$.overlay.shadowRoot.querySelector('#dropdown').shadowRoot.querySelector('#overlay').shadowRoot.querySelector('#content').style.padding=0;
+				this.$.operation.$.overlay.shadowRoot.querySelector('#dropdown').shadowRoot.querySelector('#overlay').shadowRoot.querySelector('#content').style.padding=0;
+				// setTimeout(function () {
+				// 	document.querySelector('#btnEditPlugin').fire('click');
+				// }, 2000);
+			}
+			deSerialize(tabTtitle) {
+				var jsonTabContent = null;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var tabs = infoBox.tabsdata.Tabs;
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (tabTtitle === tabs[cnt].title) {
+						jsonTabContent = tabs[cnt];
+						this.displayFields = jsonTabContent.displayFields;
+						this.$.field.items = this.displayFields.split(",");
+						this.$.TabTitle.value = jsonTabContent.title;
+						this.eclcode = jsonTabContent.eclcode;
+						this.inputeclcode = jsonTabContent.eclcode;
+						this.inputdsname = jsonTabContent.inputdsname;
+						this.outputdsname = jsonTabContent.outputdsname;
+						this.pluginId = jsonTabContent.pluginId;
+						this.title = jsonTabContent.title;
+						this.expression = jsonTabContent.expression;
+						this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields === undefined ? '' : jsonTabContent.sortfields;
+						this.$.filterformulas.value = jsonTabContent.expression;
+						this.inputTab = jsonTabContent.inputTab;
+						this.$.filterInputTab.value = jsonTabContent.inputdsname;
+						break;
+					}
+				}
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (this.inputdsname === tabs[cnt].title) {
+						this.$.field.items = tabs[cnt].displayFields.split(",");
+					}
+				}
+			}
+			serialize() {
+				var jsonStr = '{';
+				jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+				jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+				jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+				jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+				jsonStr += '\"expression\" : \"' + this.expression + '\",';
+				jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+				jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';
+				jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';
+				jsonStr += '\"pluginId\" : \"' + 'common-filter' + '\"}';
+				return jsonStr;
+			}
+			loadgrid(tabTtitle) {
+				var QueryStr1 = this.eclcode;
+				if (QueryStr1.trim() === '') {
+					return;
+				}
+				var QueryStr = QueryStr1 + "\n OUTPUT(" + this.outputdsname + ");";
+				return loadGridwithEcl(QueryStr, 1000);
+			}
+			open() {
+				this.$.TabTitle.value = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent;
+				var pages = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs");
+				var tabnames = "";
+				var inputidx = 0;
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (pages.selectedItem.id === papertabs[cnt].id) {
+						break;
+					}
+					tabnames += (tabnames === "" ? "" : ",") + papertabs[cnt].textContent.trim();
+					if (this.inputTab === papertabs[cnt].textContent.trim()) {
+						inputidx = cnt;
+					}
+				}
+				this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
+				this.$.filterInputTab.selectedItem = tabnames.split(",")[inputidx].trim();
+				this.$.dialog.open();
+			}
+			_okHandler(e) {
+				document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+				this.title = this.$.TabTitle.value;
+				var currentPage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").selectedItem;
+				currentPage.outputdsname = 'filterdsName' + '_' + Math.random().toString(36).substr(2, 4);
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				this.outputdsname = currentPage.outputdsname;
+				var QueryStr1 = this.inputeclcode + "\n" + currentPage.outputdsname + " := " +
+					this.inputdsname + "(" +
+					this.$.filterformulas.value + ")" + " : PERSIST(\'" + currentPage.outputdsname + "_persist\', EXPIRE(1));";
+				this.expression = this.$.filterformulas.value;
+				if (this.$.sortbyfieldsvalue.value == undefined)
+					this.$.sortbyfieldsvalue.value = "";
+				var QueryStr = QueryStr1 + "\n OUTPUT(" + (this.$.sortbyfieldsvalue.value.length > 0 ? ('SORT(' + currentPage.outputdsname + ',' + this.$.sortbyfieldsvalue.value + ')') : currentPage.outputdsname) + ");";
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +
+					// (this.hpccuser != '' ? this.hpccuser + ':' + this.password + '@' : '')  +
 					infoBox.cluster_address +
 					":" + infoBox.port;
-
-	currentPage.eclcode = QueryStr1;
-
-	this.inputTab = this.$.filterInputTab.value;
-
-	this.sortfields = this.$.sortbyfieldsvalue.value;
-
-	this.eclcode = QueryStr1;
-
-	return loadGridwithEcl(QueryStr, this.$.filteroutputlimit.value);
-},
-changeInput: function(e){
-
-	var tabid = "";
-
-	for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
-		if(event.currentTarget.value === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
-			tabid =  document.getElementsByTagName("paper-tab")[cnt].id;
-			break;
-		}
-	}
-
-    if(tabid === ''){
-        return;
-    }
-
-	var selpage = document.querySelector("#pages").querySelector("#" + tabid);
-
-	this.eclcode = selpage.editor.eclcode;
-
-	this.inputeclcode = selpage.editor.eclcode;
-
-	this.inputdsname = selpage.editor.outputdsname;
-
-	this.displayFields = selpage.editor.displayFields;
-
-	this.$.field.items = selpage.editor.displayFields.split(",");
-
-    this.$.sortfields.items = [];
-
-	var fieldList = [];
-
-	var splitstrs =  selpage.editor.displayFields.split(',');
-	for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
-		fieldList.push('+' + splitstrs[cnt]);
-		fieldList.push('-' + splitstrs[cnt]);
-	}
-
-    this.$.sortfields.items = fieldList;
-
-	return;
-
-    },
-    andFunction: function (e) {
-
-		var infoBox = document.querySelector('#infobox');
-
-		var strFields = ["STRING", "UNICODE"];
-
-		var formula = this.$.formulavalue.value;
-
-		formula = formula.startsWith("'") ? formula.substring(2) : formula;
-
-		formula = formula.endsWith("'") ? formula.substring(0, formula.length -1) : formula;
-
-
-		if(infoBox.fieldDtls.has(this.$.field.value)){
-		 formula = strFields.includes(infoBox.fieldDtls.get(this.$.field.value).toUpperCase()) ? ("'" + formula + "'") : formula;
-		}
-        this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' +  formula;
-		
-		//  this.$.formulavalue.value ;            
-    },
-
-	addSortFunction: function (e) {
-		var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
-		for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
-			if(splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1) ){
+				currentPage.eclcode = QueryStr1;
+				this.inputTab = this.$.filterInputTab.value;
+				this.sortfields = this.$.sortbyfieldsvalue.value;
+				this.eclcode = QueryStr1;
+				return loadGridwithEcl(QueryStr, this.$.filteroutputlimit.value);
+			}
+			changeInput(event) {
+				var tabid = "";
+				var papertabs = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (event.currentTarget.value != null || event.currentTarget.value != undefined) {
+						if (event.currentTarget.value === papertabs[cnt].textContent.trim()) {
+							tabid = papertabs[cnt].id;
+							break;
+						}
+					}
+				}
+				if (tabid === '') {
+					return;
+				}
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#" + tabid);
+				this.eclcode = selpage.editor.eclcode;
+				this.inputeclcode = selpage.editor.eclcode;
+				this.inputdsname = selpage.editor.outputdsname;
+				this.displayFields = selpage.editor.displayFields;
+				this.$.field.items = selpage.editor.displayFields.split(",");
+				this.$.sortfields.items = [];
+				var fieldList = [];
+				var splitstrs = selpage.editor.displayFields.split(',');
+				for (var cnt = 0; cnt < splitstrs.length; cnt++) {
+					fieldList.push('+' + splitstrs[cnt]);
+					fieldList.push('-' + splitstrs[cnt]);
+				}
+				this.$.sortfields.items = fieldList;
 				return;
 			}
+			andFunction(e) {
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var strFields = ["STRING", "UNICODE"];
+				var formula = this.$.formulavalue.value;
+				formula = formula.startsWith("'") ? formula.substring(2) : formula;
+				formula = formula.endsWith("'") ? formula.substring(0, formula.length - 1) : formula;
+				if (infoBox.fieldDtls.has(this.$.field.value)) {
+					formula = strFields.includes(infoBox.fieldDtls.get(this.$.field.value).toUpperCase()) ? ("'" + formula + "'") : formula;
+				}
+				if (this.$.filterformulas.value == undefined) {
+					this.$.filterformulas.value = this.$.field.value + ' ' + this.$.operation.value + ' ' + formula;
+				}
+				else
+					this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + formula;
+				//  this.$.formulavalue.value ;            
+			}
+			addSortFunction(e) {
+				if(this.$.sortbyfieldsvalue.value != undefined)
+				{
+					var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
+					for (var cnt = 0; cnt < splitstrs.length; cnt++) {
+						if (splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1)) {
+							return;
+						}
+					}	
+					this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value;
+				}
+				else
+				{
+					this.$.sortbyfieldsvalue.value =  this.$.sortfields.value;
+				}				
+			}
+			orFunction(e) {
+				this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " OR " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + this.$.formulavalue.value;
+			}
+			_cancelHandler(e) {
+				this.fire('cancel');
+			}
+			setGeneralProperties(properties) {
+			}
+			setViewProperties(properties) {
+			}
+			getViewProperties() {
+			}
 		}
-
-        this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value  ;            
-    },
-
-		
-        
-    orFunction: function (e) {
-        this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " OR " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' +this.$.formulavalue.value ;
-    },
-    _cancelHandler: function (e) {
-        this.fire('cancel');
-    },
-
-    setGeneralProperties: function (properties) {
-
-    },
-
-    setViewProperties: function(properties) {
-
-    },
-
-    getViewProperties: function() {
-
-    }
-});
-    </script>
+		customElements.define(CommonFilterEditor.is, CommonFilterEditor);
+	</script>
 </dom-module>

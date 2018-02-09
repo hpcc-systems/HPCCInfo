@@ -7,27 +7,28 @@
 <!--- ---------------------------------------------dialog button element------------------------------------------------>
 
 <dom-module id="dialog-button">
-    <style is="custom-style">
-      paper-icon-button {
-        width: 35px;
-        height: 35px;
-        color: var(--paper-indigo-500);
-        border-radius: 50%;
-      }
-
-      paper-icon-button:hover {
-        background-color: var(--paper-indigo-500);
-        color: white;
-      }
+    <custom-style>
+    <style >
+        paper-icon-button {
+            width: 35px;
+            height: 35px;
+            color: var(--paper-indigo-500);
+            border-radius: 50%;
+        }
+        paper-icon-button:hover {
+            background-color: var(--paper-indigo-500);
+            color: white;
+        }
     </style>
+    </custom-style>
     <template>
         <paper-icon-button id=[[id]] icon="[[icon]]" title=[[title]] disabled=[[disabled]] on-tap="clickHandler"></paper-icon-button>
     </template>
     <script>
-        Polymer({
-            is: 'dialog-button',
-            properties: {
-
+        class DialogButton extends Polymer.Element {
+            static get is() {return 'dialog-button'; }
+      
+        static get properties() { return {
                 dialogId: {
                     type: String
                 },
@@ -35,17 +36,22 @@
                     type : Boolean,
                     value : false
                 },
-                  /* Button ID */
-               id: String,
-
+                /* Button ID */
+                id: String,
                 /* Tooltip Text */
                 title: String,
                 icon: {
                     type: String
                 }
-            },
-
-            clickHandler: function (e) {
+            }
+            }
+            constructor(){
+                super();
+            }
+            ready(){
+                super.ready();
+            }
+            clickHandler(e) {
                if(this.id) {
                      // Get Dialog Element and Open
                      var dialog = document.querySelector(this.id);
@@ -54,7 +60,7 @@
                     console.log("dialog " + this.id + " does not exist")
                 }
             }
-        });
+        }
+        customElements.define(DialogButton.is, DialogButton);
     </script>
-
 </dom-module>

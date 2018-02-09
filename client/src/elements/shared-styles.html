@@ -3,24 +3,23 @@
 <dom-module id="shared-grid-styles">
   <template>
     <style>
-		vaadin-grid{
+        vaadin-grid{
             height: calc(100vh - 130px);
         }
-
- 	</style>
+    </style>
  </template>
 </dom-module>
 
 <dom-module id="shared-dialog-styles">
-	<template>
-		<style>
-		 	paper-button.green {
-            	background-color: var(--paper-green-500);
-            	color: white;
-        	}
+    <template>
+        <style>
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
             
-        	paper-button.indigo {
-            	background-color: var(--paper-indigo-500);
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
                 color: white;
                 --paper-button-raised-keyboard-focus: {
                     background-color: var(--paper-pink-a200) !important;
@@ -36,13 +35,11 @@
             paper-button.green:hover {
                 background-color: var(--paper-green-400)
             }
-
             paper-dialog {
                 min-width: 500px;
-                min-height: 400px;
+                /*min-height: 400px;*/
                 margin-top: 0px;
             }
-
             paper-input {
                 margin-top: 5px;
             }
@@ -50,13 +47,11 @@
             h2 {
                 margin-top: 15px;
             }
-
             .headerDiv{
                 text-align: center;
                 font-size: x-large;
                 text-transform: none;
             }
-
             /*.buttons {
                 position: absolute;
                 right: 0;
@@ -65,26 +60,29 @@
                 margin-bottom: 10px;
                 margin-right: 10px;
             }*/
-
+            .buttons {
+                padding: 15px 19px 20px;
+            }
             .container {
                 display: flex;
                 flex-direction: column;
             }
-
             paper-button.addBtn {
                 background-color: #424242; 
                 color: #fff; 
                 margin-top: 10px;
                 margin-bottom: 10px;
                 margin-left: 0px;
-                padding: 5px;"
+                padding: 5px;
             }
-
             paper-dialog-scrollable {
                 margin-top: 0px;
             }
-
-		</style>
-	</template>
+        </style>
+    </template>
+    <script type="text/javascript">
+        class SharedDialogStyles extends Polymer.Element {
+            static get is() {return 'shared-dialog-styles'; }
+    }
+    </script>
 </dom-module>
-

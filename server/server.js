@@ -18,10 +18,12 @@ app.use(express.static(path.join(__dirname, '../client')));
 const clusterDetailsRouter = require('./routes/ClusterDetailsRouter');
 
 const projectDetailsRouter = require('./routes/ProjectDetailsRouter');
+const userDetailsRouter = require('./routes/UserDetailsRouter');
 
 app.use('/clusterDetails', clusterDetailsRouter);
 
 app.use('/projectDetails', projectDetailsRouter);
+app.use('/userDetails', userDetailsRouter);
 
 //Start Server
 app.listen(3000, function() {

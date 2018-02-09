@@ -1,7 +1,5 @@
-
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html"> 
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -11,7 +9,6 @@
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
-<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
@@ -24,22 +21,25 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<!-- <link rel="import" href="../../bower_components/iron-icons/iron-icons.html"> -->
 
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
-
+<link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="info-box.html">
+<link rel="import" href="my-login.html">
 <link rel="import" href="new-worksheet-dialog.html">
 <link rel="import" href="edit-worksheet-dialog.html">
 <link rel="import" href="open-worksheet-dialog.html">
 <link rel="import" href="dialog-button.html">
-<link rel="import" href="my-login.html">
 <link rel="import" href="na-behavior.html">
 
 <dom-module id="hpcc-info-app">
-
     <template>
+        <iron-localstorage name="user-storage" value="{{user}}"></iron-localstorage>
+        <iron-localstorage name="userSigned-storage" value="{{signedIn}}"></iron-localstorage>
+      
         <iron-ajax id="ajaxRetrieveAllProjects" method="GET" handle-as="json" on-response="ajaxRetrieveAllProjectsResponse">
         </iron-ajax>
         <iron-ajax id="ajaxRetrieveProjectByName" method="GET" handle-as="json" on-response="ajaxRetrieveProjectByNameResponse">
@@ -51,12 +51,10 @@
         <iron-ajax id="ajaxUpdateProject" method="PUT" handle-as="json" on-response="ajaxUpdateProjectResponse">
         </iron-ajax>
         <style>
-            
             app-toolbar {
                 background-color: #FFFFFF;
                 height: 50px;
             }
-            
             .main-title {
                 margin-left: 20px;
                 font-size: 18px;
@@ -64,12 +62,10 @@
                 font-weight: bold;
                 padding-top: 5px;
             }
-
             app-drawer {
                 --app-drawer-scrim-background: rgba(100, 100, 100, 0.8);
                 --app-drawer-width: 300px;
             }
-
             paper-icon-button {
                 --paper-icon-button: {
                     width: 36px;
@@ -77,11 +73,9 @@
                     color: #767676;
                 }
             }
-
             .main {
                 position: relative;
             }
-
             h2 {
                 font-size: 16px;
                 font-family: Helvetica, sans-serif;
@@ -89,393 +83,359 @@
                 padding: 0 0 0 10px;
                 margin: 1em 0 .6em 0;
             }
-           
             p {
                 margin-left: 30px;
             }
-
-            .headerLabels{
+            .headerLabels {
                 color: gray;
                 font-size: 14px;
                 font-weight: bold;
             }
-
             .paperInputs {
                 padding-left: 30px;
                 padding-right: 20px;
             }
-
             paper-input.paperInputs {
                 --paper-input-container-input-color: gray;
             }
-
             .btnSaveClusterDetails {
                 background-color: #4caf50;
                 color: white;
                 text-transform: none;
                 font-size: 15px;
-                margin-left: 30px;
-                width: 100px;
+                margin: 15px;
+                width: 90%;
             }
-
             .toggleBtn {
                 padding-left: 30px;
                 padding-right: 20px;
                 color: gray;
             }
-
             paper-toggle-button.toggleBtn {
-                --paper-toggle-button-checked-bar-color:  #FF5722;
-                --paper-toggle-button-checked-button-color:  #FF5722;
+                --paper-toggle-button-checked-bar-color: #FF5722;
+                --paper-toggle-button-checked-button-color: #FF5722;
                 --paper-toggle-button-checked-ink-color: #FF5722;
-                --paper-toggle-button-unchecked-bar-color:  gray;
-                --paper-toggle-button-unchecked-button-color:  gray;
+                --paper-toggle-button-unchecked-bar-color: gray;
+                --paper-toggle-button-unchecked-button-color: gray;
                 --paper-toggle-button-unchecked-ink-color: gray;
             }
-
             paper-button.green {
                 background-color: var(--paper-green-500);
                 color: white;
                 text-transform: none;
                 font-size: 15px;
             }
-
             paper-button.btnNewWorkbook {
                 font-size: 14px;
                 text-transform: none;
                 color: gray;
             }
-
-            
             .icnNewWorkbook {
                 color: #FF5722;
                 --iron-icon-height: 20px;
                 --iron-icon-width: 20px;
                 margin-right: 5px;
             }
-
             paper-button[disabled] .icnNewWorkbook {
-                color: gray;   
+                color: gray;
             }
-
             .main-text {
                 font-family: 'Open Sans', sans-serif;
                 color: #767676;
                 font-weight: 600;
                 font-size: 24px;
             }
-
             .main-text span {
                 margin-left: 0px;
                 padding-left: 0px;
                 color: #FF5722;
             }
-
+            paper-button.btnNewWorkbook {
+                width: 100%;
+                margin: 0;
+                text-align: left;
+                padding: 15px 20px;
+                border-bottom: 1px solid #eaeaea;
+                justify-content: var(--layout-left-left_-_justify-content);
+            }
+            paper-button.btnNewWorkbook[disabled] {
+                border-bottom: 0;
+            }
+            .panel-head {
+                background: #ff7043;
+                color: #fff;
+                text-transform: uppercase;
+                margin: 0;
+                padding: 15px 20px;
+            }
+            @media (max-width: 640px) {
+            .main-text {
+                font-size: 15px;
+            }
+            }
         </style>
 
         <app-location route="{{route}}"></app-location>
-
-        <!-- ----------------------- App Drawer Left Position ---------------------------->
-
         <app-toolbar>
-            <paper-icon-button icon="menu" onclick="drawer.toggle()" ></paper-icon-button>
+            <paper-icon-button icon="menu" on-tap="_openDrawer"></paper-icon-button>
             <div class="main-text">HPCC <span>Info</span></div>
             <div class="main-title" id="projecttitle"></div>
             <span style="flex: 1;"></span>
             <my-login signed-in="{{signedIn}}" user={{user}}></my-login>
+        </app-toolbar>
+        <template is="dom-if" if="{{user}}">
+            <info-box id="infobox"></info-box>
+        </template>
+        <app-drawer-layout>
+            <app-drawer id="drawer" slot="drawer">
+                <div class="listbx_div" role="listbox">
+                    <section class="main">
+                        <h2 class="panel-head">
+                            <iron-label>Actions</iron-label>
+                        </h2>
 
-        </app-toolbar> 
+                        <p style="margin: 0px">
+                            <paper-button class="btnNewWorkbook" on-tap="_newWorkbook">
+                                <iron-icon class="icnNewWorkbook" icon="create"></iron-icon>
+                                <iron-label class="headerLabels">New Workbook</iron-label>
+                            </paper-button>
+                        </p>
+
+                        <p style="margin: 0px">
+                            <paper-button id="edit-worksheet-dialog" class="btnNewWorkbook" on-tap="_editWorkbook" disabled=true>
+                                <iron-icon class="icnNewWorkbook" icon="build"></iron-icon>
+                                <iron-label class="headerLabels">Edit Workbook</iron-label>
+                            </paper-button>
+                        </p>
+
+                        <p style="margin: 0px">
+                            <paper-button id="open-worksheet-dialog" class="btnNewWorkbook" on-tap="_openWorkbook">
+                                <iron-icon class="icnNewWorkbook" icon="apps"></iron-icon>
+                                <iron-label class="headerLabels">Open Workbook</iron-label>
+                            </paper-button>
+                        </p>
+
+                        </br>
+                        </br>
+
+                        <paper-button class="btnSaveClusterDetails" on-tap="saveProjectDtls">Save</paper-button>
+                    </section>
+                </div>
+            </app-drawer>
+            <app-header-layout has-scrolling-region>
+                <app-header slot="header" condenses reveals effects="waterfall">
+                </app-header>
+            </app-header-layout>
+        </app-drawer-layout>
         <new-worksheet-dialog id="newwork"></new-worksheet-dialog>
         <edit-worksheet-dialog id="editwork"></edit-worksheet-dialog>
         <open-worksheet-dialog id="openwork"></open-worksheet-dialog>
-        
-         <template is="dom-if" if="[[user]]">
-             <info-box id="infobox"></info-box>
-        </template>
-       
-        <app-drawer id="drawer" >
-            <div class="listbx_div" role="listbox">
-                <section class="main">
-                    <h2><iron-label>Actions</iron-label></h2><hr>
-                    <p style="margin-left: 20px">
-                        <paper-button class="btnNewWorkbook" on-tap="_newWorkbook">
-                            <iron-icon class="icnNewWorkbook" icon="create"></iron-icon>
-                            <iron-label class="headerLabels">New Workbook</iron-label>  
-                        </paper-button>
-                    </p>
-
-                    <p style="margin-left: 20px">
-                        <paper-button id="edit-worksheet-dialog" class="btnNewWorkbook" on-tap="_editWorkbook" disabled=true>
-                            <iron-icon class="icnNewWorkbook" icon="build"></iron-icon>
-                            <iron-label class="headerLabels">Edit Workbook</iron-label>
-                        </paper-button>
-                    </p>
-
-                    <p style="margin-left: 20px">
-                        <paper-button id="open-worksheet-dialog" class="btnNewWorkbook" on-tap="_openWorkbook">
-                            <iron-icon class="icnNewWorkbook" icon="apps"></iron-icon>
-                            <iron-label class="headerLabels">Open Workbook</iron-label>
-                        </paper-button>
-                    </p>
-
-                    </br></br>
-
-                    <paper-button class="btnSaveClusterDetails" on-tap="saveProjectDtls">Save</paper-button>
-                </section>
-            </div>
-        </app-drawer>
 
         <paper-toast id="toast" class="fit-bottom"></paper-toast>
-
     </template>
-    
-    <script>   
-        Polymer({
-            is: 'hpcc-info-app',
-            properties: {
-                clusteraddress : {
-                    type : String,
-                    value : ""
-                },
-                clustername : {
-                    type : String,
-                    value : ""
-                },
-                port : {
-                    type : String,
-                    value : ""
-                },
-                httpSecured : Boolean,
-                username    : {
-                    type : String,
-                    value : ''
-                },
-                password  : {
-                    type : String,
-                    value : ''
-                },
-                hideAppForSignin : {
-                    type : Boolean,
-                    value : true
-                }, 
-                 exportTo : {
-                    type : String,
-                    value : ''
-                },
-                user: {
-                    type: Object,
-                    notify: true,
-                    observer: '_userChanged',
+
+    <script type="text/javascript">
+        class HpccInfoApp extends Polymer.Element {
+            static get is() { return 'hpcc-info-app'; }
+            static get properties() {
+                return {
+                    clusteraddress: {
+                        type: String,
+                        value: ""
+                    },
+                    clustername: {
+                        type: String,
+                        value: ""
+                    },
+                    port: {
+                        type: String,
+                        value: ""
+                    },
+                    httpSecured: Boolean,
+                    username: {
+                        type: String,
+                        value: ''
+                    },
+                    password: {
+                        type: String,
+                        value: ''
+                    },
+                    hideAppForSignin: {
+                        type: Boolean,
+                        value: true
+                    },
+                    exportTo: {
+                        type: String,
+                        value: ''
+                    },
+                    user: {
+                        type: Object,
+                        notify: true,
+                        observer: '_userChanged',
+                    }
                 }
-            },
-            ready : function(){
-                var infoBox = this.$$('#infobox');
-                try{
-                infoBox.properties.cluster_name =  "4-way";
-                infoBox.properties.cluster_address = "10.173.147.1";
-                infoBox.properties.port = "8010";
-                infoBox.properties.username = "";
-                infoBox.properties.password = "";
-                infoBox.properties.httpSecured = false;
-
-                var pluginId = "common-input";
-                infoBox.properties.projectid = 'projectid' + '_' +  Math.random().toString(36).substr(2, 4); 
-                infoBox.properties.title = 'Welcome to HPCC Ino Application';
-                // infobox.addTab(pluginId, "Input", pluginId);    
-
-                }catch(e2){
-                    console.log("Error occurred");
-                }
-            },
-
-            // This function is called evertime the user state changes (login/logout)
-            _userChanged: function() {
-                this.async(function() {                   
-                    if(this.user !== null && this.user !== undefined) {
-                        var infoBox = this.$$('#infobox');
-                        try{
-                            infoBox.properties.cluster_name =  "4-way";
-                            infoBox.properties.cluster_address = "10.173.147.1";
-                            infoBox.properties.port = "8010";
-                            infoBox.properties.username = "";
-                            infoBox.properties.password = "";
-                            infoBox.properties.httpSecured = false;
-                            infoBox.properties.updatedby = this.user.email;
-
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                Polymer.Async.microTask.run(function () {
+                    if (this.user === null || this.user === undefined) {
+                        this.set('route.path', '/');
+                    }
+                    var infoBox = this.shadowRoot.querySelector('#infobox');
+                    try {
+                        infoBox.cluster_name = "4-way";
+                        infoBox.cluster_address = "10.173.147.1";
+                        infoBox.port = "8010";
+                        infoBox.username = "";
+                        infoBox.password = "";
+                        infoBox.httpSecured = false;
+                        var pluginId = "common-input";
+                        infoBox.projectid = 'projectid' + '_' + Math.random().toString(36).substr(2, 4);
+                        infoBox.title = 'Welcome to HPCC Ino Application';
+                        // infobox.addTab(pluginId, "Input", pluginId);    
+                    } catch (e2) {
+                        console.log("Error occurred");
+                    }
+                }.bind(this), 50);
+            }
+            _userChanged() {
+                Polymer.Async.microTask.run(function () {
+                    if (this.user !== null && this.user !== undefined) {
+                        var infoBox = this.shadowRoot.querySelector('#infobox');
+                        try {
+                            infoBox.cluster_name = "4-way";
+                            infoBox.cluster_address = "10.173.147.1";
+                            infoBox.port = "8010";
+                            infoBox.username = "";
+                            infoBox.password = "";
+                            infoBox.httpSecured = false;
+                            infoBox.updatedby = this.user.email;
                             var pluginId = "common-input";
-                            infoBox.properties.projectid = 'projectid' + '_' +  Math.random().toString(36).substr(2, 4); 
-                            infoBox.properties.title = 'Welcome to HPCCInfo Application';
+                            infoBox.projectid = 'projectid' + '_' + Math.random().toString(36).substr(2, 4);
+                            infoBox.title = 'Welcome to HPCCInfo Application';
                             // infobox.addTab(pluginId, "Input", pluginId);
-
                             //Initialize projecttitle handler for inline editing of projecttitle
                             //editProjectTitleHandler();
-
-                        }catch(e2){
+                            this.$.drawer.open();
+                        } catch (e2) {
                             console.log("Error occurred");
                         }
                     }
-                                      
                 }.bind(this), 50);
-
-            },
-
-            ready : function() {
-                // If the user is not authenticated, this will redirect him to Home page.
-                // This will take care if the user types in the protected page url in the browser and if the user refreshes the page
-                if(this.user === null || this.user === undefined) {
-                    this.set('route.path', '/');
-                }
-            },
-
-            saveProjectDtls : function(event){
-                var infoBox = this.$$('#infobox');
-                var projectid = infobox.properties.projectid;
+            }
+            _openDrawer() {
+                this.$.drawer.toggle();
+            }
+            saveProjectDtls(event) {
+                var infoBox = this.shadowRoot.querySelector('#infobox');
+                var projectid = infoBox.projectid;
                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + projectid;
-                document.querySelector('#infobox').parentNode.querySelector('#drawer').toggle();
-                document.querySelector('#btnExportProject').disabled = false;
+                this.shadowRoot.querySelector('#drawer').toggle();
+                this.shadowRoot.querySelector('#infobox').shadowRoot.querySelector('app-toolbar').querySelector('#btnExportProject').disabled = false;
                 this.$.ajaxRetrieveProjectByName.generateRequest();
-                
-            },
-
-            exportProjectDtls : function(exportTo){
+            }
+            exportProjectDtls(exportTo) {
                 // document.querySelector('#drawer').toggle();
-                this.$.exportTo =  exportTo;
-                var infoBox = this.$$('#infobox');
-                var projectid = infobox.properties.projectid;
+                this.$.exportTo = exportTo;
+                var infoBox = this.shadowRoot.querySelector('#infobox');
+                var projectid = infoBox.projectid;
                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + projectid;
                 this.$.ajaxRetrieveProjectByName.generateRequest();
-
-            },
-
-            ajaxRetrieveProjectByNameResponse : function(eve){
-                var infoBox = this.$$('#infobox');
-
-                var insterOrUpdate = (this.$.ajaxRetrieveProjectByName.lastResponse.length > 0 ? 
-                                      (( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? false : true) : true);
-
+            }
+            ajaxRetrieveProjectByNameResponse(eve) {
+                var infoBox = this.shadowRoot.querySelector('#infobox');
+                var insterOrUpdate = (this.$.ajaxRetrieveProjectByName.lastResponse.length > 0 ?
+                    ((this.$.exportTo === undefined || this.$.exportTo === null || this.$.exportTo === '') ? false : true) : true);
                 // infoBox.properties.cluster_name = this.$.cluster_name.value;
                 // infoBox.properties.cluster_address = this.$.cluster_address.value;
                 // infoBox.properties.port = this.$.port.value;
                 // infoBox.properties.username = this.$.username.value;
                 // infoBox.properties.password = this.$.password.value;
                 // infoBox.properties.httpSecured = this.$.httpSecured.value;
-
-                var tabs = infobox.querySelector('#tabs');
-
-                var projectid = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.projectid : 'projectid' + '_' +  Math.random().toString(36).substr(2, 4);
+                var tabs = infoBox.querySelector('#tabs');
+                var projectid = (this.$.exportTo === undefined || this.$.exportTo === null || this.$.exportTo === '') ? infoBox.projectid : 'projectid' + '_' + Math.random().toString(36).substr(2, 4);
                 //  infobox.properties.projectid;
-
                 var title = this.$.projecttitle.textContent;
-
                 /* if(this.$.projecttitle.textContent.startsWith('HPCCInfo-')) {
                     title = this.$.projecttitle.textContent.substring(9);
                 } else {
                     title = this.$.projecttitle.textContent;
-                } */  
-
-                var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
-
-                var forExportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') === false;
-
-                if(updatedby === undefined || updatedby === null ||updatedby === ''){
+                } */
+                var updatedby = (this.$.exportTo === undefined || this.$.exportTo === null || this.$.exportTo === '') ? infoBox.updatedby : this.$.exportTo;
+                var forExportAction = (this.$.exportTo === undefined || this.$.exportTo === null || this.$.exportTo === '') === false;
+                if (updatedby === undefined || updatedby === null || updatedby === '') {
                     return;
                 }
-                var forExportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') === false;
-
+                var forExportAction = (this.$.exportTo === undefined || this.$.exportTo === null || this.$.exportTo === '') === false;
                 var responseMsg = "";
-
-                if(forExportAction === false){
-                  
-                  infobox.properties.updatedby = updatedby;
-                  
-                  responseMsg = "Workbook Details are saved successfully!!!";
-                  
-                }else{
+                if (forExportAction === false) {
+                    infoBox.updatedby = updatedby;
+                    responseMsg = "Workbook Details are saved successfully!!!";
+                } else {
                     responseMsg = "Workbook Details are exported to " + this.$.exportTo + " successfully!!!";
                 }
-
-                var dateupdated = infobox.properties.dateupdated;
-
-                var file = infobox.properties.file;
-
-
+                var dateupdated = infoBox.dateupdated;
+                var file = infoBox.file;
                 var projectJsonStr = '{\"updatedby\": \"' + updatedby + '\", \"projectdata\" : \"{\\"cluster_details\\":{';
-
                 var projectJsonStr1 = '';
-
-                projectJsonStr1 += '\"ip\" : \"' + infoBox.properties.cluster_address + '\",';
-                projectJsonStr1 += '\"name\" :\"' + infoBox.properties.cluster_name + '\",';
-                projectJsonStr1 += '\"port\" :\"' + infoBox.properties.port + '\",';
-                projectJsonStr1 += '\"username\" :\"' + infoBox.properties.username + '\",';
-                projectJsonStr1 += '\"password\" :\"' + infoBox.properties.password + '\",';
-                projectJsonStr1 += '\"clusterid\" :\"' + infoBox.properties.clusterid + '\",';
-                projectJsonStr1 += '\"hpccsecured\" :\"' + infoBox.properties.httpSecured + '\"}, \"Tabs\":[';
-                for(var cnt = 0 ; cnt < infoBox.viewList.length; cnt++){
-                    projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length -1 ? ',' : '');
+                projectJsonStr1 += '\"ip\" : \"' + infoBox.cluster_address + '\",';
+                projectJsonStr1 += '\"name\" :\"' + infoBox.cluster_name + '\",';
+                projectJsonStr1 += '\"port\" :\"' + infoBox.port + '\",';
+                projectJsonStr1 += '\"username\" :\"' + infoBox.username + '\",';
+                projectJsonStr1 += '\"password\" :\"' + infoBox.password + '\",';
+                projectJsonStr1 += '\"clusterid\" :\"' + infoBox.clusterid + '\",';
+                projectJsonStr1 += '\"hpccsecured\" :\"' + infoBox.httpSecured + '\"}, \"Tabs\":[';
+                for (var cnt = 0; cnt < infoBox.viewList.length; cnt++) {
+                    projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length - 1 ? ',' : '');
                 }
-
-                projectJsonStr +=  projectJsonStr1.replace(/"/g, '\\"') + ' ]}\"' +  
-                                   ',\"projectid\" : \"' + projectid + 
-                                   '",\"udpatedby\" : \"' + updatedby + 
-                                   '",\"dateupdated\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') + 
-                                   '",\"file\" : \"' + file + 
-                                    '",\"title\" : \"' + title + '\"}';
-
-                
+                projectJsonStr += projectJsonStr1.replace(/"/g, '\\"') + ' ]}\"' +
+                    ',\"projectid\" : \"' + projectid +
+                    '",\"udpatedby\" : \"' + updatedby +
+                    '",\"dateupdated\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') +
+                    '",\"file\" : \"' + file +
+                    '",\"title\" : \"' + title + '\"}';
                 console.log(projectJsonStr);
-
                 console.log(JSON.parse(projectJsonStr));
-
-                if(insterOrUpdate != true) {
+                if (insterOrUpdate != true) {
                     this.$.ajaxUpdateProject.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + projectid;
-
                     this.$.ajaxUpdateProject.body = JSON.stringify(JSON.parse(projectJsonStr));
-
-                    this.$.ajaxUpdateProject.contentType =  'application/json';
-
+                    this.$.ajaxUpdateProject.contentType = 'application/json';
                     this.$.ajaxUpdateProject.generateRequest();
-                }else{
+                } else {
                     this.$.ajaxAddProject.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails';
-
                     this.$.ajaxAddProject.body = JSON.stringify(JSON.parse(projectJsonStr));
-
-                    this.$.ajaxAddProject.contentType =  'application/json';
-
+                    this.$.ajaxAddProject.contentType = 'application/json';
                     this.$.ajaxAddProject.generateRequest();
                 }
-
                 this.$.toast.text = "Workbook Details are saved successfully!!!";
                 this.$.toast.open();
-            },
-
-            addAllToSession  : function(event){
-
-                 var infoBox = this.$$('#infobox');
-
-                infoBox.properties.cluster_name = this.$.cluster_name.value;
-                infoBox.properties.cluster_address = this.$.cluster_address.value;
-                infoBox.properties.port = this.$.port.value;
-                infoBox.properties.username = this.$.username.value;
-                infoBox.properties.password = this.$.password.value;
-                infoBox.properties.httpSecured = this.$.httpSecured.value;
-                
-            },
-
-            _newWorkbook: function(e) {
-                var dialog = document.querySelector('#newwork');
-                dialog.open();
-            },
-
-            _openWorkbook: function(e) {
-                var dialog = document.querySelector('#openwork');
-                dialog.open();
-            },
-
-            _editWorkbook: function(e) {
-                var dialog = document.querySelector('#editwork');
+            }
+            addAllToSession(event) {
+                var infoBox = this.shadowRoot.querySelector('#infobox');
+                infoBox.cluster_name = this.$.cluster_name.value;
+                infoBox.cluster_address = this.$.cluster_address.value;
+                infoBox.port = this.$.port.value;
+                infoBox.username = this.$.username.value;
+                infoBox.password = this.$.password.value;
+                infoBox.httpSecured = this.$.httpSecured.value;
+            }
+            _newWorkbook(e) {
+                var dialog = this.$.newwork;
                 dialog.open();
             }
-        });
+            _openWorkbook(e) {
+                var dialog = this.$.openwork;
+                dialog.open();
+            }
+            _editWorkbook(e) {
+                var dialog = this.$.editwork;
+                dialog.open();
+            }
+        }
+        customElements.define(HpccInfoApp.is, HpccInfoApp);
     </script>
 
-</dom-module>   
+</dom-module>

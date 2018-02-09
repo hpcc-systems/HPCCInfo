@@ -1,4 +1,4 @@
 client/bower_components
 server/node_modules
 npm-debug.log
-server/logs/
+server/logs

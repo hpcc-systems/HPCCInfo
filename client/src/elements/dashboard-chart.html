@@ -1,0 +1,137 @@
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<script  src="../../echarts.js"></script>
+<dom-module id="dashboard-chart">
+	<template>
+		<style>
+		  .card {
+			margin: 24px;
+			padding: 16px;
+			color: #757575;
+			border-radius: 5px;
+			background-color: white;
+			box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+		  }
+	 
+		  h1 {
+			margin: 16px 0;
+			color: #212121;
+			font-size: 22px;
+		  }
+	 
+		  .chart-container {
+			margin-left: auto;
+			margin-right: auto;
+			width: (less than 100%) or in px
+		  }
+		</style>
+	 
+		<div class="card">
+		  <h1>Attendence</h1>
+		  <div id="attendence" class="chart-container" style="width:700px;height:400px"></div>
+		</div>
+	 
+	  </template>
+	 
+    <script>
+ class dashboardchart extends Polymer.Element {
+	static get is() { return 'dashboard-chart'; }
+	static get properties() {
+	  return {
+		// This shouldn't be neccessary, but the Analyzer isn't picking up
+		// Polymer.Element#rootPath
+		rootPath: String,
+
+		subjectId: {
+		  type: String,
+		  reflectToAttribute: true,
+		  observer: '_subjectIdChanged',
+		},
+
+		myChart: Object
+	  };
+	}
+
+	_subjectIdChanged(id) {
+	  this.subjectId = id;
+	}
+
+	ready() {
+	  super.ready();
+	  this.initAttendence();
+
+	}
+
+	initAttendence() {
+  
+    this.myChart = echarts.init(this.$.attendence);
+   
+	  //For echarts styling   http://echarts.baidu.com/echarts2/doc/example/bar.html
+	  // specify chart configuration item and data
+      var  option = {
+        title : {
+            text: 'A site user access source',
+            subtext: 'Purely fictional',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        legend: {
+            orient : 'vertical',
+            x : 'left',
+            data:['direct interview','Mail marketing','Affiliate advertising','Video ad','search engine']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {
+                    show: true, 
+                    type: ['pie', 'funnel'],
+                    option: {
+                        funnel: {
+                            x: '25%',
+                            width: '50%',
+                            funnelAlign: 'left',
+                            max: 1548
+                        }
+                    }
+                },
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        series : [
+            {
+                name:'Access source',
+                type:'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:[
+                    {value:335, name:'direct interview'},
+                    {value:310, name:'Mail marketing'},
+                    {value:234, name:'Affiliate advertising'},
+                    {value:135, name:'Video ad'},
+                    {value:1548, name:'search engine'}
+                ]
+            }
+        ]
+    };
+                    
+
+	  // use configuration item and data specified to show chart
+	  this.myChart.setOption(option);
+
+	}
+  }
+
+ window.customElements.define(dashboardchart.is, dashboardchart);
+  
+
+ 
+    </script>
+</dom-module>
