@@ -25,6 +25,10 @@ below.
 	$ npm install -g bower
 	$ npm install
 
+PM2 is a production process manager for Node.js / io.js applications with a built-in load balancer. It allows you to keep applications alive forever, to reload them without downtime and to facilitate common system admin tasks.
+
+	$ npm install pm2 -g
+
 Execute myql script located in folder HPCCInfo/server/HPCCInfo_schema.sql
 Update the MySql connection properties in HPCCInfo/server/DBConnection.js
 
@@ -34,7 +38,15 @@ Update the MySql connection properties in HPCCInfo/server/DBConnection.js
 ## Start the application
 
 	$ cd HPCCInfo/server
-	$ node server.js
+	$ pm2 start server.js
+
+## Stop the application
+	$ pm2 stop server
+
+## Current Processes
+	$ pm2 list
+
+More about PM2 commands here http://pm2.keymetrics.io/docs/usage/quick-start/#cheat-sheet
 
 Open Google Chrome browser and enter the url (http://localhost:3000)
 
