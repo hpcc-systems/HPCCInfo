@@ -1,6 +1,8 @@
 //Dependencies
-var express = require('express');
-var router = express.Router();
+import { Router } from 'express'
+let router = Router();
+
+
 var ProjectDetails = require('../models/ProjectDetails');
 const logger = require("../utils/logger");
 
@@ -65,4 +67,4 @@ router.delete('/:name',function(req, res, next){
 });
 
 //Return router
-module.exports = router;
+export {router};

@@ -1,16 +1,15 @@
 //reference of dbconnection.js
-var mysql_pool = require('../DBConnection');
-
-var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport({
-	service: 'gmail',
+import * as mysql_pool from "../DBConnection";
+import * as nodemailer from "nodemailer";
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
 	port:587,
 	secure:false,
 	auth: {
 	user: 'polymerdemo2017@gmail.com',
 	pass: 'polymerdemo_2017'
 	}
-});
+  });
 
 // REST API calls for tbl_userdetails
 var UserDetails = {
@@ -49,7 +48,18 @@ var UserDetails = {
 		updatePassword: function(username, userDetails, callback) {
 	    	return  mysql_pool.query("update user set Password = ?,  ModifiedDate = ? where UserName = ?",
 	    		[userDetails.password, userDetails.dateupdated, username], callback);
-		}
+		},
+		getUserByName: function(username) {
+            return new Promise ( (resolve, reject) => {
+                mysql_pool.query("select * from user where username = ?", [username], (error, result) => {
+                    if(error) {
+                        return reject(error);
+                    }
+    
+                    return resolve(result);
+                });
+            });
+        }
 };
 
 module.exports = UserDetails;
