@@ -13,6 +13,7 @@
     "echarts": "^3.7.2",
     "express": "^4.15.2",
     "guid-typescript": "^1.0.7",
+    "hoek": "^5.0.3",
     "mysql": "^2.13.0",
     "nodemailer": "^4.4.2",
     "request": "^2.83.0",
