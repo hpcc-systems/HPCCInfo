@@ -1,10 +1,11 @@
-//Dependencies
-var express = require('express');
-var router = express.Router();
-var UserDetails = require('../models/UserDetails');
+import { Router } from 'express'
+let router = Router();
+
 const logger = require("../utils/logger");
 var Utils = require('../utils/GenericFunctions');
-var crypto = require('crypto');
+var UserDetails = require('../models/UserDetails');
+//var crypto = require('crypto');
+import * as crypto from "crypto";
 
 router.get('/:userName?', function (req, res, next) {
 	UserDetails.getUserByLogin(req.params.userName, function (err, rows) {
@@ -135,6 +136,4 @@ router.put('/changePassword/:userName', function (req, res, next) {
 		});
 });
 
-
-//Return router
-module.exports = router;
+export {router};

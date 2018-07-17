@@ -1,0 +1,557 @@
+<link rel="import" href="../../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
+<link rel="import" href="../../my-dropdown.html">
+
+<dom-module id="common-datapattern-editor">
+	<template>
+		<style include="shared-dialog-styles"></style>
+		<style>
+			paper-tabs {
+				font-family: 'Roboto', 'Noto', sans-serif;
+				-webkit-font-smoothing: antialiased;
+				width: 100%;
+				text-transform: uppercase;
+				color: #767676;
+				--paper-tabs-selection-bar-color: white;
+			}
+			vaadin-combo-box {
+				width: 100%;
+				display: block !important;
+			}
+			
+			 my-dropdown {
+                --paper-listbox: {
+                    width:auto !important;
+                    min-width: 300px !important;
+                    height: 210px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button-dropdown: {
+                    margin-right:20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-input-container: {
+                    margin-right:-20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button: {
+                    margin-right:-20px;
+                }
+            }
+		</style>
+
+		<!-- <iron-ajax id="ajaxCreateECLFIle" 
+			method="POST" 
+			url="/hpcc/ajaxCreateECLFIle" 
+			handle-as="json"> -->
+			<!-- on-response="ajaxCreateECLFIleResponse"> -->
+		</iron-ajax>
+		<paper-dialog id="dialog" modal>
+			<iron-label>
+				<div class="headerDiv">
+					<span>Apply Data Patterns</span>
+				</div>
+			</iron-label>
+			<paper-dialog-scrollable>
+				<!-- User cannot enter title value beginning with a number -->
+                <paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
+                <vaadin-combo-box id='filterInputTab' on-value-changed='changeDatapatternsInput' required label="Input Dataset"></vaadin-combo-box>
+				<!-- <paper-input id='fieldListStr' label="Field List"></paper-input> -->
+				<my-dropdown id="fieldListStr" required label="Field List" items="{{attributefieldList}}" halign="right" valign="top"></my-dropdown>
+                <paper-input id='maxPatterns' label="The maximum number of patterns" auto-validate error-message="Title is Required" value="100"></paper-input>
+                <paper-input id='maxPatternLen' label="Maximum length of a pattern" auto-validate error-message="Value must be larger than 32" value="100"></paper-input>
+			
+                <my-dropdown id="operation" required label="Features" items='["fill_rate", "cardinality", "best_ecl_types","modes","lengths","patterns","min_max","mean","std_dev","quartiles","correlations"]' halign="right" valign="top"></my-dropdown>
+                <paper-input id='sampleSize' label="Sample Size" value="100"></paper-input>
+				
+			</paper-dialog-scrollable>
+			<div class="buttons">
+				<paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
+				<paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+			</div>
+		</paper-dialog>
+	</template>
+	<script>
+		class CommonDatapatternEditor extends Polymer.Element {
+			static get is() { return 'common-datapattern-editor'; }
+			static get properties() {
+				return {
+					
+				}
+			}
+			constructor() {
+				super();
+			}
+			ready(e) {
+				super.ready();
+				var selpage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#pages").querySelector("#common-input");
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var username = infoBox.username;
+				var password = infoBox.password;
+				var credentials = username === null || username === "" ? "" : (
+					password === null || password === "" ? (username + '@') :
+						(username + ':' + password + '@')
+				);
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address +
+					":" + infoBox.port;
+				this.eclIP = eclIP;
+				this.hpccuser = username;
+				this.displayFields = '';
+				this.eclcode = '';
+				this.inputeclcode = '';
+				this.$.TabTitle.value = '';
+				this.inputdsname = '';
+				this.outputdsname = '';
+				this.expression = '';
+				this.sortfields = '';
+				this.inputTab = '';
+				// this.$.sortfields.$.overlay.shadowRoot.querySelector('#dropdown').shadowRoot.querySelector('#overlay').shadowRoot.querySelector('#content').style.padding=0;
+				// this.$.operation.$.overlay.shadowRoot.querySelector('#dropdown').shadowRoot.querySelector('#overlay').shadowRoot.querySelector('#content').style.padding=0;
+				// setTimeout(function () {
+				// 	document.querySelector('#btnEditPlugin').fire('click');
+				// }, 2000);
+			}	
+			serialize() {
+				var jsonStr = '{';
+				jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+				jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+				jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+				jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+				jsonStr += '\"expression\" : \"' + this.expression + '\",';
+				jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+				jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';
+				jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';
+				jsonStr += '\"pluginId\" : \"' + 'common-datapattern' + '\"}';
+				return jsonStr;
+			}	
+			deSerialize(tabTtitle) {
+				console.log(tabTtitle);
+				var jsonTabContent = null;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var tabs = infoBox.tabsdata.Tabs;
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (tabTtitle === tabs[cnt].title) {
+						jsonTabContent = tabs[cnt];
+						this.displayFields = jsonTabContent.displayFields;
+						this.$.TabTitle.value = jsonTabContent.title;
+						this.eclcode = jsonTabContent.eclcode;
+						this.pluginId = jsonTabContent.pluginId;
+						this.title = jsonTabContent.title;
+						this.inputdsname = jsonTabContent.inputdsname;
+						this.outputdsname = jsonTabContent.outputdsname;
+						this.expression = jsonTabContent.expression;
+						var formulas = this.expression.split('#');
+						this.inputTab = jsonTabContent.inputTab;
+						break;
+					}
+				}
+				for (var cnt = 0; cnt < tabs.length; cnt++) {
+					if (this.inputdsname === tabs[cnt].title) {
+						this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
+					}
+				}
+			}
+			changeDatapatternsInput(event){
+                var tabid = "";
+                var papertab = document.querySelector('my-app').shadowRoot.querySelector("hpcc-info-app").shadowRoot.querySelector("info-box").shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+                for(var cnt =0 ; cnt < papertab.length; cnt++){
+                    if(event.currentTarget.value != null || event.currentTarget.value != undefined)
+                    {
+                    if(event.currentTarget.value === papertab[cnt].textContent.trim()){
+                        tabid = papertab[cnt].id;
+                        break;
+                    }
+                    }
+                }
+                if(tabid === ''){
+                    return;
+                }
+                var selpage = document.querySelector('my-app').shadowRoot.querySelector("hpcc-info-app").shadowRoot.querySelector("info-box").shadowRoot.querySelector('#pages').querySelector("#"+ tabid);
+                this.attributefieldList = selpage.editor.displayFields.split(",");
+                return;
+            } 	
+            open() {
+				debugger;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				this.$.TabTitle.value = infoBox.shadowRoot.querySelector("#tabs").selectedItem.textContent;
+				var pages = infoBox.shadowRoot.querySelector("#tabs");
+				var tabnames = "";
+				var inputidx = 0;
+				var papertabs = infoBox.shadowRoot.querySelector('app-toolbar').getElementsByTagName("paper-tab");
+				for (var cnt = 0; cnt < papertabs.length; cnt++) {
+					if (pages.selectedItem.id === papertabs[cnt].id) {
+						break;
+					}
+					tabnames += (tabnames === "" ? "" : ",") + papertabs[cnt].textContent.trim();
+					if (this.inputTab === papertabs[cnt].textContent.trim()) {
+						inputidx = cnt;
+					}
+				}
+				this.inputeclcode = infoBox.tabsdata.Tabs[0].eclcode;
+				this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
+				this.$.filterInputTab.selectedItem = tabnames.split(",")[inputidx].trim();
+				this.$.dialog.open();
+            }
+            loadgrid(tabTtitle) {
+				var QueryStr1 = this.eclcode;
+				if (QueryStr1.trim() === '') {
+					return;
+				}
+				//var QueryStr1 = this.eclcode;
+				var QueryStr = this.eclcode;
+				return this.loadGridwithEclDP(QueryStr,1000 );
+			}
+            _okHandler(e) {
+				document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+				this.title = this.$.TabTitle.value;
+				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
+				var currentPage = infoBox.shadowRoot.querySelector("#pages").selectedItem;
+				currentPage.outputdsname = 'dataPatternName' + '_' + Math.random().toString(36).substr(2, 4);				
+				var clusterid = infoBox.clusterid === '' || infoBox.clusterid === undefined || infoBox.clusterid === 'undefined' ? 'hthor' : infoBox.clusterid;
+				this.outputdsname = currentPage.outputdsname;		
+				var features1 = "";	
+				var featureLen = this.$.operation.shadowRoot.querySelector('.myCustomDropdown').querySelector('#myListBox').selectedItems.length;
+				for(var len=0; len < featureLen; len++)	{
+					features1 = features1 + this.$.operation.shadowRoot.querySelector('.myCustomDropdown').querySelector('#myListBox').selectedItems[len].value +",";
+				}
+				var features = features1.replace(/(^,)|(,$)/g, "");
+				var title= this.shadowRoot.querySelector('#dialog').querySelector('#TabTitle').value;	
+				
+				var fieldList = "";
+				// var fieldListLen = this.shadowRoot.querySelector('#dialog').querySelector('#fieldListStr').selectedItems.length;	
+				// for(var len=0; len < fieldListLen; len++)	{
+				// 	fieldList1 = fieldList + this.shadowRoot.querySelector('#dialog').querySelector('#fieldListStr').selectedItems[len].value +",";
+				// }		
+				//var fieldList = fieldList1.replace(/(^,)|(,$)/g, "");
+				var MaxNumPatter=this.shadowRoot.querySelector('#dialog').querySelector('#maxPatterns').value;
+				var MaxLenPattern = this.shadowRoot.querySelector('#dialog').querySelector('#maxPatternLen').value;
+				var sampleSize = this.shadowRoot.querySelector('#dialog').querySelector('#sampleSize').value;
+				var username = infoBox.username;
+				var password = infoBox.password;
+				var outputdsname1 = infoBox.tabsdata.Tabs[0].outputdsname;
+				var filenaem = infoBox.tabsdata.Tabs[0].expression.slice(0,-5);
+				var QueryStr =  "IMPORT DataPatterns;"+this.inputeclcode +"\n"+"OUTPUT("+outputdsname1+", NAMED('Result1'));"+
+				"rawProfileResults := DataPatterns.Profile("+outputdsname1+",fieldListStr:= '"+fieldList+"', maxPatterns:="+MaxNumPatter+", maxPatternLen:= "+MaxLenPattern+",features := '"+features+"', sampleSize := "+sampleSize+");"+
+				"OUTPUT(rawProfileResults,,'"+filenaem+"_datapattern.thor', OVERWRITE,NAMED('Result2'));"				
+
+
+  
+					
+				var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +
+					 (this.hpccuser != '' ? this.hpccuser + ':' + this.password + '@' : '')  +
+					infoBox.cluster_address +
+					":" + infoBox.port;
+				currentPage.eclcode = QueryStr;
+				this.eclcode = QueryStr;
+				return this.loadGridwithEclDP(QueryStr,1000 );
+			}
+	loadGridwithEclDP(QueryStr, recLimit, extenderQueryStr = "") {
+		var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+		var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+
+		//Set paper-progress when the grid is being loaded
+		currentPage.loading = true;
+
+		var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +
+			// (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '') +
+			infoBox.cluster_address +
+			":" + infoBox.port;
+
+		var getFileData = new Promise(function (resolve, reject) {
+			infoBox.callAjaxForECLDataPattern(eclIP, QueryStr, infoBox.username, infoBox.password, recLimit).then(function (resData) {
+				resolve(resData);
+			});
+		});
+
+		getFileData.then(function (ajaxResp) {
+
+			var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+			var grid;
+			if (currentPage.shadowRoot.querySelector(".projectworksheet") != null) {
+				grid = currentPage.shadowRoot.querySelector(".projectworksheet");
+				grid.innerHTML = "";
+				if (ajaxResp.Result.Result2.Row.length == 0) {
+					var headerTemplate = document.createElement('template');
+					headerTemplate.classList.add('header');
+					headerTemplate.innerHTML = "<b>There are no records for your Filter Query</b>";
+					var bodyTemplate = document.createElement('template');
+					bodyTemplate.innerHTML = "<b>There are no records for your Filter Query</b>";
+					var column = document.createElement('vaadin-grid-column');
+					column.appendChild(headerTemplate);
+					column.appendChild(bodyTemplate);
+					grid.appendChild(column);
+					grid.items = ajaxResp.Result.Result2.Row;
+					currentPage.loading = false;
+					return;
+				}
+				var obj = ajaxResp.Result.Result2.Row[0];
+				var resobj = ajaxResp.Result.Result2.Row[0];
+				var cnt = 0;
+				var colArray = [];
+				var fieldnames = "";
+				var xfieldnames = "";
+				var yfieldnames = "";
+
+				Object.keys(obj).forEach(function (key) {
+					//grid.addColumn({ name: key, resizable: true });
+					if (fieldnames === "") {
+						fieldnames += key;
+					} else {
+						fieldnames += "," + key;
+					}
+					colArray[cnt] = key;
+					cnt++;
+				});
+				for (var i = 0; i < cnt; i++) {
+					var headername = colArray[i];
+					headername = headername != null ? headername : "";
+					headername = headername.replace("_", " ");
+					
+					var items = ajaxResp.Result.Result2.Row;
+					var itemLen = items.length;
+
+					if(headername === "modes")
+					{						
+						//var items = ajaxResp.Result.Result2.Row;
+						console.log(items);
+						var columnGroup = document.createElement('vaadin-grid-column-group');
+						
+						var headerTemplate = document.createElement('template');
+						headerTemplate.classList.add('header');
+						headerTemplate.innerHTML = headername;
+						columnGroup.appendChild(headerTemplate);
+
+						var column = document.createElement('vaadin-grid-column');
+						var headerTemplate1 = document.createElement('template');
+						headerTemplate1.classList.add('header');
+						headerTemplate1.innerHTML = "Values";
+						column.appendChild(headerTemplate1);
+						var bodyTemplateVal = document.createElement('template');						
+						//column.appendChild(bodyTemplateVal);
+						//columnGroup.appendChild(column);
+
+						var column1 = document.createElement('vaadin-grid-column');
+						var headerTemplate2 = document.createElement('template');
+						headerTemplate2.classList.add('header');
+						headerTemplate2.innerHTML = "Rec Count";
+						column1.appendChild(headerTemplate2);						
+						var bodyTemplateRec = document.createElement('template');						
+						//column1.appendChild(bodyTemplateRec);
+						//columnGroup.appendChild(column1);
+						
+						//column.appendChild(headerTemplate);
+						
+						// var body = "[[item.value]]";
+						// var bodyTemplate = document.createElement('template');
+						// bodyTemplate.id = "value";
+						// bodyTemplate.innerHTML = body;
+						// column.appendChild(bodyTemplate);
+
+						for(var m =0; m< itemLen; m++)
+						{
+							
+							
+							var bodyVal = "";
+							var bodyRec = "";
+						 	for(var n=0; n<items[m].modes.Row.length; n++){
+								bodyVal = bodyVal + "<br>"+ items[m].modes.Row[n].value+"<br>";
+								bodyRec = bodyRec + "<br>"+ items[m].modes.Row[n].rec_count+"<br>";
+						 	}
+							 //var bodyTemplateVal = document.createElement('template');
+							bodyTemplateVal.innerHTML = bodyVal;
+							bodyTemplateRec.innerHTML = bodyRec;
+							column.appendChild(bodyTemplateVal);
+							column1.appendChild(bodyTemplateRec);
+							columnGroup.appendChild(column);
+							columnGroup.appendChild(column1);
+						 	
+						 }
+						 grid.appendChild(columnGroup);
+						
+					}
+					else if(headername === "numeric correlations"){
+						console.log(headername);
+						var items = ajaxResp.Result.Result2.Row;
+						var columnGroup = document.createElement('vaadin-grid-column-group');
+						
+						var headerTemplate = document.createElement('template');
+						headerTemplate.classList.add('header');
+						headerTemplate.innerHTML = headername;
+						columnGroup.appendChild(headerTemplate);
+
+						var column = document.createElement('vaadin-grid-column');
+						var headerTemplate1 = document.createElement('template');
+						headerTemplate1.classList.add('header');
+						headerTemplate1.innerHTML = "Values";
+						column.appendChild(headerTemplate1);
+						columnGroup.appendChild(column);
+
+						var column1 = document.createElement('vaadin-grid-column');
+						var headerTemplate2 = document.createElement('template');
+						headerTemplate2.classList.add('header');
+						headerTemplate2.innerHTML = "Rec Count";
+						column1.appendChild(headerTemplate2);
+						columnGroup.appendChild(column1);
+						//column.appendChild(headerTemplate);
+						var itemLen = items.length;
+						var bodyAtt = "";
+						var bodyCorr = "";
+						for(var m =0; m< itemLen; m++)
+						{
+							for(var n=0; n<items[m].numeric_correlations.Row.length; n++){
+								bodyAtt = bodyAtt + "<br>"+ items[m].numeric_correlations.Row[n].attribute+"<br>";
+								bodyCorr = bodyCorr + "<br>"+ items[m].numeric_correlations.Row[n].corr+"<br>";
+						 	}
+							 var bodyTemplateAtt = document.createElement('template');
+							bodyTemplateAtt.innerHTML = bodyAtt;
+							var bodyTemplateCorr = document.createElement('template');
+							bodyTemplateCorr.innerHTML = bodyCorr;
+							column.appendChild(bodyTemplateAtt);
+							column1.appendChild(bodyTemplateCorr);
+							grid.appendChild(columnGroup);
+						 }
+						 
+					}
+					else if(headername === "popular patterns"){
+						console.log(headername);
+						var columnGroup = document.createElement('vaadin-grid-column-group');
+						
+						var headerTemplate = document.createElement('template');
+						headerTemplate.classList.add('header');
+						headerTemplate.innerHTML = headername;
+						columnGroup.appendChild(headerTemplate);
+
+						var column = document.createElement('vaadin-grid-column');
+						var headerTemplate1 = document.createElement('template');
+						headerTemplate1.classList.add('header');
+						headerTemplate1.innerHTML = "Values";
+						column.appendChild(headerTemplate1);
+						columnGroup.appendChild(column);
+
+						var column1 = document.createElement('vaadin-grid-column');
+						var headerTemplate2 = document.createElement('template');
+						headerTemplate2.classList.add('header');
+						headerTemplate2.innerHTML = "Rec Count";
+						column1.appendChild(headerTemplate2);
+						columnGroup.appendChild(column1);
+						var itemLen = items.length;
+						var bodyPat = "";
+						var bodyRec = "";
+						for(var m =0; m< itemLen; m++)
+						{
+							for(var n=0; n<items[m].popular_patterns.Row.length; n++){
+								bodyPat = bodyPat + "<br>"+ items[m].popular_patterns.Row[n].data_pattern+"<br>";
+								bodyRec = bodyRec + "<br>"+ items[m].popular_patterns.Row[n].rec_count+"<br>";
+						 	}
+							 var bodyTemplatePat = document.createElement('template');
+							bodyTemplatePat.innerHTML = bodyPat;
+							var bodyTemplateRec = document.createElement('template');
+							bodyTemplateRec.innerHTML = bodyRec;
+							column.appendChild(bodyTemplatePat);
+							column1.appendChild(bodyTemplateRec);
+							grid.appendChild(columnGroup);
+						 }
+						 						
+					}
+					else if(headername === "rare patterns"){
+						console.log(headername);
+						var items = ajaxResp.Result.Result2.Row;
+						var columnGroup = document.createElement('vaadin-grid-column-group');
+						
+						var headerTemplate = document.createElement('template');
+						headerTemplate.classList.add('header');
+						headerTemplate.innerHTML = headername;
+						columnGroup.appendChild(headerTemplate);
+
+						var column = document.createElement('vaadin-grid-column');
+						var headerTemplate1 = document.createElement('template');
+						headerTemplate1.classList.add('header');
+						headerTemplate1.innerHTML = "Values";
+						column.appendChild(headerTemplate1);
+						columnGroup.appendChild(column);
+
+						var column1 = document.createElement('vaadin-grid-column');
+						var headerTemplate2 = document.createElement('template');
+						headerTemplate2.classList.add('header');
+						headerTemplate2.innerHTML = "Rec Count";
+						column1.appendChild(headerTemplate2);
+						columnGroup.appendChild(column1);
+						//column.appendChild(headerTemplate);
+						var itemLen = items.length;
+						var bodyPat = "";
+						var bodyRec = "";
+						for(var m =0; m< itemLen; m++)
+						{
+							for(var n=0; n<items[m].rare_patterns.Row.length; n++){
+								bodyPat = bodyPat + "<br>"+ items[m].rare_patterns.Row[n].data_pattern+"<br>";
+								bodyRec = bodyRec + "<br>"+ items[m].rare_patterns.Row[n].rec_count+"<br>";
+						 	}
+							var bodyTemplatePat = document.createElement('template');
+							bodyTemplatePat.innerHTML = bodyPat;
+							var bodyTemplateRec = document.createElement('template');
+							bodyTemplateRec.innerHTML = bodyRec;
+							column.appendChild(bodyTemplatePat);
+							column1.appendChild(bodyTemplateRec);
+						 }
+
+							grid.appendChild(columnGroup);
+						
+					}					
+					else{
+						var headerTemplate = document.createElement('template');
+						headerTemplate.classList.add('header');
+						headerTemplate.innerHTML = headername;
+						var body = "[[item." + colArray[i] + "]]";
+						var bodyTemplate = document.createElement('template');
+						bodyTemplate.innerHTML = body;
+						var column = document.createElement('vaadin-grid-column');
+						column.appendChild(headerTemplate);
+						column.appendChild(bodyTemplate);
+						grid.appendChild(column);
+						
+					}	
+					var validatedfields = colArray[i];
+
+					if (isNaN(resobj[validatedfields])) {
+						if (xfieldnames === "") {
+							xfieldnames += validatedfields;
+						} else {
+							xfieldnames += "," + validatedfields;
+						}
+					}
+					else {
+						if (yfieldnames === "") {
+							yfieldnames += validatedfields;
+						} else {
+							yfieldnames += "," + validatedfields;
+						}
+					}
+				}
+				grid.items = ajaxResp.Result.Result2.Row;
+				grid.querySelectorAll("#value").items =  items[0].modes.Row[0];
+
+				currentPage.editor.displayFields = fieldnames;
+				currentPage.editor.xdisplayFields = xfieldnames;
+				currentPage.editor.ydisplayFields = yfieldnames;
+				sessionStorage.setItem('gridColumns', colArray);
+				// Add some example data as an array.
+				currentPage.loading = false;
+			}		
+		});
+		return;
+	}
+			
+		}
+		customElements.define(CommonDatapatternEditor.is, CommonDatapatternEditor);
+	</script>
+</dom-module>
