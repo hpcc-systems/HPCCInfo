@@ -27,11 +27,13 @@
 <link rel="import" href="plugins/aggregate/view.html">
 <link rel="import" href="plugins/sample/editor.html">
 <link rel="import" href="plugins/sample/view.html">
+<link rel="import" href="plugins/datapatterns/editor.html">	
+<link rel="import" href="plugins/datapatterns/view.html">
 <link rel="import" href="export-project-dialog.html">
 
 <!-- Needed for paper-listbox -->
- <!-- Ensure Web Animations polyfill is loaded since neon-animation 2.0 doesn't import it -->
- <link rel="import" href="../../bower_components/neon-animation/web-animations.html">
+<!-- Ensure Web Animations polyfill is loaded since neon-animation 2.0 doesn't import it -->
+<link rel="import" href="../../bower_components/neon-animation/web-animations.html">
 
 <dom-module id="info-box">
     <template>
@@ -44,41 +46,61 @@
                 color: #767676;
                 --paper-tabs-selection-bar-color: white;
             }
+
             paper-tab.iron-selected {
                 color: white;
                 font-weight: bold;
                 text-transform: uppercase;
             }
+            /* paper tabs custom border */
+            paper-tab.iron-selected {
+            --paper-tab-content: {
+            border-bottom: 4px solid #fff;
+            }
+            } 
             app-toolbar {
                 background-color: #FF7043;
                 height: 50px;
                 color: #fff;
             }
+
             paper-icon-button {
                 --paper-icon-button: {
                     width: 40px;
                     height: 40px;
                 }
             }
+
             paper-listbox {
                 font-size: 15px;
                 font-weight: bold;
                 color: #333;
                 min-width: 200px;
             }
+
             paper-listbox paper-item {
                 cursor: pointer
             }
+
             paper-listbox paper-item:hover {
                 background: #f2f2f2
             }
         </style>
+        <iron-ajax id="callForFileDetails" url="/hpcc/callForFileDetails" handle-as "json" >
+        </iron-ajax>
+        <iron-ajax id="createAndUpdateWUnit" method="POST" url="/hpcc/workUnitCreateandUpdate" handle-as "json">
+        </iron-ajax>
+        <iron-ajax id="getWorkUnitResult" method="POST" url="/hpcc/workUnitResult" handle-as "json">
+        </iron-ajax>
+        <iron-ajax id="getWorkUnitInfo" method="POST" url="/hpcc/getWorkunitInfo" handle-as "json">
+        </iron-ajax>
+        <iron-ajax id="ajaxCreateECLFIle" method="POST" url="/hpcc/ajaxCreateECLFIle" handle-as="json">
+        </iron-ajax>
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
 
             <paper-icon-button id="btnEditPlugin" disabled="true" hidden$="{{hideedit}}" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
             <paper-tooltip for="btnEditPlugin" offset="0">Edit Worksheet</paper-tooltip>
-
 
             <paper-icon-button id="btnEditDashboard" hidden$="{{hidden}}" icon="create" on-tap="_pluginEditDashboardHandler"></paper-icon-button>
             <paper-tooltip for="btnEditDashboard" offset="0">Edit Worksheet</paper-tooltip>
@@ -253,7 +275,10 @@
                     editChartStatus: {
                         type: Boolean,
                         value: false
-                    }
+                    },
+                    eclIP: String,
+                    filename: String,
+                    recLimit: String
                 }
             }
             constructor() {
@@ -267,6 +292,7 @@
                 this.addPlugin("common-sort", "Sort", "common");
                 this.addPlugin("common-sample", "Data Sampling", "common");
                 this.addPlugin("common-dashboard", "Dashboard", "common");
+                this.addPlugin("common-datapattern","Data Patterns","common");
             }
             handleTabTap(e) {
                 if (e.detail.item.editor != undefined) {
@@ -471,8 +497,225 @@
                 var dialog = this.shadowRoot.querySelector('#export-project-dialog');
                 dialog.open();
             }
+
+            callForFileDetails(eclIP, filename, subfilename, hpccuser, password, recLimit) {
+                this.eclIP = eclIP;
+                this.filename = filename;
+                this.recLimit = recLimit;
+                var that = this;
+                var promise = new Promise(function (resolve, reject) {
+                    var wuid = '';
+                    var selectedfilename = (subfilename.startsWith('~') === false ? '~' : '') + subfilename;
+                    that.$.callForFileDetails.params = { eclIP: eclIP, selectedFile: selectedfilename };
+                    that.$.callForFileDetails.contentType = 'application/json';
+                    let request = that.$.callForFileDetails.generateRequest();
+                    request.completes.then(function (req) {
+                        var filename = that.filename;
+                        var url = that.eclIP;
+                        var recLimit = that.recLimit;
+                        var data = JSON.parse(req.response);
+                        // var filename = this.$.subfilesgrid.value;
+                        var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                        //var filename = filename;
+                        console.log(data.DFUInfoResponse);
+
+                        //var currentPage = document.querySelector("#pages").selectedItem;
+                        var currentPage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox').shadowRoot.querySelector('#pages').selectedItem;
+                        var outputdsname = 'inputds' + '_' + Math.random().toString(36).substr(2, 4);
+
+                        if (data.DFUInfoResponse.FileDetail.isSuperfile) {
+                            var QueryStr = "IMPORT STD;NOTHOR(OUTPUT(DATASET([{NOTHOR(std.file.SUPERFILECONTENTS('~" + filename + "', TRUE)[1].NAME), '~" + filename + "'}], {STRING NAME, STRING SUPER}), NAMED('SUPERFILECONTENTS')));";
+
+                            // OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + filename + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
+                        } else {
+                            var QueryStr1 = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + data.DFUInfoResponse.FileDetail.Ecl + "\n" +
+                                outputdsname + " := DATASET(\'" + (filename.startsWith('~') ? '' : '~') + filename + "\'," + "recLayout, THOR);\n";
+
+                            var recLayout = data.DFUInfoResponse.FileDetail.Ecl.replace("RECORD", "");
+
+                            var str = recLayout.replace("[{}]", "").replace(",", ";").trim();
+
+                            // HashMap<String, String> fielddts = new HashMap<String, String>();
+                            var fields = str.split(";");
+
+                            var fielddts = new Map();
+
+                            var recordStartEnd = ["RECORD", "END"];
+
+                            for (var cnt = 0; cnt < fields.length; cnt++) {
+                                var singlePart = fields[cnt].trim();
+                                if (!recordStartEnd.includes(singlePart.trim())) {
+                                    var twoParts = (singlePart.endsWith(";") ? singlePart.substring(0, singlePart.length() - 1) : singlePart).trim().split(" ");
+                                    fielddts.set(twoParts[1], twoParts[0]);
+                                }
+                            }
+
+                            infoBox.fieldDtls = fielddts;
+
+                            var strFields = ["STRING", "UNICODE"];
+
+                            console.log("Field====>Type ======> IsStringType\n===============================================\n\n");
+
+                            // for(Map.Entry<String, String> maps : fielddts.entrySet()){
+                            // 	System.out.println(maps.getKey() + "===>" + maps.getValue() + "==>" + 
+                            // 			strtypes.includes(maps.getValue().toUpperCase().replace("[^a-zA-Z]", "")));
+                            // }
+
+
+                            for (var i in fielddts) {
+                                console.log('Key is: ' + i + '. Value is: ' + fielddts[i]);
+                            }
+                            var QueryStr = QueryStr1 + "Output(" + outputdsname + ");";
+                        }
+                        console.log(QueryStr);
+                        var callAjaxPromise = new Promise(function (rs, rj) {
+                            infoBox.callAjaxForECL(url, QueryStr, hpccuser, password, recLimit).then(function (data) {
+                                rs(data);
+                            })
+                        });
+
+                        callAjaxPromise.then(function (data) {
+                            data.outputdsname = outputdsname;
+                            data.querystr = QueryStr1 != undefined ? QueryStr1 : data.querystr;
+                            resolve(data);
+                            //rs(data);
+
+                        });
+                    });
+                });
+                return promise;
+            }
+            callAjaxForECLDataPattern(url, eclCode, hpccuser, password, recLimit) {
+                var wuid = '';
+                //var infoBox = document.querySelector('#infobox')
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var clusterid = infoBox.clusterid === '' || infoBox.clusterid === undefined || infoBox.clusterid === 'undefined' ? 'hthor' : infoBox.clusterid;
+                var that = this;
+                eclCode = eclCode.replace(/\n/g, '');
+                console.log(eclCode);
+                var promise = new Promise(function (resolve, reject) {
+                    that.$.ajaxCreateECLFIle.body = {eclIP: url ,eclQuery:eclCode,username:hpccuser,password:password, clusterid:clusterid};                    
+                    that.$.ajaxCreateECLFIle.contentType =  'application/json';
+                    let createRequest = that.$.ajaxCreateECLFIle.generateRequest();
+                    createRequest.completes.then(function (createRequestResp) {
+                        console.log(createRequestResp.response._espState);
+                        var Workunit = createRequestResp.response._espState;
+                        var wuid = Workunit.Wuid;
+                        var wustatus = new Promise(function (res, rej) {
+                            infoBox.workunitStatus(url, wuid, hpccuser, password).then(function (data) {
+                                res(data);
+                            })
+                        });
+                        wustatus.then(function (result) {
+                            that.$.getWorkUnitResult.body = { eclIP: url, username: hpccuser, password: password, ResultName: 'Result2', ResultLimit: recLimit, ClusterId: clusterid, wuid: result };
+                            that.$.getWorkUnitResult.contentType = 'application/json';
+                            let wunitResultRequest = that.$.getWorkUnitResult.generateRequest();
+                            wunitResultRequest.completes.then(function (wunitResultRequestResp) {
+                                var data = JSON.parse(wunitResultRequestResp.response);
+                                if (data.Name === "SUPERFILECONTENTS") {
+                                    var newData = infoBox.callForFileDetails(url, data.Result.Row[0].super, data.Result.Row[0].name, hpccuser, password);
+                                    newData.then(
+                                        function (val) {
+                                            resolve(val);
+                                        }
+                                    );
+                                } else {
+                                    resolve(data);
+                                }
+                            });
+                        });
+                    });
+                });
+                return promise;
+
+            }
+            callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
+                var wuid = '';
+                //var infoBox = document.querySelector('#infobox')
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var clusterid = infoBox.clusterid === '' || infoBox.clusterid === undefined || infoBox.clusterid === 'undefined' ? 'hthor' : infoBox.clusterid;
+                var that = this;
+                eclCode = eclCode.replace(/\n/g, '');
+                console.log(eclCode);
+                var promise = new Promise(function (resolve, reject) {
+                    that.$.createAndUpdateWUnit.body = { eclIP: url, username: hpccuser, password: password, ResultLimit: recLimit, QueryText: eclCode, ClusterId: clusterid };
+                    that.$.createAndUpdateWUnit.contentType = 'application/json';
+                    let createRequest = that.$.createAndUpdateWUnit.generateRequest();
+                    createRequest.completes.then(function (createRequestResp) {
+                        var Workunit = JSON.parse(createRequestResp.response);
+                        var wuid = Workunit.Workunit.Wuid;
+                        var wustatus = new Promise(function (res, rej) {
+                            infoBox.workunitStatus(url, wuid, hpccuser, password).then(function (data) {
+                                res(data);
+                            })
+                        });
+                        wustatus.then(function (result) {
+                            that.$.getWorkUnitResult.body = { eclIP: url, username: hpccuser, password: password, ResultLimit: recLimit, ClusterId: clusterid, wuid: result };
+                            that.$.getWorkUnitResult.contentType = 'application/json';
+                            let wunitResultRequest = that.$.getWorkUnitResult.generateRequest();
+                            wunitResultRequest.completes.then(function (wunitResultRequestResp) {
+                                var data = JSON.parse(wunitResultRequestResp.response);
+                                if (data.Name === "SUPERFILECONTENTS") {
+                                    var newData = infoBox.callForFileDetails(url, data.Result.Row[0].super, data.Result.Row[0].name, hpccuser, password);
+                                    newData.then(
+                                        function (val) {
+                                            resolve(val);
+                                        }
+                                    );
+                                } else {
+                                    resolve(data);
+                                }
+                            });
+                        });
+                    });
+                });
+
+                return promise;
+
+            }
+
+            workunitStatus(url, wuid, hpccuser, password) {
+                var that = this;
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var promise = new Promise(function (resolve, reject) {
+                    that.$.getWorkUnitInfo.body = { eclIP: url, username: hpccuser, password: password, wuid: wuid };
+                    that.$.getWorkUnitInfo.contentType = 'application/json';
+                    let workunitInfo = that.$.getWorkUnitInfo.generateRequest();
+                    workunitInfo.completes.then(function (workunitInfoResp) {
+                        var data = JSON.parse(workunitInfo.response);
+                        var wuid = data.Workunit.Wuid;
+                        var wuState = data.Workunit.State;
+
+                        if (wuState === "submitted" ||wuState === "failed" || wuState === 'compiling' || wuState === 'running' || wuState === 'compiled' || wuState === 'blocked' || wuState === 'unknown') {
+                            infoBox.workunitStatus(url, wuid, hpccuser, password).then(function (data) {
+                                resolve(data);
+                            })
+                        } else if (wuState === 'completed') {
+                            resolve(data.Workunit.Wuid);
+                            // return;
+                        } else {
+                            //var currentPage = document.querySelector("#pages").selectedItem;
+                            var currentPage = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox').shadowRoot.querySelector('#pages').selectedItem;
+                            var grid = currentPage.shadowRoot.querySelector(".projectworksheet");
+                            if (grid !== null) {
+                                var cols = grid.columns;
+                                for (; cols.length > 0;) {
+                                    console.log(cols[0].name);
+                                    grid.removeColumn(cols[0].name);
+                                }
+                                currentPage.loading = false;
+                                grid.items = [];
+                                grid.addColumn({ name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>" });
+                            }
+                            reject('Something went wrong while fetching the data, Please try again or check you filter query again!');
+                        }
+
+                    });
+                });
+                return promise;
+            }
+
         }
         customElements.define(InfoBox.is, InfoBox);
     </script>
-
 </dom-module>

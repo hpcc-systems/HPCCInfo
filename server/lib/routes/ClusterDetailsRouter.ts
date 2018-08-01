@@ -1,8 +1,9 @@
 //Dependencies
-var express = require('express');
-var router = express.Router();
-const rp = require('request-promise');
-const logger = require("../utils/logger");
+import * as express from "express";
+import {Router} from "express";
+let router = Router();
+import * as rp from "request-promise";
+import * as logger from "../utils/logger";
 
 //Routes
 router.post('/checkConnection', function(req, res, next) {
@@ -29,4 +30,4 @@ router.post('/checkConnection', function(req, res, next) {
 });
 
 //Return router
-module.exports = router;
+export {router};
