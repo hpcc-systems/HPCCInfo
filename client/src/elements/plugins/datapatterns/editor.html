@@ -25,28 +25,29 @@
 				width: 100%;
 				display: block !important;
 			}
-			my-dropdown{
-				--paper-listbox:{
-					width: auto!important;
-					min-width: 300px !important;
-					height: 210px !important;
-				}
-			}
-			my-dropdown{
-				--paper-menu-button-dropdown:{
-					margin-right :20px !important;					
-				}
-			}
-			my-dropdown{
-				--paper-input-container: {
-					margin-right:-20px !important;
-				}
-			}            
-			my-dropdown {
-				--paper-menu-button:{
-					margin-right:-20px;
-				}
-			}
+			 my-dropdown {
+                --paper-listbox: {
+                    width:auto !important;
+                    min-width: 300px !important;
+                    height: 210px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button-dropdown: {
+                    margin-right:20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-input-container: {
+                    margin-right:-20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button: {
+                    margin-right:-20px;
+                }
+            }
+
 		</style>
 
 		<!-- <iron-ajax id="ajaxCreateECLFIle" 
@@ -254,9 +255,7 @@
 				this.eclcode = QueryStr;
 				return this.loadGridwithEclDP(QueryStr,1000 );
 			}
-	getvalue(){
-		return "Test";
-	}
+
 	loadGridwithEclDP(QueryStr, recLimit, extenderQueryStr = "") {
 		var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
 		var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
@@ -274,6 +273,7 @@
 				resolve(resData);
 			});
 		});	
+
 		getFileData.then(function (ajaxResp) {
 
 			var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
@@ -344,7 +344,7 @@
 						headerTemplate2.innerHTML = "Rec Count";
 						column1.appendChild(headerTemplate2);						
 						var bodyTemplateRec = document.createElement('template');						
-						
+					
 						for(var m =0; m< itemLen; m++)
 						{
 							var bodyVal = "";
@@ -353,7 +353,6 @@
 								bodyVal = bodyVal + "<br>"+ items[m].modes.Row[n].value+"<br>";
 								bodyRec = bodyRec + "<br>"+ items[m].modes.Row[n].rec_count+"<br>";
 						 	}
-							 
 							bodyTemplateVal.innerHTML = bodyVal;
 							bodyTemplateRec.innerHTML = bodyRec;
 							column.appendChild(bodyTemplateVal);
@@ -378,6 +377,7 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
+
 						headerTemplate1.innerHTML = "Attribute";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
@@ -385,6 +385,7 @@
 						var column1 = document.createElement('vaadin-grid-column');
 						var headerTemplate2 = document.createElement('template');
 						headerTemplate2.classList.add('header');
+
 						headerTemplate2.innerHTML = "Corr";
 						column1.appendChild(headerTemplate2);
 						columnGroup.appendChild(column1);
@@ -420,6 +421,7 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
+
 						headerTemplate1.innerHTML = "Data pattern";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
@@ -462,6 +464,7 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
+
 						headerTemplate1.innerHTML = "Data Pattern";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
