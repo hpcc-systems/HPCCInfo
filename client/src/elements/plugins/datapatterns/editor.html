@@ -24,7 +24,29 @@
 			vaadin-combo-box {
 				width: 100%;
 				display: block !important;
-			}
+			}			
+			 my-dropdown {
+                --paper-listbox: {
+                    width:auto !important;
+                    min-width: 300px !important;
+                    height: 210px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button-dropdown: {
+                    margin-right:20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-input-container: {
+                    margin-right:-20px !important;
+                }
+            }
+            my-dropdown {
+                --paper-menu-button: {
+                    margin-right:-20px;
+                }
+            }
 		</style>
 
 		<!-- <iron-ajax id="ajaxCreateECLFIle" 
@@ -188,11 +210,7 @@
 				var QueryStr = this.eclcode;
 				return this.loadGridwithEclDP(QueryStr,1000 );
 			}
-			getFormatedData() {
-				debugger;	
-				return "test";
-			}
-            _okHandler(e) {
+     _okHandler(e) {
 				document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box').shadowRoot.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
 				this.title = this.$.TabTitle.value;
 				var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('info-box');
@@ -465,7 +483,7 @@
 				}
 				
 				grid.items = ajaxResp.Result.Result2.Row;
-				
+
 				currentPage.editor.displayFields = fieldnames;
 				currentPage.editor.xdisplayFields = xfieldnames;
 				currentPage.editor.ydisplayFields = yfieldnames;
