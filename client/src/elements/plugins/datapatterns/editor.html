@@ -25,7 +25,6 @@
 				width: 100%;
 				display: block !important;
 			}
-			
 			 my-dropdown {
                 --paper-listbox: {
                     width:auto !important;
@@ -48,6 +47,7 @@
                     margin-right:-20px;
                 }
             }
+
 		</style>
 
 		<!-- <iron-ajax id="ajaxCreateECLFIle" 
@@ -255,6 +255,7 @@
 				this.eclcode = QueryStr;
 				return this.loadGridwithEclDP(QueryStr,1000 );
 			}
+
 	loadGridwithEclDP(QueryStr, recLimit, extenderQueryStr = "") {
 		var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
 		var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
@@ -271,7 +272,7 @@
 			infoBox.callAjaxForECLDataPattern(eclIP, QueryStr, infoBox.username, infoBox.password, recLimit).then(function (resData) {
 				resolve(resData);
 			});
-		});
+		});	
 
 		getFileData.then(function (ajaxResp) {
 
@@ -321,8 +322,7 @@
 					var itemLen = items.length;
 
 					if(headername === "modes")
-					{						
-						//var items = ajaxResp.Result.Result2.Row;
+					{	
 						console.log(items);
 						var columnGroup = document.createElement('vaadin-grid-column-group');
 						
@@ -335,10 +335,8 @@
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
 						headerTemplate1.innerHTML = "Values";
-						column.appendChild(headerTemplate1);
-						var bodyTemplateVal = document.createElement('template');						
-						//column.appendChild(bodyTemplateVal);
-						//columnGroup.appendChild(column);
+						column.appendChild(headerTemplate1);						
+						var bodyTemplateVal = document.createElement('template');
 
 						var column1 = document.createElement('vaadin-grid-column');
 						var headerTemplate2 = document.createElement('template');
@@ -346,28 +344,15 @@
 						headerTemplate2.innerHTML = "Rec Count";
 						column1.appendChild(headerTemplate2);						
 						var bodyTemplateRec = document.createElement('template');						
-						//column1.appendChild(bodyTemplateRec);
-						//columnGroup.appendChild(column1);
-						
-						//column.appendChild(headerTemplate);
-						
-						// var body = "[[item.value]]";
-						// var bodyTemplate = document.createElement('template');
-						// bodyTemplate.id = "value";
-						// bodyTemplate.innerHTML = body;
-						// column.appendChild(bodyTemplate);
-
+					
 						for(var m =0; m< itemLen; m++)
 						{
-							
-							
 							var bodyVal = "";
 							var bodyRec = "";
 						 	for(var n=0; n<items[m].modes.Row.length; n++){
 								bodyVal = bodyVal + "<br>"+ items[m].modes.Row[n].value+"<br>";
 								bodyRec = bodyRec + "<br>"+ items[m].modes.Row[n].rec_count+"<br>";
 						 	}
-							 //var bodyTemplateVal = document.createElement('template');
 							bodyTemplateVal.innerHTML = bodyVal;
 							bodyTemplateRec.innerHTML = bodyRec;
 							column.appendChild(bodyTemplateVal);
@@ -392,14 +377,16 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
-						headerTemplate1.innerHTML = "Values";
+
+						headerTemplate1.innerHTML = "Attribute";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
 
 						var column1 = document.createElement('vaadin-grid-column');
 						var headerTemplate2 = document.createElement('template');
 						headerTemplate2.classList.add('header');
-						headerTemplate2.innerHTML = "Rec Count";
+
+						headerTemplate2.innerHTML = "Corr";
 						column1.appendChild(headerTemplate2);
 						columnGroup.appendChild(column1);
 						//column.appendChild(headerTemplate);
@@ -434,7 +421,8 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
-						headerTemplate1.innerHTML = "Values";
+
+						headerTemplate1.innerHTML = "Data pattern";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
 
@@ -476,7 +464,8 @@
 						var column = document.createElement('vaadin-grid-column');
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
-						headerTemplate1.innerHTML = "Values";
+
+						headerTemplate1.innerHTML = "Data Pattern";
 						column.appendChild(headerTemplate1);
 						columnGroup.appendChild(column);
 
@@ -537,8 +526,7 @@
 						}
 					}
 				}
-				grid.items = ajaxResp.Result.Result2.Row;
-				grid.querySelectorAll("#value").items =  items[0].modes.Row[0];
+				grid.items = ajaxResp.Result.Result2.Row;				
 
 				currentPage.editor.displayFields = fieldnames;
 				currentPage.editor.xdisplayFields = xfieldnames;

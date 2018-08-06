@@ -6,28 +6,6 @@ import * as superagent from "superagent";
 var fs = require('fs');
 
 let router = Router();
-
-
-
-router.get('/testCall1', function (request, response, next) {
-    try {
-        console.log("Calling testCall1...");
-        //Topology.fetchTargetClusters();
-        // SampleFile.getUserByName('test')
-        //     .then(results => {
-        //         console.log('User: ', results);
-        // 		response.json(results);
-        //     })
-        //     .catch(error => {
-        // 		console.log(error);
-        // 		response.json(error);
-        // 	});
-    } catch (err) {
-        console.log('err', err);
-        next(err);
-    }
-});
-
 router.post('/getThorList', function (request, response) {
     try {
         let url = request.body.eclIP;
@@ -144,31 +122,24 @@ router.post('/ajaxCreateECLFIle', function (request, response) {
         let username = request.body.username;
         let password = request.body.password;
        let QueryText = request.body.eclQuery;
-       let ClusterId = request.body.clusterid;       
-       console.log("ajaxCreateECLFIle===================", QueryText);
+       let ClusterId = request.body.clusterid;    
        var id = Guid.create();
     fs.writeFile('./lib/temp/In/'+id+'.ecl',QueryText, 'UTF8',(err) => {
         if (err) throw err;
-        console.log('====----====The file has been saved!',ClusterId);
       });
       locateClientTools(undefined, undefined, ".").then((clientTools) => {
         return clientTools.createArchive('./lib/temp/In/'+id+'.ecl');
     }).then(archive => {
         return Workunit.submit({ baseUrl: url, userID: username, password: password }, ClusterId, archive.content);
     }).then((wu) => {
-        console.log("watchuntilcomplete");
         return wu.watchUntilComplete();
     }).then((wu) => {
-        console.log("wt then", wu);
         return wu.fetchResults().then((results) => {
             let wt = results[0].fetchRows();
-            console.log('wt',results);
             return wt;
         }).then((rows) => {
-            console.log('wu',wu);
             return wu;
         }).then((rs)=>{
-            console.log("File is deleted",rs);
             fs.unlinkSync('./lib/temp/In/'+id+'.ecl' );           
             response.json(rs); 
         });         
