@@ -6,28 +6,6 @@ import * as superagent from "superagent";
 var fs = require('fs');
 
 let router = Router();
-
-
-
-router.get('/testCall1', function (request, response, next) {
-    try {
-        console.log("Calling testCall1...");
-        //Topology.fetchTargetClusters();
-        // SampleFile.getUserByName('test')
-        //     .then(results => {
-        //         console.log('User: ', results);
-        // 		response.json(results);
-        //     })
-        //     .catch(error => {
-        // 		console.log(error);
-        // 		response.json(error);
-        // 	});
-    } catch (err) {
-        console.log('err', err);
-        next(err);
-    }
-});
-
 router.post('/getThorList', function (request, response) {
     try {
         let url = request.body.eclIP;

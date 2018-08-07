@@ -47,6 +47,7 @@
                     margin-right:-20px;
                 }
             }
+
 		</style>
 
 		<!-- <iron-ajax id="ajaxCreateECLFIle" 
@@ -254,6 +255,7 @@
 				this.eclcode = QueryStr;
 				return this.loadGridwithEclDP(QueryStr,1000 );
 			}
+
 	loadGridwithEclDP(QueryStr, recLimit, extenderQueryStr = "") {
 		var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
 		var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
@@ -270,7 +272,7 @@
 			infoBox.callAjaxForECLDataPattern(eclIP, QueryStr, infoBox.username, infoBox.password, recLimit).then(function (resData) {
 				resolve(resData);
 			});
-		});
+		});	
 
 		getFileData.then(function (ajaxResp) {
 			var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
@@ -332,8 +334,8 @@
 						var headerTemplate1 = document.createElement('template');
 						headerTemplate1.classList.add('header');
 						headerTemplate1.innerHTML = "Values";
-						column1.appendChild(headerTemplate1);
 
+						column1.appendChild(headerTemplate1);
 						var bodyTemplate1 = document.createElement('template');
 						bodyTemplate1.innerHTML="<template is=\"dom-repeat\" items=\"{{item.modes.Row}}\"> <div>{{item.value}}</span></div></template>";
 						column1.appendChild(bodyTemplate1);		
@@ -382,7 +384,6 @@
 						var bodyTemplate2 = document.createElement('template');
 						bodyTemplate2.innerHTML="<template is=\"dom-repeat\" items=\"{{item.popular_patterns.Row}}\"> <div>{{item.rec_count}}</span></div></template>";
 						column2.appendChild(bodyTemplate2);	
-
 						columnGroup.appendChild(column1);
 						columnGroup.appendChild(column2);
 						grid.appendChild(columnGroup);											
@@ -400,7 +401,6 @@
 						headerTemplate1.classList.add('header');
 						headerTemplate1.innerHTML = "Data pattern";
 						column1.appendChild(headerTemplate1);
-
 						var bodyTemplate1 = document.createElement('template');
 						bodyTemplate1.innerHTML="<template is=\"dom-repeat\" items=\"{{item.rare_patterns.Row}}\"> <div>{{item.data_pattern}}</span></div></template>";
 						column1.appendChild(bodyTemplate1);		
@@ -432,7 +432,6 @@
 						headerTemplate1.classList.add('header');
 						headerTemplate1.innerHTML = "Attribute";
 						column1.appendChild(headerTemplate1);
-
 						var bodyTemplate1 = document.createElement('template');
 						bodyTemplate1.innerHTML="<template is=\"dom-repeat\" items=\"{{item.numeric_correlations.Row}}\"> <div>{{item.attribute}}</span></div></template>";
 						column1.appendChild(bodyTemplate1);		
@@ -484,7 +483,7 @@
 				
 				grid.items = ajaxResp.Result.Result2.Row;
 
-				currentPage.editor.displayFields = fieldnames;
+        currentPage.editor.displayFields = fieldnames;
 				currentPage.editor.xdisplayFields = xfieldnames;
 				currentPage.editor.ydisplayFields = yfieldnames;
 				sessionStorage.setItem('gridColumns', colArray);
