@@ -1,0 +1,155 @@
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid-column-group.html">
+<link rel="import" href="../../../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../shared-styles.html">
+
+<dom-module id="common-datapattern-view">
+  <template>
+    <style include="shared-grid-styles"></style>
+    <style is="custom-style">
+      vaadin-grid.projectworksheet {
+        position: relative;
+        font: 300 16px/1.55 "Open Sans", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        --divider-color: #d4d4d4;
+
+        --vaadin-grid-cell: {
+          padding: 0 18px;
+          //height: 50px;
+          border-right: 1px solid #d4d4d4 !important;
+          box-sizing: border-box;
+        }
+        ;
+
+        --vaadin-grid-header-cell: {
+          border-bottom: 1px solid #d4d4d4;
+          /*background-image: linear-gradient(to bottom, #ececec 2%, #d6d6d6 98%);*/
+          background:#eee;
+          font-weight: bold;
+          color: #333;
+          font-size: 15px;
+          text-transform: capitalize;
+          height: 38px;
+        }
+        ;
+
+        --vaadin-grid-footer-cell: {
+          background-image: linear-gradient(to bottom, #fafafa 2%, #efefef 98%);
+        }
+        ;
+
+        --vaadin-grid-cell-last-frozen: {
+          box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+        }
+        ;
+
+        --vaadin-grid-body-row-active-cell: {
+          background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%);
+          color: #c8dbed;
+          text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+          border-right-color: #1d69b4;
+        }
+        ;
+
+        --vaadin-grid-body-row-odd-cell: {
+          background-color: #f5f5f5;
+        }
+        ;
+
+        --vaadin-grid-loading-spinner: {
+          display: none;
+        }
+        ;
+
+        --vaadin-grid-body-cell: {
+          transition: opacity 0.2s;
+          border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+          /* added */
+        }
+        ;
+
+        --vaadin-grid-loading-body-cell: {
+          opacity: 0.2;
+        }
+        ;
+
+      }
+
+      vaadin-grid.projectworksheet input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      @keyframes loading-expand {
+        0% {
+          transform: scaleX(0);
+        }
+        100% {
+          transform: scaleX(1);
+        }
+      }
+
+      vaadin-grid.projectworksheet::before {
+        content: "";
+        width: 100%;
+        position: absolute;
+        height: 4px;
+        background: var(--primary-color);
+        z-index: 1;
+        opacity: 0.5;
+        transform-origin: left;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      vaadin-grid.projectworksheet[loading]::before {
+        opacity: 1;
+        animation: loading-expand 1s linear;
+      }   
+    </style>
+    <template is="dom-if" if={{loading}}>
+      <paper-progress indeterminate="true" style="width: 100%;"></paper-progress>
+      <h4 style="margin-left: 20px; color: #767676">Please Wait. Fetching data from server.</h4>
+    </template>
+    <div>
+      <vaadin-grid class="projectworksheet" name="worksheet" >
+        </vaadin-grid>   
+    </div>
+  </template>
+  <script>
+    class CommonDatapatternView extends Polymer.Element {
+      static get is() { return 'common-datapattern-view'; }
+      static get properties() {
+        return {
+          pluginId: String,
+          label: String,
+          id: String,
+          editor: Object,
+          tab: Object,
+          loading: {
+            type: Boolean,
+            value: false,
+            notify: true
+          }
+        }
+      }
+      constructor() {
+        super();
+      }
+      ready(e) {
+        super.ready();
+        var grid = this.shadowRoot.querySelector(".projectworksheet");
+        grid.items = [];
+        //grid.addColumn({name: "<b>Please use this Edit button to filter on the Data </b>"});
+      }
+      setGeneralProperties(properties) {
+      }
+      setViewProperties(properties) {
+      }
+      getViewProperties() {
+      }
+    }
+    customElements.define(CommonDatapatternView.is, CommonDatapatternView);
+  </script>
+
+</dom-module>

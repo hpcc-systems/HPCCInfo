@@ -1,6 +1,6 @@
-const winston = require('winston');
-const fs = require('fs');
-const logDir = './logs';
+import * as winston from "winston";
+import * as fs from "fs";
+var logDir = "./logs";
 
 winston.emitErrs = true;
 
@@ -56,7 +56,7 @@ var logger = new winston.Logger({
     exitOnError: false
 });*/
 
-module.exports = logger;
+export = logger;
 module.exports.stream = {
     write: function(message, encoding){
         logger.info(message);

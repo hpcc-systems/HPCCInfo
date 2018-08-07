@@ -1,12 +1,11 @@
-var mysql = require('mysql');
-
+import * as mysql from "mysql";
 //MySQL Connection
-var pool = mysql.createPool({
+const pool = mysql.createPool({
 	connectionLimit : 100, //important
 	host:'localhost',
  	user:'root',
- 	password:'password',
+ 	password:'root',
  	database:'hpccinfo'
 });
+export = pool;
 
-module.exports = pool;

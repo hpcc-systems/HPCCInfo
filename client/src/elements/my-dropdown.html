@@ -1,0 +1,178 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="my-dropdown">
+  	<template>
+    	<style>
+    		:host {
+    			--my-elem-visibility: hidden;
+    			--my-inputfontsize;
+    			--my-dropdowncustomwidth;
+    		}
+
+    		.myCustomDropdown {
+    			@apply --layout-horizontal;
+    			padding: 5px;
+    			@apply(--layout-flex);
+                margin-right: -5%;
+    		}
+
+    		paper-menu-button {
+    			@apply --layout-horizontal;
+    			@apply --layout-end;
+    			padding: 0px;
+    		}
+			paper-listbox{
+				height: 325px;
+				overflow-y: scroll;	
+			}
+    		paper-input {
+    			width: var(--dropdown-width);
+    		}
+
+    		.custom {
+			  width: var(--my-dropdowncustomwidth, 500px);
+			}
+
+			.inputsize {
+                width: 100%;
+				--paper-input-container-label: {
+	          		font-size: var(--my-inputfontsize);                      
+	        	};
+
+	        	/* This is for after selection label text */
+	        	--paper-input-container-input: {
+      				font-size: 14px;
+   		 		};
+			}
+
+			paper-fab {
+	          width: 28px;
+	          height: 28px;
+	          padding: 3px;
+	          --paper-fab-background: var(--paper-light-blue-400);
+	        }
+
+	        .doneButton {
+          		margin-bottom: 8px;
+          		margin-left: 8px;
+          		@apply(--layout-horizontal);
+          		@apply(--layout-end);          		
+       		}
+
+       		#doneButtonDiv {
+       			visibility: var(--my-elem-visibility)
+       		}
+
+       		paper-icon-button.iconcolor {
+       			color: #9B9B9B;
+       			padding: 0px;
+       			width: 24px;
+	          	height: 24px;
+	          	@apply(--layout-center);
+       		}
+
+       		paper-menu-button {
+       			padding-bottom: 8px ;
+       		}
+
+    		
+    	</style>
+    	<div class="myCustomDropdown" >
+	    	<paper-input class="inputsize" id="myInput" label="[[label]]" readonly="true" on-tap="openDropdown"></paper-input>
+	    	<paper-menu-button id="dropdownMenu" on-paper-dropdown-close="dropdownClosed" horizontal-align="[[halign]]" vertical-align="[[valign]]">
+			  	<paper-icon-button class="iconcolor" icon="arrow-drop-down" slot="dropdown-trigger" alt="menu" on-tap="menuOpened"></paper-icon-button>
+				<paper-listbox id="myListBox" slot="dropdown-content" class="dropdown-content custom"  multi selected-values="{{allselected}}">
+				  	<template is="dom-repeat" items="[[items]]">
+			        	<paper-item value="[[item]]">[[item]]</paper-item>
+			      	</template>
+				</paper-listbox>
+			</paper-menu-button>
+			<div id="doneButtonDiv" class="doneButton">
+				<paper-fab mini icon="icons:done" on-tap="hideIcon"></paper-fab>
+			</div>
+		</div>
+    </template>
+    <script type="text/javascript">
+    	class MyDropdown extends Polymer.Element {
+			static get is() { return 'my-dropdown'; }
+
+			static get properties() {
+				return {
+					/*values: {
+				        type: Array,
+				        value: function() {
+				          return [];
+				        }
+				    },*/
+				    items: {
+				    	type: Array,
+				        value: function() {
+				          return [];
+				        }
+				    },
+				    label: String,
+				    halign: String,
+					valign: String,
+					allselected:String
+				}
+			}
+
+			dropdownClosed() {
+				this.selectallitems();				
+				this.hideIcon();	
+			}		
+			selectallitems(){
+				var updatedString = '';
+				var cpyArray = new Array();
+				let selectedItems = this.$.myListBox.selectedItems;
+				selectedItems.forEach( function(element) {
+					cpyArray.push(element.innerText);
+				});
+				var displayString = '';
+				if (cpyArray.length === 1) {
+		          	displayString = cpyArray.join() +' has been selected';
+		        } else if (cpyArray.length > 2) {
+		          	displayString = cpyArray.slice(0, 2).join() + ' +' + (cpyArray.length - 2) + ' more item(s) selected';
+		        } else if (cpyArray.length !== 0) {
+		          	displayString = cpyArray.slice(0, 2).join() + ' have been selected';
+		        }
+				this.$.myInput.value = displayString; 
+			}		
+			ready() {
+				super.ready();
+				this.$.dropdownMenu.ignoreSelect = true;
+				var that =this;
+				if(this.label=="Features"){
+					this.allselected=[0,1,2,3,4,5,6,7,8,9,10];
+					setTimeout(function () {
+						that.selectallitems();	
+				}, 200);
+				}	
+			}
+			
+			openDropdown() {			
+				this.updateStyles({'--my-elem-visibility': 'visible'});
+				this.$.dropdownMenu.open();
+			}
+
+			menuOpened() {
+				this.updateStyles({'--my-elem-visibility': 'visible'});
+				console.log('Opened');
+			}
+
+			hideIcon() {
+				this.updateStyles({'--my-elem-visibility': 'hidden'});
+			}
+		}
+		window.customElements.define(MyDropdown.is, MyDropdown);
+    </script>
+</dom-module>    
