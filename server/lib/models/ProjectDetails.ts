@@ -1,5 +1,5 @@
 //reference of dbconnection.js
-var mysql_pool = require('../DBConnection');
+import * as mysql_pool from "../DBConnection";
 
 // REST API calls for tbl_projectdetails
 var ProjectDetails = {

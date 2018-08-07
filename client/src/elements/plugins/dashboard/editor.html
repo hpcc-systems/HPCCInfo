@@ -242,7 +242,7 @@
 					var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
 					//var grid = currentPage.shadowRoot.querySelector(".projectworksheet");
 
-					callForFileDetails(eclIP, infoBox.file, infoBox.file, infoBox.username, infoBox.password, 10000).then(function (resData) {
+					infoBox.callForFileDetails(eclIP, infoBox.file, infoBox.file, infoBox.username, infoBox.password, 10000).then(function (resData) {
 						resolve(resData);
 					});
 				});
