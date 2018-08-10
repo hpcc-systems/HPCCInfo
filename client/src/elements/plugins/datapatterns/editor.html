@@ -25,6 +25,40 @@
 				width: 100%;
 				display: block !important;
 			}
+			paper-tabs {
+				font-family: 'Roboto', 'Noto', sans-serif;
+				-webkit-font-smoothing: antialiased;
+				width: 100%;
+				text-transform: uppercase;
+				color: #767676;
+				--paper-tabs-selection-bar-color: white;
+			}
+			vaadin-combo-box {
+				width: 100%;
+				display: block !important;
+			}
+			my-dropdown {
+				--paper-listbox: {
+					width:auto !important;
+					min-width: 300px !important;
+					height: 210px !important;
+				}
+			}
+			my-dropdown {
+				--paper-menu-button-dropdown: {
+				margin-right:20px !important;
+				}
+			}
+			my-dropdown {
+				--paper-input-container: {
+				margin-right:-20px !important;
+				}
+			}
+			my-dropdown {
+				--paper-menu-button: {
+				margin-right:-20px;
+				}
+			}
 		</style>
 		</iron-ajax>
 		<paper-dialog id="dialog" modal>
