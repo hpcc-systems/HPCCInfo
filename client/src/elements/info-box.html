@@ -30,6 +30,7 @@
 <link rel="import" href="plugins/datapatterns/editor.html">	
 <link rel="import" href="plugins/datapatterns/view.html">
 <link rel="import" href="export-project-dialog.html">
+<link rel="import" href="delete-project-dialog.html">
 
 <!-- Needed for paper-listbox -->
 <!-- Ensure Web Animations polyfill is loaded since neon-animation 2.0 doesn't import it -->
@@ -114,9 +115,13 @@
             <paper-icon-button id="btnExportProject" disabled="true" icon="social:share" on-tap="_projectExportOpenHandler">
             </paper-icon-button>
             <paper-tooltip for="btnExportProject" disabled="true" offset="0">Share Project</paper-tooltip>
+            <paper-icon-button id="btnDeleteProject" disabled="true" icon="icons:delete-forever" on-tap="_projectDeleteOpenHandler"></paper-icon-button>
+            <paper-tooltip for="btnDeleteProject" offset="0">Delete Workbook</paper-tooltip>
+            
 
         </app-toolbar>
         <export-project-dialog id="export-project-dialog"></export-project-dialog>
+        <delete-project-dialog id ="delete-project-dialog"></delete-project-dialog>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
         <info-plugin-dialog id="plugininfo"></info-plugin-dialog>
         <info-message-dialog id="messageinfo"></info-message-dialog>
@@ -292,18 +297,25 @@
                 this.addPlugin("common-sort", "Sort", "common");
                 this.addPlugin("common-sample", "Data Sampling", "common");
                 this.addPlugin("common-dashboard", "Dashboard", "common");
-                this.addPlugin("common-datapattern","Data Patterns","common");
+                this.addPlugin("common-datapattern","Data Patterns","common");                             
             }
             handleTabTap(e) {
                 if (e.detail.item.editor != undefined) {
                     if (e.detail.item.id.includes("common-dashboard")) {
+                        this.shadowRoot.querySelector('#btnDeleteProject').disabled = false;
                         this.hidden = false;
                         this.hideedit = true;
                         if (e.detail.item.editor != undefined) {
                             e.detail.item.editor.loadChart();
                         }
                     }
+                    else if(e.detail.item.id === "common-input"){
+                        this.shadowRoot.querySelector('#btnDeleteProject').disabled = true;
+                        this.hidden = true;
+                        this.hideedit = false;
+                    }
                     else {
+                        this.shadowRoot.querySelector('#btnDeleteProject').disabled = false;
                         this.hidden = true;
                         this.hideedit = false;
                     }
@@ -338,6 +350,7 @@
             }
             clearWorkBook() {
                 this.shadowRoot.querySelector('#btnExportProject').disabled = true;
+                this.shadowRoot.querySelector('#btnDeleteProject').disabled = true;
                 this.shadowRoot.querySelector('#export-project-dialog').disabled = true;
                 this.cluster_name = '';
                 this.cluster_address = '';
@@ -373,6 +386,7 @@
             addTab(id, label, pluginId, reload = false) {
                 if (pluginId === "common-input") {
                     this.shadowRoot.querySelector('#export-project-dialog').disabled = true;
+                    this.shadowRoot.querySelector('#delete-project-dialog').disabled = true;
                     var tabitems = Polymer.dom(this.$.tabs);
                     var pageitems = Polymer.dom(this.$.pages);
                     var cnt = 0;
@@ -495,6 +509,10 @@
             }
             _projectExportOpenHandler(e) {
                 var dialog = this.shadowRoot.querySelector('#export-project-dialog');
+                dialog.open();
+            }
+            _projectDeleteOpenHandler(e) {
+                var dialog = this.shadowRoot.querySelector('#delete-project-dialog');
                 dialog.open();
             }
 

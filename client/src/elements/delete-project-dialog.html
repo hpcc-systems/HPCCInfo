@@ -1,0 +1,112 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
+
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+
+
+<!--- ---------------------------------------------filter dialog------------------------------------------------>
+
+
+<dom-module id="delete-project-dialog">
+    <template>
+        <style>
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    background-color: var(--paper-pink-a200) !important;
+                    color: white !important;
+                }
+                ;
+            }
+            paper-button.indigo:hover {
+                background-color: var(--paper-indigo-400);
+            }
+            paper-dialog {
+                width: 500px;
+            }
+            .buttons {
+                padding: 15px 19px 20px;
+            }
+            .worksheettitle {
+                margin-top:0;
+            }
+        </style>
+
+        <paper-dialog id="dialog" modal>
+            <iron-label>
+                <div style="text-align: center;">
+                    <span style="font-size: x-large;">
+                            Delete Project
+                    </span>
+                </div>
+
+            </iron-label>
+            <div>Are you sure you want to delete this tab?</div>
+
+            <div class="buttons">
+                <paper-button dialog-confirm raised class="indigo" on-tap="_deleteProject">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        class DeleteProjectDialog extends Polymer.Element {
+            static get is() { return 'delete-project-dialog'; }
+            static get properties() {
+                return {
+                    pluginId: {
+                        type: String,
+                        value: 'common-input'
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+            open(e) {
+                this.$.dialog.open();
+            }
+            _deleteProject(event) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var tabId = infoBox.$.tabs.selectedItem.id;
+                var tab = infoBox.shadowRoot.querySelector("#"+tabId+"");
+                var page = infoBox.shadowRoot.querySelector("#pages").querySelector("#"+tabId+"");
+                var arr =infoBox.viewList;                
+                var arrLen = arr.length;
+                if(tabId != "common-input")
+                {                                                     
+                    Polymer.dom(infoBox.$.tabs).removeChild(tab.nextSibling);              
+                    Polymer.dom(infoBox.$.tabs).removeChild(tab); 
+                    Polymer.dom(infoBox.$.pages).removeChild(page);   
+                    for(var i=0; i< arrLen; i++){
+                        if(arr[i].id === tabId){
+                            arr.splice(i, 1);
+                            if(i === arrLen -1)
+                            {
+                                infoBox.$.tabs.selected = i-1;
+                            }
+                            break;
+                        }                        
+                    }            
+                }
+
+            }
+        }
+        customElements.define(DeleteProjectDialog.is, DeleteProjectDialog);
+    </script>
+</dom-module>
