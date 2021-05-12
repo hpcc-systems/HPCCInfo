@@ -19,7 +19,7 @@
     "hoek": "^5.0.3",
     "lodash": "^4.17.19",
     "mysql": "^2.13.0",
-    "nodemailer": "^4.4.2",
+    "nodemailer": "^6.4.16",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "superagent": "^3.8.3",
